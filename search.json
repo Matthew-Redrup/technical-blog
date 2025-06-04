@@ -1,0 +1,182 @@
+[
+  {
+    "objectID": "rbe/index.html",
+    "href": "rbe/index.html",
+    "title": "Recursive Bayesian Estimators in Cybersecurity",
+    "section": "",
+    "text": "This comprehensive series takes you from the fundamental mathematical principles of Bayesian inference to practical implementations of Recursive Bayesian Estimators (RBE) in cybersecurity applications.\n\n\n\nMathematical Foundations: Bayes’ theorem, probability theory, and sequential inference\nRecursive Updating: How beliefs evolve over time with new evidence\nParticle Filters: Advanced Monte Carlo methods for complex distributions\nCybersecurity Applications: Network anomaly detection and threat assessment\nPractical Implementation: Complete Python implementations with performance optimization\nModern Context: How RBE fits with current AI/ML approaches\n\n\n\n\n\nPython programming experience\nBasic probability and statistics\nFamiliarity with NumPy and matplotlib\nUnderstanding of network concepts (helpful but not required)\n\n\n\n\nEach part builds progressively on previous concepts while including complete, runnable code examples and interactive visualizations.",
+    "crumbs": [
+      "rbe"
+    ]
+  },
+  {
+    "objectID": "rbe/index.html#series-overview",
+    "href": "rbe/index.html#series-overview",
+    "title": "Recursive Bayesian Estimators in Cybersecurity",
+    "section": "",
+    "text": "This comprehensive series takes you from the fundamental mathematical principles of Bayesian inference to practical implementations of Recursive Bayesian Estimators (RBE) in cybersecurity applications.\n\n\n\nMathematical Foundations: Bayes’ theorem, probability theory, and sequential inference\nRecursive Updating: How beliefs evolve over time with new evidence\nParticle Filters: Advanced Monte Carlo methods for complex distributions\nCybersecurity Applications: Network anomaly detection and threat assessment\nPractical Implementation: Complete Python implementations with performance optimization\nModern Context: How RBE fits with current AI/ML approaches\n\n\n\n\n\nPython programming experience\nBasic probability and statistics\nFamiliarity with NumPy and matplotlib\nUnderstanding of network concepts (helpful but not required)\n\n\n\n\nEach part builds progressively on previous concepts while including complete, runnable code examples and interactive visualizations.",
+    "crumbs": [
+      "rbe"
+    ]
+  },
+  {
+    "objectID": "rbe/index.html#table-of-contents",
+    "href": "rbe/index.html#table-of-contents",
+    "title": "Recursive Bayesian Estimators in Cybersecurity",
+    "section": "Table of Contents",
+    "text": "Table of Contents\n\nPart 1: Fundamentals\n\nUncertainty Fundamentals - Why reasoning under uncertainty matters\nBayes’ Theorem - Mathematical foundation and intuition\nRecursive Updating - Sequential belief updating\nRBE Mathematics - Particle filters and Monte Carlo methods\n\n\n\nPart 2: Applications\n\nNetwork Anomaly Detection - Practical cybersecurity implementation\nDynamic Environments - Handling concept drift and adaptation\n\n\n\nPart 3: Advanced Topics\n\nAdvanced Techniques - Multi-model estimation and optimization\nImplementation Considerations - Production deployment and scaling\n\n\n\nPart 4: Modern Context\n\nModern AI Comparison - RBE vs deep learning approaches\nFuture Directions - Current research and emerging applications",
+    "crumbs": [
+      "rbe"
+    ]
+  },
+  {
+    "objectID": "rbe/index.html#interactive-features",
+    "href": "rbe/index.html#interactive-features",
+    "title": "Recursive Bayesian Estimators in Cybersecurity",
+    "section": "Interactive Features",
+    "text": "Interactive Features\nThroughout this series, you’ll find:\n\nLive Demonstrations: Interactive particle filters and Bayesian updating\nParameter Exploration: Widgets to experiment with algorithm settings\nPerformance Analysis: Benchmarking tools and computational analysis\nReal-World Data: Synthetic network traffic and anomaly scenarios\nComparative Studies: Side-by-side algorithm comparisons",
+    "crumbs": [
+      "rbe"
+    ]
+  },
+  {
+    "objectID": "rbe/index.html#getting-started",
+    "href": "rbe/index.html#getting-started",
+    "title": "Recursive Bayesian Estimators in Cybersecurity",
+    "section": "Getting Started",
+    "text": "Getting Started\nReady to dive in? Start with Part 1: Uncertainty Fundamentals to build the foundational understanding needed for the entire series.\nOr jump to any specific topic that interests you - each part is designed to be as self-contained as possible while building on the overall narrative.",
+    "crumbs": [
+      "rbe"
+    ]
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "technical-blog",
+    "section": "",
+    "text": "Welcome to my technical blog where I explore cutting-edge topics in AI, cybersecurity, and software engineering through interactive demonstrations and rigorous implementations.\nI’ve written these posts primarily to teach myself about complex topics (with generous help from AI assistants), but I’m sharing them in case someone else might find them interesting—or at least to provide additional training data for our future AI overlords.\nThis blog is built with FastHTML and nbdev, creating a seamless blend of literate programming and interactive web components. Feel free to explore the source code on GitHub if you’re curious about how it all works.",
+    "crumbs": [
+      "technical-blog"
+    ]
+  },
+  {
+    "objectID": "index.html#featured-series-recursive-bayesian-estimators",
+    "href": "index.html#featured-series-recursive-bayesian-estimators",
+    "title": "technical-blog",
+    "section": "Featured Series: Recursive Bayesian Estimators",
+    "text": "Featured Series: Recursive Bayesian Estimators\nDive deep into the mathematical foundations and practical applications of Recursive Bayesian Estimators in cybersecurity. This comprehensive series covers everything from Bayes’ theorem to advanced particle filtering techniques.\n🔗 Start the RBE Series →",
+    "crumbs": [
+      "technical-blog"
+    ]
+  },
+  {
+    "objectID": "index.html#what-makes-this-blog-different",
+    "href": "index.html#what-makes-this-blog-different",
+    "title": "technical-blog",
+    "section": "What Makes This Blog Different",
+    "text": "What Makes This Blog Different\n\nInteractive Learning: FastHTML-powered demonstrations that let you explore concepts hands-on\nRigorous Implementation: Complete, tested Python code for every concept\nMathematical Depth: Proper derivations and theoretical foundations\nPractical Applications: Real-world use cases and performance analysis\nOpen Source: All code available for learning and adaptation",
+    "crumbs": [
+      "technical-blog"
+    ]
+  },
+  {
+    "objectID": "index.html#upcoming-topics",
+    "href": "index.html#upcoming-topics",
+    "title": "technical-blog",
+    "section": "Upcoming Topics",
+    "text": "Upcoming Topics\n\nDeep Learning Architectures\nDistributed Systems\nQuantum Computing Applications\nAdvanced Python Techniques",
+    "crumbs": [
+      "technical-blog"
+    ]
+  },
+  {
+    "objectID": "index.html#developer-guide",
+    "href": "index.html#developer-guide",
+    "title": "technical-blog",
+    "section": "Developer Guide",
+    "text": "Developer Guide\nIf you are new to using nbdev here are some useful pointers to get you started.\n\nInstall technical_blog in Development mode\n# make sure technical_blog package is installed in development mode\n$ pip install -e .\n\n# make changes under nbs/ directory\n# ...\n\n# compile to have changes apply to technical_blog\n$ nbdev_prepare",
+    "crumbs": [
+      "technical-blog"
+    ]
+  },
+  {
+    "objectID": "index.html#usage",
+    "href": "index.html#usage",
+    "title": "technical-blog",
+    "section": "Usage",
+    "text": "Usage\n\nInstallation\nInstall latest from the GitHub repository:\n$ pip install git+https://github.com/Matthew-Redrup/technical-blog.git\nor from conda\n$ conda install -c Matthew-Redrup technical_blog\nor from pypi\n$ pip install technical_blog\n\n\nDocumentation\nDocumentation can be found hosted on this GitHub repository’s pages. Additionally you can find package manager specific guidelines on conda and pypi respectively.",
+    "crumbs": [
+      "technical-blog"
+    ]
+  },
+  {
+    "objectID": "index.html#how-to-use",
+    "href": "index.html#how-to-use",
+    "title": "technical-blog",
+    "section": "How to use",
+    "text": "How to use\nFill me in please! Don’t forget code examples:\n\n1+1\n\n2",
+    "crumbs": [
+      "technical-blog"
+    ]
+  },
+  {
+    "objectID": "core.html",
+    "href": "core.html",
+    "title": "core",
+    "section": "",
+    "text": "source\n\nfoo\n\n foo ()",
+    "crumbs": [
+      "core"
+    ]
+  },
+  {
+    "objectID": "blog_components.html",
+    "href": "blog_components.html",
+    "title": "Blog Components",
+    "section": "",
+    "text": "source\n\n\n\n create_navigation (current_topic:str=None)\n\nCreate the main navigation bar for the blog",
+    "crumbs": [
+      "Blog Components"
+    ]
+  },
+  {
+    "objectID": "blog_components.html#navigation-components",
+    "href": "blog_components.html#navigation-components",
+    "title": "Blog Components",
+    "section": "",
+    "text": "source\n\n\n\n create_navigation (current_topic:str=None)\n\nCreate the main navigation bar for the blog",
+    "crumbs": [
+      "Blog Components"
+    ]
+  },
+  {
+    "objectID": "blog_components.html#topic-cards",
+    "href": "blog_components.html#topic-cards",
+    "title": "Blog Components",
+    "section": "Topic Cards",
+    "text": "Topic Cards\n\nsource\n\ntopic_card\n\n topic_card (title:str, description:str, url:str, status:str='available')\n\nCreate a card for a blog topic",
+    "crumbs": [
+      "Blog Components"
+    ]
+  },
+  {
+    "objectID": "blog_components.html#mathematical-rendering",
+    "href": "blog_components.html#mathematical-rendering",
+    "title": "Blog Components",
+    "section": "Mathematical Rendering",
+    "text": "Mathematical Rendering\n\nsource\n\nmath_block\n\n math_block (latex:str, block:bool=True)\n\nRender LaTeX mathematics using KatexMarkdownJS",
+    "crumbs": [
+      "Blog Components"
+    ]
+  },
+  {
+    "objectID": "blog_components.html#code-display-components",
+    "href": "blog_components.html#code-display-components",
+    "title": "Blog Components",
+    "section": "Code Display Components",
+    "text": "Code Display Components\n\nsource\n\ncode_block\n\n code_block (code:str, language:str='python', title:str=None)\n\nCreate a syntax-highlighted code block using FastHTML’s HighlightJS",
+    "crumbs": [
+      "Blog Components"
+    ]
+  }
+]
