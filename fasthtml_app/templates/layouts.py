@@ -117,7 +117,8 @@ def error_layout(error_code: int, error_message: str):
         error_code: HTTP error code (404, 500, etc.)
         error_message: Error description
     """
-    return base_layout(f"Error {error_code} - Matthew Redrup's Technical Blog")(
+    return Titled(f"Error {error_code} - Matthew Redrup's Technical Blog",
+        create_navigation(None),
         Container(
             Card(
                 Div(
