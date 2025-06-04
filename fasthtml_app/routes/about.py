@@ -10,7 +10,8 @@ def about_routes(rt):
     @rt("/about/")
     def about():
         """About page"""
-        return Titled("About - Matthew Redrup's Technical Blog",
+        return (
+            Title("About - Matthew Redrup's Technical Blog"),
             create_navigation("About"),
             Container(
                 Card(

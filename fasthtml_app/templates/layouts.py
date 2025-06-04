@@ -28,7 +28,6 @@ def base_layout(title: str = "Matthew Redrup's Technical Blog",
                 KatexMarkdownJS(),
                 Link(rel="stylesheet", href="/static/css/main.css"),
                 Link(rel="stylesheet", href="/static/css/utilities.css"),
-                Script(src="/static/js/theme.js", defer=True),
                 *extra_headers
             ),
             Body(
@@ -67,7 +66,8 @@ def error_layout(error_code: int, error_message: str):
         error_code: HTTP error code (404, 500, etc.)
         error_message: Error description
     """
-    return Titled(f"Error {error_code} - Matthew Redrup's Technical Blog",
+    return (
+        Title(f"Error {error_code} - Matthew Redrup's Technical Blog"),
         create_navigation(None),
         Container(
             Card(

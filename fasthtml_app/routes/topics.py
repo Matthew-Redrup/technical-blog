@@ -10,7 +10,8 @@ def topics_routes(rt):
     @rt("/topics/")
     def topics_index():
         """Future topics overview page"""
-        return Titled("Future Topics - Matthew Redrup's Technical Blog",
+        return (
+            Title("Future Topics - Matthew Redrup's Technical Blog"),
             create_navigation("Future Topics"),
             Container(
                 Card(
@@ -85,7 +86,8 @@ print(f"Updated belief: {updated_belief:.3f}")"""
 
         sample_math = r"P(H|E) = \\frac{P(E|H) \\cdot P(H)}{P(E)}"
         
-        return Titled("Blog Components Demo",
+        return (
+            Title("Blog Components Demo"),
             create_navigation("Demo"),
             Container(
                 Card(

@@ -10,7 +10,8 @@ def rbe_routes(rt):
     @rt("/rbe/")
     def rbe_index():
         """RBE series index page"""
-        return Titled("Recursive Bayesian Estimators in Cybersecurity",
+        return (
+            Title("Recursive Bayesian Estimators in Cybersecurity"),
             create_navigation("RBE"),
             Container(
                 Card(
@@ -63,7 +64,8 @@ def rbe_routes(rt):
     @rt("/rbe/foundations/")
     def rbe_foundations():
         """RBE mathematical foundations"""
-        return Titled("RBE: Mathematical Foundations",
+        return (
+            Title("RBE: Mathematical Foundations"),
             create_navigation("RBE"),
             Container(
                 Card(
@@ -83,7 +85,8 @@ def rbe_routes(rt):
     @rt("/rbe/implementation/")
     def rbe_implementation():
         """RBE implementation strategies"""
-        return Titled("RBE: Implementation Strategies",
+        return (
+            Title("RBE: Implementation Strategies"),
             create_navigation("RBE"),
             Container(
                 Card(
@@ -103,7 +106,8 @@ def rbe_routes(rt):
     @rt("/rbe/cybersecurity/")
     def rbe_cybersecurity():
         """RBE cybersecurity applications"""
-        return Titled("RBE: Cybersecurity Applications",
+        return (
+            Title("RBE: Cybersecurity Applications"),
             create_navigation("RBE"),
             Container(
                 Card(
