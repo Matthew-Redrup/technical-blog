@@ -5,4 +5,10 @@ d = { 'settings': { 'branch': 'main',
                 'doc_host': 'https://Matthew-Redrup.github.io',
                 'git_url': 'https://github.com/Matthew-Redrup/technical-blog',
                 'lib_path': 'technical_blog'},
-  'syms': {'technical_blog.core': {'technical_blog.core.foo': ('core.html#foo', 'technical_blog/core.py')}}}
+  'syms': { 'technical_blog.blog_components': { 'technical_blog.blog_components.create_navigation': ( 'blog_components.html#create_navigation',
+                                                                                                      'technical_blog/blog_components.py'),
+                                                'technical_blog.blog_components.math_block': ( 'blog_components.html#math_block',
+                                                                                               'technical_blog/blog_components.py'),
+                                                'technical_blog.blog_components.topic_card': ( 'blog_components.html#topic_card',
+                                                                                               'technical_blog/blog_components.py')},
+            'technical_blog.core': {'technical_blog.core.foo': ('core.html#foo', 'technical_blog/core.py')}}}
