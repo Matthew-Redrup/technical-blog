@@ -16,7 +16,8 @@ def home_routes(rt):
             ('linkedin', 'https://www.linkedin.com/in/your-profile')
         )
         
-        return Titled("Matthew Redrup's Technical Blog - Ramblings on AI & Cybersecurity",
+        return (
+            Title("Matthew Redrup's Technical Blog - Ramblings on AI & Cybersecurity"),
             create_navigation("Home"),
             Container(
                 # Hero Section

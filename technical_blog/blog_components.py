@@ -7,11 +7,12 @@ __all__ = ['create_navigation', 'topic_card', 'math_block', 'code_block']
 
 # %% ../nbs/01_blog_components.ipynb 3
 from fasthtml.common import *
+from monsterui.all import *
 from typing import List, Dict, Any
 
 # %% ../nbs/01_blog_components.ipynb 5
-def create_navigation(current_topic: str = None) -> Div:
-    """Create the main navigation bar for the blog"""
+def create_navigation(current_topic: str = None) -> NavBar:
+    """Create the main navigation bar for the blog using MonsterUI NavBar"""
     nav_items = [
         ('Home', '/'),
         ('RBE Series', '/rbe/'),
@@ -19,14 +20,49 @@ def create_navigation(current_topic: str = None) -> Div:
         ('About', '/about/')
     ]
     
+    # Create navigation links
     nav_links = []
     for title, url in nav_items:
-        active_class = "active" if current_topic and title.lower().startswith(current_topic.lower()) else ""
-        nav_links.append(
-            A(title, href=url, cls=f"nav-link {active_class}")
-        )
+        # Check if this item should be active
+        is_active = False
+        if current_topic:
+            if title.lower().startswith(current_topic.lower()) or \
+               (current_topic.lower() == "home" and title == "Home") or \
+               (current_topic.lower() == "rbe" and title == "RBE Series"):
+                is_active = True
+        
+        # Add styling for active state
+        link_cls = "nav-link font-medium px-3 py-2 rounded-md transition-colors"
+        if is_active:
+            link_cls += " bg-primary text-primary-foreground"
+        else:
+            link_cls += " text-muted-foreground hover:text-foreground hover:bg-muted"
+            
+        nav_links.append(A(title, href=url, cls=link_cls))
     
-    return Nav(*nav_links, cls="main-navigation")
+    # Add MonsterUI ThemePicker (mode only for dark/light toggle)
+    theme_toggle = ThemePicker(
+        color=False,
+        radii=False, 
+        shadows=False,
+        font=False,
+        mode=True,
+        cls="p-2"
+    )
+    
+    # Create brand/title
+    brand = Div(
+        H3("Matthew Redrup's Blog", cls="text-lg font-bold text-foreground"),
+        P("Ramblings on AI & Cybersecurity", cls="text-sm text-muted-foreground hidden sm:block"),
+        cls="flex flex-col"
+    )
+    
+    return NavBar(
+        *nav_links,
+        theme_toggle,
+        brand=brand,
+        cls="border-b"
+    )
 
 # %% ../nbs/01_blog_components.ipynb 7
 def topic_card(title: str, description: str, url: str, status: str = "available") -> Div:

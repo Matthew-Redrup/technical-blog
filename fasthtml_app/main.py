@@ -19,7 +19,9 @@ app, rt = fast_app(
     hdrs=(
         *Theme.blue.headers(),
         HighlightJS(),  # Syntax highlighting for code blocks
-        KatexMarkdownJS()  # Math rendering for LaTeX expressions
+        KatexMarkdownJS(),  # Math rendering for LaTeX expressions
+        Link(rel="stylesheet", href="/static/css/main.css"),
+        Link(rel="stylesheet", href="/static/css/utilities.css")
     ),
     static_path="static"
 )
