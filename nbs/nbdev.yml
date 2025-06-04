@@ -1,0 +1,9 @@
+project:
+  output-dir: _docs
+
+website:
+  title: "technical-blog"
+  site-url: "https://Matthew-Redrup.github.io/technical-blog"
+  description: "Interactive technical blog covering advanced topics in AI, cybersecurity, and software engineering using FastHTML + nbdev"
+  repo-branch: main
+  repo-url: "https://github.com/Matthew-Redrup/technical-blog"
