@@ -26,60 +26,10 @@ def base_layout(title: str = "Matthew Redrup's Technical Blog",
                 *Theme.blue.headers(),
                 HighlightJS(),
                 KatexMarkdownJS(),
-                *extra_headers,
-                # Custom CSS for enhanced styling
-                Style("""
-                    .main-navigation {
-                        display: flex;
-                        gap: 1rem;
-                        padding: 1rem 0;
-                        border-bottom: 1px solid #e5e7eb;
-                        margin-bottom: 2rem;
-                    }
-                    .nav-link {
-                        padding: 0.5rem 1rem;
-                        text-decoration: none;
-                        border-radius: 0.375rem;
-                        transition: background-color 0.2s;
-                    }
-                    .nav-link:hover {
-                        background-color: #f3f4f6;
-                    }
-                    .nav-link.active {
-                        background-color: #3b82f6;
-                        color: white;
-                    }
-                    .topic-card {
-                        border: 1px solid #e5e7eb;
-                        border-radius: 0.5rem;
-                        padding: 1.5rem;
-                        transition: box-shadow 0.2s;
-                    }
-                    .topic-card:hover {
-                        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-                    }
-                    .topic-coming-soon {
-                        opacity: 0.6;
-                    }
-                    .code-block-container {
-                        margin: 1rem 0;
-                    }
-                    .code-title {
-                        background-color: #374151;
-                        color: white;
-                        padding: 0.5rem 1rem;
-                        border-radius: 0.375rem 0.375rem 0 0;
-                        font-size: 0.875rem;
-                        font-weight: 500;
-                    }
-                    .math-content {
-                        text-align: center;
-                        margin: 1rem 0;
-                    }
-                    .math-inline {
-                        display: inline;
-                    }
-                """)
+                Link(rel="stylesheet", href="/static/css/main.css"),
+                Link(rel="stylesheet", href="/static/css/utilities.css"),
+                Script(src="/static/js/theme.js", defer=True),
+                *extra_headers
             ),
             Body(
                 Div(
