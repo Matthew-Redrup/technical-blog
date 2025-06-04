@@ -150,3 +150,54 @@ checklink/cookies.txt
 
 # Quarto
 .quarto
+
+# Technical blog specific
+# Large datasets and generated files
+data/**/*.csv
+data/**/*.json
+data/**/*.pkl
+data/**/*.h5
+data/**/*.parquet
+!data/**/README.md
+!data/**/*_sample.*
+
+# Generated plots and figures (keep examples)
+figures/temp_*
+plots/temp_*
+*.png
+*.jpg
+*.gif
+!static/**/*.png
+!static/**/*.jpg
+!static/**/*.gif
+!**/example_*.png
+!**/demo_*.png
+
+# FastHTML specific
+fasthtml_app/uploads/
+fasthtml_app/sessions/
+fasthtml_app/logs/
+*.db
+*.sqlite
+*.sqlite3
+.sesskey
+
+# Development notebooks and drafts
+drafts/
+scratch/
+tmp_*.ipynb
+test_*.ipynb
+playground_*.ipynb
+
+# API keys and secrets (extra safety)
+*.key
+*.pem
+secrets.py
+config_local.py
+
+# Performance profiling
+*.prof
+*.cprofile
+
+# Jupyter lab extensions
+.jupyter/
