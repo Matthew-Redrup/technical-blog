@@ -28,24 +28,41 @@ def slugify(text: str) -> str:
     slug = re.sub(r'[-\s]+', '-', slug)
     return slug
 
-# %% ../nbs/00_core.ipynb 8
+# %% ../nbs/00_core.ipynb 7
 def read_meta(nb_path: Path) -> dict:
-    "Read metadata from notebook at `nb_path`"
+    "Extract metadata from notebook `nb_path`"
     import json
-    meta = {'title': 'Untitled', 'description': '', 'keywords': []}
     
-    if nb_path.exists():
-        with open(nb_path) as f:
-            nb = json.load(f)
-            # Extract from first markdown cell if available
-            if nb.get('cells') and nb['cells'][0]['cell_type'] == 'markdown':
-                lines = nb['cells'][0]['source']
-                if lines:
-                    # First line is title
-                    meta['title'] = lines[0].strip('# \n')
-                    # Look for description after >
-                    for line in lines:
-                        if line.startswith('>'):
-                            meta['description'] = line.strip('> \n')
-                            break
-    return meta
+    # Read the notebook file
+    with open(nb_path, 'r', encoding='utf-8') as f:
+        nb_data = json.load(f)
+    
+    # Extract title and description from first markdown cell
+    cells = nb_data.get('cells', [])
+    
+    title = "Untitled"
+    description = ""
+    
+    for cell in cells:
+        if cell.get('cell_type') == 'markdown':
+            source = ''.join(cell.get('source', []))
+            lines = source.split('\n')
+            
+            # Look for title (# header)
+            for line in lines:
+                if line.startswith('# '):
+                    title = line[2:].strip()
+                    break
+            
+            # Look for description (> blockquote)
+            for line in lines:
+                if line.startswith('> '):
+                    description = line[2:].strip()
+                    break
+            
+            break
+    
+    return {
+        'title': title,
+        'description': description
+    }
