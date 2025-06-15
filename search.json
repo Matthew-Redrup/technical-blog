@@ -1,0 +1,414 @@
+[
+  {
+    "objectID": "core.html",
+    "href": "core.html",
+    "title": "Core",
+    "section": "",
+    "text": "source\n\nget_nb_url\n\n get_nb_url (nb_path:pathlib.Path)\n\nConvert notebook nb_path to documentation URL\n\n# Test get_nb_url\ntest_eq(get_nb_url(Path('nbs/index.ipynb')), '/')\ntest_eq(get_nb_url(Path('nbs/rbe/intro.ipynb')), '/rbe/intro/')\ntest_eq(get_nb_url(Path('nbs/00_core.ipynb')), '/00_core/')\n\n\nsource\n\n\nslugify\n\n slugify (text:str)\n\nConvert text to URL-friendly slug\n\nsource\n\n\nread_meta\n\n read_meta (nb_path:pathlib.Path)\n\nExtract metadata from notebook nb_path\n\n# Test slugify\ntest_eq(slugify(\"Hello World\"), \"hello-world\")\ntest_eq(slugify(\"Fast.AI Style Guide\"), \"fastai-style-guide\")\ntest_eq(slugify(\"  Multiple   Spaces  \"), \"multiple-spaces\")\ntest_eq(slugify(\"Special!@#$%^Characters\"), \"specialcharacters\")\n\n\n# Test read_meta on this very notebook\nmeta = read_meta(Path('00_core.ipynb'))\nprint(f\"Title: '{meta['title']}'\")\nprint(f\"Description: '{meta['description']}'\")\n# Strip whitespace for comparison\ntest_eq(meta['title'].strip(), 'Core')\ntest_eq(meta['description'].strip(), 'Core utilities and helpers for the technical blog following fast.ai conventions')\n\n\n---------------------------------------------------------------------------\nNameError                                 Traceback (most recent call last)\nCell In[8], line 2\n      1 # Test read_meta on this very notebook\n----&gt; 2 meta = read_meta(Path('00_core.ipynb'))\n      3 print(f\"Title: '{meta['title']}'\")\n      4 print(f\"Description: '{meta['description']}'\")\n\nNameError: name 'read_meta' is not defined\n\n\n\n\n# Test read_meta on this very notebook\nmeta = read_meta(Path('00_core.ipynb'))\ntest_eq(meta['title'], 'Core')\ntest_eq(meta['description'], 'Core utilities and helpers for the technical blog following fast.ai conventions')",
+    "crumbs": [
+      "Core"
+    ]
+  },
+  {
+    "objectID": "rbe/uncertainty_fundamentals.html",
+    "href": "rbe/uncertainty_fundamentals.html",
+    "title": "RBE Part 1: Uncertainty Fundamentals",
+    "section": "",
+    "text": "In cybersecurity, we constantly make decisions under uncertainty. Consider these scenarios:\n\nNetwork Anomaly Detection: Is this unusual traffic pattern a cyberattack or normal variation?\nThreat Intelligence: How confident are we that this IP address is malicious?\nIncident Response: What’s the probability this breach came from an insider threat?\n\nTraditional approaches often ignore uncertainty, leading to brittle systems that fail when conditions change. Recursive Bayesian Estimation (RBE) provides a principled framework for handling uncertainty that evolves over time.\nLet’s start with a concrete example:\n\n# Example: Network intrusion detection uncertainty\n# We observe suspicious activity but aren't sure if it's an attack\n\n# Prior belief: 5% of network events are attacks\nprior_attack = 0.05\nprior_normal = 0.95\nprior = np.array([prior_attack, prior_normal])\n\nprint(f\"Prior belief: {prior_attack*100:.1f}% chance of attack\")\nprint(f\"Uncertainty (entropy): {prob_entropy(prior):.3f} bits\")\n\nPrior belief: 5.0% chance of attack\nUncertainty (entropy): 0.286 bits\n\n\nThis entropy measure tells us how uncertain we are. Higher entropy = more uncertainty. Now let’s see how new evidence changes our beliefs:\n\n# New evidence: unusual port scanning detected\n# Likelihood: attacks cause port scanning 90% of the time\n#            normal traffic causes it 10% of the time\nlikelihood = np.array([0.9, 0.1])  # [P(evidence|attack), P(evidence|normal)]\n\n# Update beliefs using Bayes' theorem\nposterior = bayes_update(prior, likelihood)\n\nprint(f\"After observing port scanning:\")\nprint(f\"Updated belief: {posterior[0]*100:.1f}% chance of attack\")\nprint(f\"New uncertainty: {prob_entropy(posterior):.3f} bits\")\nprint(f\"Uncertainty reduction: {prob_entropy(prior) - prob_entropy(posterior):.3f} bits\")\n\nAfter observing port scanning:\nUpdated belief: 32.1% chance of attack\nNew uncertainty: 0.906 bits\nUncertainty reduction: -0.620 bits\n\n\nNotice how the evidence both increased our confidence in an attack and reduced our uncertainty. This is the essence of Bayesian reasoning - we start with prior beliefs and update them as we gather evidence.",
+    "crumbs": [
+      "rbe",
+      "RBE Part 1: Uncertainty Fundamentals"
+    ]
+  },
+  {
+    "objectID": "rbe/uncertainty_fundamentals.html#introduction-why-uncertainty-matters-in-cybersecurity",
+    "href": "rbe/uncertainty_fundamentals.html#introduction-why-uncertainty-matters-in-cybersecurity",
+    "title": "RBE Part 1: Uncertainty Fundamentals",
+    "section": "",
+    "text": "In cybersecurity, we constantly make decisions under uncertainty. Consider these scenarios:\n\nNetwork Anomaly Detection: Is this unusual traffic pattern a cyberattack or normal variation?\nThreat Intelligence: How confident are we that this IP address is malicious?\nIncident Response: What’s the probability this breach came from an insider threat?\n\nTraditional approaches often ignore uncertainty, leading to brittle systems that fail when conditions change. Recursive Bayesian Estimation (RBE) provides a principled framework for handling uncertainty that evolves over time.\nLet’s start with a concrete example:\n\n# Example: Network intrusion detection uncertainty\n# We observe suspicious activity but aren't sure if it's an attack\n\n# Prior belief: 5% of network events are attacks\nprior_attack = 0.05\nprior_normal = 0.95\nprior = np.array([prior_attack, prior_normal])\n\nprint(f\"Prior belief: {prior_attack*100:.1f}% chance of attack\")\nprint(f\"Uncertainty (entropy): {prob_entropy(prior):.3f} bits\")\n\nPrior belief: 5.0% chance of attack\nUncertainty (entropy): 0.286 bits\n\n\nThis entropy measure tells us how uncertain we are. Higher entropy = more uncertainty. Now let’s see how new evidence changes our beliefs:\n\n# New evidence: unusual port scanning detected\n# Likelihood: attacks cause port scanning 90% of the time\n#            normal traffic causes it 10% of the time\nlikelihood = np.array([0.9, 0.1])  # [P(evidence|attack), P(evidence|normal)]\n\n# Update beliefs using Bayes' theorem\nposterior = bayes_update(prior, likelihood)\n\nprint(f\"After observing port scanning:\")\nprint(f\"Updated belief: {posterior[0]*100:.1f}% chance of attack\")\nprint(f\"New uncertainty: {prob_entropy(posterior):.3f} bits\")\nprint(f\"Uncertainty reduction: {prob_entropy(prior) - prob_entropy(posterior):.3f} bits\")\n\nAfter observing port scanning:\nUpdated belief: 32.1% chance of attack\nNew uncertainty: 0.906 bits\nUncertainty reduction: -0.620 bits\n\n\nNotice how the evidence both increased our confidence in an attack and reduced our uncertainty. This is the essence of Bayesian reasoning - we start with prior beliefs and update them as we gather evidence.",
+    "crumbs": [
+      "rbe",
+      "RBE Part 1: Uncertainty Fundamentals"
+    ]
+  },
+  {
+    "objectID": "rbe/uncertainty_fundamentals.html#types-of-uncertainty",
+    "href": "rbe/uncertainty_fundamentals.html#types-of-uncertainty",
+    "title": "RBE Part 1: Uncertainty Fundamentals",
+    "section": "Types of Uncertainty",
+    "text": "Types of Uncertainty\nUnderstanding uncertainty requires distinguishing between two fundamental types:\n\nAleatory Uncertainty (Irreducible)\nInherent randomness in the system that cannot be reduced by gathering more data.\nCybersecurity Examples: - Random timing of legitimate user logins - Network packet loss due to congestion - Attacker’s choice of target systems\n\n\nEpistemic Uncertainty (Reducible)\nLack of knowledge that can be reduced by collecting more information.\nCybersecurity Examples: - Unknown attack signatures - Incomplete threat intelligence - Uncertain system configurations\n\nsource\n\n\ndemo_uncertainty_types\n\n demo_uncertainty_types (n_samples=1000, rng=None)\n\nDemonstrate aleatory vs epistemic uncertainty with cybersecurity examples\nKey Insight: RBE excels at handling epistemic uncertainty. As we collect more evidence, our beliefs converge toward the truth. Aleatory uncertainty remains, but we can quantify and account for it.",
+    "crumbs": [
+      "rbe",
+      "RBE Part 1: Uncertainty Fundamentals"
+    ]
+  },
+  {
+    "objectID": "rbe/uncertainty_fundamentals.html#mathematical-foundations",
+    "href": "rbe/uncertainty_fundamentals.html#mathematical-foundations",
+    "title": "RBE Part 1: Uncertainty Fundamentals",
+    "section": "Mathematical Foundations",
+    "text": "Mathematical Foundations\nLet’s build our mathematical toolkit using the core functions. We’ll start with probability distributions and work toward Bayesian inference.\n\nProbability Distributions and Entropy\n\nsource\n\n\nexplore_distributions\n\n explore_distributions ()\n\nInteractive exploration of probability distributions and entropy\nEntropy Interpretation: - High entropy (uniform): We’re completely uncertain about the threat level - Low entropy (certain): We’re confident in our assessment - Information gain: Entropy reduction when we receive evidence\n\n\nBayes’ Theorem in Action\nNow let’s see how Bayes’ theorem works in practice for cybersecurity scenarios:\n\nsource\n\n\nbayesian_intrusion_detection\n\n bayesian_intrusion_detection (n_observations=10, rng=None)\n\nDemonstrate Bayesian updating for intrusion detection\nKey Observations: 1. Sequential updating: Each piece of evidence refines our beliefs 2. Evidence strength matters: Port scans have bigger impact than normal traffic 3. Counter-evidence: Normal traffic observations reduce attack probability 4. Uncertainty tracking: We can quantify how confident we are\n\n\nHandling Multiple Hypotheses\nIn real cybersecurity scenarios, we often consider multiple threat types simultaneously:\n\nsource\n\n\nmulti_threat_assessment\n\n multi_threat_assessment (rng=None)\n\nDemonstrate multi-hypothesis threat assessment",
+    "crumbs": [
+      "rbe",
+      "RBE Part 1: Uncertainty Fundamentals"
+    ]
+  },
+  {
+    "objectID": "rbe/uncertainty_fundamentals.html#interactive-uncertainty-explorer",
+    "href": "rbe/uncertainty_fundamentals.html#interactive-uncertainty-explorer",
+    "title": "RBE Part 1: Uncertainty Fundamentals",
+    "section": "Interactive Uncertainty Explorer",
+    "text": "Interactive Uncertainty Explorer\nLet’s create an interactive component to explore how different evidence affects our beliefs:\n\nsource\n\ncreate_uncertainty_calculator\n\n create_uncertainty_calculator ()\n\nCreate an interactive uncertainty calculator using FastHTML",
+    "crumbs": [
+      "rbe",
+      "RBE Part 1: Uncertainty Fundamentals"
+    ]
+  },
+  {
+    "objectID": "rbe/uncertainty_fundamentals.html#summary-key-takeaways",
+    "href": "rbe/uncertainty_fundamentals.html#summary-key-takeaways",
+    "title": "RBE Part 1: Uncertainty Fundamentals",
+    "section": "Summary: Key Takeaways",
+    "text": "Summary: Key Takeaways\nWe’ve explored the fundamentals of uncertainty in cybersecurity through the lens of Bayesian reasoning:\n\nCore Concepts\n\nTwo Types of Uncertainty:\n\nAleatory (irreducible): Inherent randomness in systems\nEpistemic (reducible): Our lack of knowledge\n\nEntropy as Uncertainty Measure:\n\nQuantifies how uncertain we are about outcomes\nInformation gain = entropy reduction\n\nBayesian Updating:\n\nStart with prior beliefs\nUpdate with evidence using Bayes’ theorem\nTrack uncertainty throughout the process\n\n\n\n\nPractical Applications\n\nNetwork intrusion detection with evolving threat assessments\nMulti-hypothesis testing for different attack types\nEvidence accumulation over time\nUncertainty quantification for decision making\n\n\n\nNext Steps\nIn the next notebook, we’ll explore how to implement these concepts using Recursive Bayesian Estimation with particle filters for real-time cybersecurity applications.\nThe mathematical foundation we’ve built here provides the basis for more sophisticated techniques that can handle: - Non-linear system dynamics - Multi-dimensional state spaces - Continuous-time observations - Adaptive learning algorithms",
+    "crumbs": [
+      "rbe",
+      "RBE Part 1: Uncertainty Fundamentals"
+    ]
+  },
+  {
+    "objectID": "rbe/rbe_core.html",
+    "href": "rbe/rbe_core.html",
+    "title": "RBE Core",
+    "section": "",
+    "text": "Basic probability distribution functions following fast.ai style with short, clear names.\n\nsource\n\n\n\n prob_kl_div (p, q)\n\nKL divergence from q to p\n\nsource\n\n\n\n\n prob_entropy (probs)\n\nCalculate entropy of probs distribution\n\nsource\n\n\n\n\n prob_sample (probs, n=1, rng=None)\n\nSample n indices from probs distribution\n\nsource\n\n\n\n\n prob_normalize (probs)\n\nNormalize probs to sum to 1\n\n# Test probability utilities\nprobs = [1, 2, 3]\nnormalized = prob_normalize(probs)\ntest_close(np.sum(normalized), 1.0)\ntest_close(normalized, [1/6, 2/6, 3/6])\n\n# Test sampling\nrng = np.random.default_rng(42)\nsamples = prob_sample([0.1, 0.7, 0.2], n=1000, rng=rng)\nassert len(samples) == 1000\nassert np.all((samples &gt;= 0) & (samples &lt;= 2))\n\n# Test entropy\nuniform = [0.5, 0.5]\ncertain = [1.0, 0.0]\nassert prob_entropy(uniform) &gt; prob_entropy(certain)\n\n# Test KL divergence\np = [0.5, 0.5]\nq = [0.5, 0.5]\ntest_close(prob_kl_div(p, q), 0.0, eps=1e-10)  # Same distributions",
+    "crumbs": [
+      "rbe",
+      "RBE Core"
+    ]
+  },
+  {
+    "objectID": "rbe/rbe_core.html#probability-utilities",
+    "href": "rbe/rbe_core.html#probability-utilities",
+    "title": "RBE Core",
+    "section": "",
+    "text": "Basic probability distribution functions following fast.ai style with short, clear names.\n\nsource\n\n\n\n prob_kl_div (p, q)\n\nKL divergence from q to p\n\nsource\n\n\n\n\n prob_entropy (probs)\n\nCalculate entropy of probs distribution\n\nsource\n\n\n\n\n prob_sample (probs, n=1, rng=None)\n\nSample n indices from probs distribution\n\nsource\n\n\n\n\n prob_normalize (probs)\n\nNormalize probs to sum to 1\n\n# Test probability utilities\nprobs = [1, 2, 3]\nnormalized = prob_normalize(probs)\ntest_close(np.sum(normalized), 1.0)\ntest_close(normalized, [1/6, 2/6, 3/6])\n\n# Test sampling\nrng = np.random.default_rng(42)\nsamples = prob_sample([0.1, 0.7, 0.2], n=1000, rng=rng)\nassert len(samples) == 1000\nassert np.all((samples &gt;= 0) & (samples &lt;= 2))\n\n# Test entropy\nuniform = [0.5, 0.5]\ncertain = [1.0, 0.0]\nassert prob_entropy(uniform) &gt; prob_entropy(certain)\n\n# Test KL divergence\np = [0.5, 0.5]\nq = [0.5, 0.5]\ntest_close(prob_kl_div(p, q), 0.0, eps=1e-10)  # Same distributions",
+    "crumbs": [
+      "rbe",
+      "RBE Core"
+    ]
+  },
+  {
+    "objectID": "rbe/rbe_core.html#bayesian-core",
+    "href": "rbe/rbe_core.html#bayesian-core",
+    "title": "RBE Core",
+    "section": "Bayesian Core",
+    "text": "Bayesian Core\nCore Bayesian inference functions for updating beliefs with evidence.\n\nsource\n\nbayes_posterior_predictive\n\n bayes_posterior_predictive (posterior, likelihood_fn, n_samples=1000,\n                             rng=None)\n\nSample from posterior predictive distribution\n\nsource\n\n\nbayes_sequential\n\n bayes_sequential (priors, likelihoods, evidences=None)\n\nSequential updating of priors with likelihoods and optional evidences\n\nsource\n\n\nbayes_update\n\n bayes_update (prior, likelihood, evidence=None)\n\nUpdate prior with likelihood and optional evidence\n\n# Test Bayesian core functions\nprior = np.array([0.3, 0.7])\nlikelihood = np.array([0.8, 0.2])\nposterior = bayes_update(prior, likelihood)\ntest_close(np.sum(posterior), 1.0)\nassert posterior[0] &gt; prior[0]  # First hypothesis should increase\n\n# Test sequential updating\npriors = [0.5, 0.5]\nlikelihoods = [[0.9, 0.1], [0.8, 0.2], [0.7, 0.3]]\nposteriors = bayes_sequential(priors, likelihoods)\nassert posteriors.shape == (4, 2)  # Initial + 3 updates\ntest_close(np.sum(posteriors, axis=1), 1.0)  # All normalized\n\n# Test posterior predictive (simple case)\nposterior = [0.6, 0.4]\ndef simple_likelihood(param_idx):\n    if param_idx == 0:\n        return [0.8, 0.2]  # Biased toward observation 0\n    else:\n        return [0.3, 0.7]  # Biased toward observation 1\n\nrng = np.random.default_rng(42)\npredictions = bayes_posterior_predictive(posterior, simple_likelihood, n_samples=100, rng=rng)\nassert len(predictions) == 100\nassert np.all((predictions &gt;= 0) & (predictions &lt;= 1))",
+    "crumbs": [
+      "rbe",
+      "RBE Core"
+    ]
+  },
+  {
+    "objectID": "rbe/rbe_core.html#particle-filter-foundation",
+    "href": "rbe/rbe_core.html#particle-filter-foundation",
+    "title": "RBE Core",
+    "section": "Particle Filter Foundation",
+    "text": "Particle Filter Foundation\nCore particle filter functions for Monte Carlo-based Bayesian inference.\n\nsource\n\npf_step\n\n pf_step (particles, weights, observation, transition_fn, likelihood_fn,\n          resample_threshold=0.5, rng=None)\n\nComplete particle filter step: predict, update, and conditionally resample\n\nsource\n\n\npf_effective_size\n\n pf_effective_size (weights)\n\nCalculate effective sample size of weights\n\nsource\n\n\npf_resample\n\n pf_resample (particles, weights, method='systematic', rng=None)\n\nResample particles using weights with specified method\n\nsource\n\n\npf_update\n\n pf_update (particles, weights, observation, likelihood_fn)\n\nUpdate step: weight particles using observation and likelihood_fn\n\nsource\n\n\npf_predict\n\n pf_predict (particles, weights, transition_fn, rng=None)\n\nPrediction step: apply transition_fn to particles\n\nsource\n\n\npf_init\n\n pf_init (n_particles, state_dim, init_fn=None, rng=None)\n\nInitialize particle filter with n_particles and state_dim\n\n# Test particle filter functions\nrng = np.random.default_rng(42)\n\n# Test initialization\nparticles, weights = pf_init(100, 2, rng=rng)\nassert particles.shape == (100, 2)\nassert len(weights) == 100\ntest_close(np.sum(weights), 1.0)\n\n# Test prediction with simple transition\ndef simple_transition(particle, rng):\n    return particle + rng.normal(0, 0.1, size=particle.shape)\n\nnew_particles, new_weights = pf_predict(particles, weights, simple_transition, rng)\nassert new_particles.shape == particles.shape\ntest_close(new_weights, weights)  # Weights unchanged\n\n# Test update with simple likelihood\ndef simple_likelihood(particle, observation):\n    # Gaussian likelihood\n    diff = np.linalg.norm(particle - observation)\n    return np.exp(-0.5 * diff**2)\n\nobservation = np.array([0.5, 0.5])\nparticles, weights = pf_update(particles, weights, observation, simple_likelihood)\ntest_close(np.sum(weights), 1.0)\n\n# Test resampling\nparticles, weights = pf_resample(particles, weights, rng=rng)\ntest_close(np.sum(weights), 1.0)\ntest_close(weights, np.ones(100)/100)  # Should be uniform after resampling\n\n# Test effective sample size\nuniform_weights = np.ones(100) / 100\nskewed_weights = np.zeros(100)\nskewed_weights[0] = 1.0\nassert pf_effective_size(uniform_weights) &gt; pf_effective_size(skewed_weights)",
+    "crumbs": [
+      "rbe",
+      "RBE Core"
+    ]
+  },
+  {
+    "objectID": "rbe/rbe_core.html#rbe-estimator",
+    "href": "rbe/rbe_core.html#rbe-estimator",
+    "title": "RBE Core",
+    "section": "RBE Estimator",
+    "text": "RBE Estimator\nMain recursive Bayesian estimator implementations.\n\nsource\n\nrbe_metrics\n\n rbe_metrics (true_states, estimates)\n\nCalculate performance metrics for RBE estimates\n\nsource\n\n\nrbe_adaptive\n\n rbe_adaptive (observations, transition_fn, likelihood_fn,\n               adapt_rate=0.01, n_particles=1000, init_fn=None, rng=None)\n\nAdaptive RBE estimator that adjusts parameters based on performance\n\nsource\n\n\nrbe_estimator\n\n rbe_estimator (observations, transition_fn, likelihood_fn,\n                n_particles=1000, init_fn=None, rng=None)\n\nMain RBE estimator for observations with particle filter\n\n# Test RBE estimator functions\nrng = np.random.default_rng(42)\n\n# Generate synthetic data\ntrue_states = [np.array([i * 0.1, i * 0.05]) for i in range(10)]\nobservations = [state + rng.normal(0, 0.1, 2) for state in true_states]\n\n# Define simple transition and likelihood\ndef test_transition(particle, rng):\n    return particle + rng.normal(0, 0.05, particle.shape)\n\ndef test_likelihood(particle, observation):\n    diff = np.linalg.norm(particle - observation)\n    return np.exp(-0.5 * (diff / 0.1)**2)\n\n# Test basic estimator\nresult = rbe_estimator(observations, test_transition, test_likelihood, \n                      n_particles=100, rng=rng)\nassert result['estimates'].shape == (10, 2)\nassert len(result['particles']) == 11  # Initial + 10 steps\nassert len(result['weights']) == 11\n\n# Test adaptive estimator\nadaptive_result = rbe_adaptive(observations, test_transition, test_likelihood,\n                              n_particles=100, rng=rng)\nassert 'adaptation_info' in adaptive_result\nassert 'avg_effective_size' in adaptive_result['adaptation_info']\n\n# Test metrics\nmetrics = rbe_metrics(true_states, result['estimates'])\nassert 'mse' in metrics\nassert 'rmse' in metrics\nassert 'mae' in metrics\nassert metrics['n_samples'] == 10\nassert metrics['rmse'] == np.sqrt(metrics['mse'])",
+    "crumbs": [
+      "rbe",
+      "RBE Core"
+    ]
+  },
+  {
+    "objectID": "rbe/rbe_core.html#visualization-helpers",
+    "href": "rbe/rbe_core.html#visualization-helpers",
+    "title": "RBE Core",
+    "section": "Visualization Helpers",
+    "text": "Visualization Helpers\nHelper functions for visualizing RBE results and particle filters.\n\nsource\n\nviz_rbe_summary\n\n viz_rbe_summary (rbe_result, true_states=None, title='RBE Summary',\n                  figsize=(15, 10))\n\nCreate comprehensive summary visualization of RBE results\n\nsource\n\n\nviz_comparison\n\n viz_comparison (methods_data, time_steps=None, title='Method Comparison',\n                 figsize=(12, 8), metrics=['mse', 'mae'])\n\nCompare multiple methods with methods_data dict\n\nsource\n\n\nviz_beliefs\n\n viz_beliefs (beliefs, time_steps=None, title='Belief Evolution',\n              figsize=(10, 6), labels=None)\n\nVisualize evolution of beliefs over time_steps\n\nsource\n\n\nviz_particles\n\n viz_particles (particles, weights, title='Particle Distribution',\n                figsize=(8, 6), alpha=0.6)\n\nVisualize particles with weights\n\n# Test visualization functions (basic functionality)\nrng = np.random.default_rng(42)\n\n# Create test data\nparticles = rng.normal(0, 1, (100, 2))\nweights = rng.exponential(1, 100)\nweights = prob_normalize(weights)\n\n# Test particle visualization\nfig, ax = viz_particles(particles, weights)\nassert fig is not None\nplt.close(fig)\n\n# Test belief visualization\nbeliefs = np.random.random((10, 3))\nfig, ax = viz_beliefs(beliefs)\nassert fig is not None\nplt.close(fig)\n\n# Test comparison visualization\nmethods_data = {\n    'Method A': {\n        'estimates': np.random.random(10), \n        'mse': np.random.random(10), \n        'mae': np.random.random(10)\n    },\n    'Method B': {\n        'estimates': np.random.random(10), \n        'mse': np.random.random(10), \n        'mae': np.random.random(10)\n    }\n}\nfig, axes = viz_comparison(methods_data)\nassert fig is not None\nplt.close(fig)\n\n# Test RBE summary visualization\n# Use the RBE result from previous test\ntrue_states = [np.array([i * 0.1, i * 0.05]) for i in range(10)]\nobservations = [state + rng.normal(0, 0.1, 2) for state in true_states]\nresult = rbe_estimator(observations, test_transition, test_likelihood, \n                      n_particles=50, rng=rng)  # Smaller for faster test\n\nfig = viz_rbe_summary(result, true_states)\nassert fig is not None\nplt.close(fig)",
+    "crumbs": [
+      "rbe",
+      "RBE Core"
+    ]
+  },
+  {
+    "objectID": "rbe/rbe_core.html#export-functions",
+    "href": "rbe/rbe_core.html#export-functions",
+    "title": "RBE Core",
+    "section": "Export Functions",
+    "text": "Export Functions\nDefine all functions to be exported from this module.",
+    "crumbs": [
+      "rbe",
+      "RBE Core"
+    ]
+  },
+  {
+    "objectID": "rbe/rbe_core.html#summary",
+    "href": "rbe/rbe_core.html#summary",
+    "title": "RBE Core",
+    "section": "Summary",
+    "text": "Summary\nThis module provides the complete foundation for Recursive Bayesian Estimation following fast.ai coding principles:\n\nShort, clear names: prob_normalize, bayes_update, pf_init\nFunction-first approach: Minimal classes, comprehensive functions\nLiberal imports: Full __all__ definition for from rbe.core import *\nInline testing: Comprehensive tests using test_eq and test_close\nMathematical focus: Functions optimized for interactive exploration\nModular design: Mix-and-match functionality for different use cases\n\nThe module supports the entire RBE blog series with: - Core probability and Bayesian inference functions - Complete particle filter implementation - Ready-to-use RBE estimators - Comprehensive visualization tools - Performance metrics and analysis functions",
+    "crumbs": [
+      "rbe",
+      "RBE Core"
+    ]
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "technical-blog",
+    "section": "",
+    "text": "Welcome to my technical blog where I explore cutting-edge topics in AI, cybersecurity, and software engineering through interactive demonstrations and rigorous implementations.\nI’ve written these posts primarily to teach myself about complex topics (with generous help from AI assistants), but I’m sharing them in case someone else might find them interesting—or at least to provide additional training data for our future AI overlords.\nThis blog is built with FastHTML and nbdev, creating a seamless blend of literate programming and interactive web components. Feel free to explore the source code on GitHub if you’re curious about how it all works.",
+    "crumbs": [
+      "technical-blog"
+    ]
+  },
+  {
+    "objectID": "index.html#featured-series-recursive-bayesian-estimators",
+    "href": "index.html#featured-series-recursive-bayesian-estimators",
+    "title": "technical-blog",
+    "section": "Featured Series: Recursive Bayesian Estimators",
+    "text": "Featured Series: Recursive Bayesian Estimators\nDive deep into the mathematical foundations and practical applications of Recursive Bayesian Estimators in cybersecurity. This comprehensive series covers everything from Bayes’ theorem to advanced particle filtering techniques.\n🔗 Start the RBE Series →",
+    "crumbs": [
+      "technical-blog"
+    ]
+  },
+  {
+    "objectID": "index.html#what-makes-this-blog-different",
+    "href": "index.html#what-makes-this-blog-different",
+    "title": "technical-blog",
+    "section": "What Makes This Blog Different",
+    "text": "What Makes This Blog Different\n\nInteractive Learning: FastHTML-powered demonstrations that let you explore concepts hands-on\nRigorous Implementation: Complete, tested Python code for every concept\nMathematical Depth: Proper derivations and theoretical foundations\nPractical Applications: Real-world use cases and performance analysis\nOpen Source: All code available for learning and adaptation",
+    "crumbs": [
+      "technical-blog"
+    ]
+  },
+  {
+    "objectID": "index.html#upcoming-topics",
+    "href": "index.html#upcoming-topics",
+    "title": "technical-blog",
+    "section": "Upcoming Topics",
+    "text": "Upcoming Topics\n\nDeep Learning Architectures\nDistributed Systems\nQuantum Computing Applications\nAdvanced Python Techniques",
+    "crumbs": [
+      "technical-blog"
+    ]
+  },
+  {
+    "objectID": "index.html#developer-guide",
+    "href": "index.html#developer-guide",
+    "title": "technical-blog",
+    "section": "Developer Guide",
+    "text": "Developer Guide\nIf you are new to using nbdev here are some useful pointers to get you started.\n\nInstall technical_blog in Development mode\n# make sure technical_blog package is installed in development mode\n$ pip install -e .\n\n# make changes under nbs/ directory\n# ...\n\n# compile to have changes apply to technical_blog\n$ nbdev_prepare",
+    "crumbs": [
+      "technical-blog"
+    ]
+  },
+  {
+    "objectID": "index.html#usage",
+    "href": "index.html#usage",
+    "title": "technical-blog",
+    "section": "Usage",
+    "text": "Usage\n\nInstallation\nInstall latest from the GitHub repository:\n$ pip install git+https://github.com/Matthew-Redrup/technical-blog.git\nor from conda\n$ conda install -c Matthew-Redrup technical_blog\nor from pypi\n$ pip install technical_blog\n\n\nDocumentation\nDocumentation can be found hosted on this GitHub repository’s pages. Additionally you can find package manager specific guidelines on conda and pypi respectively.",
+    "crumbs": [
+      "technical-blog"
+    ]
+  },
+  {
+    "objectID": "index.html#how-to-use",
+    "href": "index.html#how-to-use",
+    "title": "technical-blog",
+    "section": "How to use",
+    "text": "How to use\nFill me in please! Don’t forget code examples:\n\n1+1\n\n2",
+    "crumbs": [
+      "technical-blog"
+    ]
+  },
+  {
+    "objectID": "blog_components.html",
+    "href": "blog_components.html",
+    "title": "Blog Components",
+    "section": "",
+    "text": "source\n\n\n\n create_nav_links (nav_items, current_topic=None)\n\nCreate navigation links with active state handling\n\nfrom IPython.display import HTML\n\nnav_items = [\n        ('Home', '/'),\n        ('RBE Series', '/rbe/'),\n        ('Future Topics', '/topics/'),\n        ('About', '/about/')\n    ]\n\nn_links = create_nav_links(nav_items, \"home\")\nHTML(str(n_links))\n\n[button(('Home',),{'href': '/', 'variant': 'default', 'size': 'sm', 'type': 'submit', 'class': 'uk-btn transition-colors'}), button(('RBE Series',),{'href': '/rbe/', 'variant': 'ghost', 'size': 'sm', 'type': 'submit', 'class': 'uk-btn transition-colors'}), button(('Future Topics',),{'href': '/topics/', 'variant': 'ghost', 'size': 'sm', 'type': 'submit', 'class': 'uk-btn transition-colors'}), button(('About',),{'href': '/about/', 'variant': 'ghost', 'size': 'sm', 'type': 'submit', 'class': 'uk-btn transition-colors'})]\n\n\n\nsource\n\n\n\n\n create_brand (title=\"Matthew Redrup's Blog\", subtitle='Ramblings on AI &\n               Cybersecurity')\n\nCreate the brand/header section\n\nfrom IPython.display import HTML\nbrand = create_brand()\nHTML(str(brand))\n\nRamblings on AI & Cybersecurity\n\n\n\nsource\n\n\n\n\n create_theme_toggle ()\n\nCreate theme toggle that works with MonsterUI’s system\n\nfrom IPython.display import HTML\ntoggle = create_theme_toggle()\nHTML(str(toggle))\n\n☀️🌙",
+    "crumbs": [
+      "Blog Components"
+    ]
+  },
+  {
+    "objectID": "blog_components.html#navigation-components",
+    "href": "blog_components.html#navigation-components",
+    "title": "Blog Components",
+    "section": "",
+    "text": "source\n\n\n\n create_nav_links (nav_items, current_topic=None)\n\nCreate navigation links with active state handling\n\nfrom IPython.display import HTML\n\nnav_items = [\n        ('Home', '/'),\n        ('RBE Series', '/rbe/'),\n        ('Future Topics', '/topics/'),\n        ('About', '/about/')\n    ]\n\nn_links = create_nav_links(nav_items, \"home\")\nHTML(str(n_links))\n\n[button(('Home',),{'href': '/', 'variant': 'default', 'size': 'sm', 'type': 'submit', 'class': 'uk-btn transition-colors'}), button(('RBE Series',),{'href': '/rbe/', 'variant': 'ghost', 'size': 'sm', 'type': 'submit', 'class': 'uk-btn transition-colors'}), button(('Future Topics',),{'href': '/topics/', 'variant': 'ghost', 'size': 'sm', 'type': 'submit', 'class': 'uk-btn transition-colors'}), button(('About',),{'href': '/about/', 'variant': 'ghost', 'size': 'sm', 'type': 'submit', 'class': 'uk-btn transition-colors'})]\n\n\n\nsource\n\n\n\n\n create_brand (title=\"Matthew Redrup's Blog\", subtitle='Ramblings on AI &\n               Cybersecurity')\n\nCreate the brand/header section\n\nfrom IPython.display import HTML\nbrand = create_brand()\nHTML(str(brand))\n\nRamblings on AI & Cybersecurity\n\n\n\nsource\n\n\n\n\n create_theme_toggle ()\n\nCreate theme toggle that works with MonsterUI’s system\n\nfrom IPython.display import HTML\ntoggle = create_theme_toggle()\nHTML(str(toggle))\n\n☀️🌙",
+    "crumbs": [
+      "Blog Components"
+    ]
+  },
+  {
+    "objectID": "blog_components.html#fasthtml-navigation-component-with-custom-theme-toggle",
+    "href": "blog_components.html#fasthtml-navigation-component-with-custom-theme-toggle",
+    "title": "Blog Components",
+    "section": "FastHTML Navigation Component with Custom Theme Toggle",
+    "text": "FastHTML Navigation Component with Custom Theme Toggle\nThis code demonstrates how to create a modular, reusable navigation component for FastHTML applications using MonsterUI styling. The key improvements over monolithic route definitions include:\n\nComponent Separation Benefits\n\nMaintainability: Each function has a single responsibility\nReusability: Components can be used across different routes\nTestability: Individual components can be tested in isolation\nReadability: Clear separation of concerns makes code easier to understand\n\n\n\nKey Components\n\n1. Navigation Links (create_nav_links)\n\nUses MonsterUI Button components instead of manual CSS classes\nHandles active state logic cleanly with helper functions\nReturns a list of styled navigation buttons\n\n\n\n2. Brand Section (create_brand)\n\nSeparates the site title and subtitle into its own component\nUses semantic HTML with consistent styling\nEasily customizable through parameters\n\n\n\n3. Custom Theme Toggle (create_theme_toggle)\n\nKey Discovery: MonsterUI uses localStorage with the key \"__FRANKEN__\" to persist theme preferences\nManually toggles the dark class on document.documentElement\nUses matching MonsterUI Button styling for visual consistency\nBypasses the complex Uk_theme_switcher component that had alignment issues\n\n\n\n\nTheme Toggle Implementation Details\nThe theme toggle works by: 1. Reading the current theme state from localStorage.getItem('__FRANKEN__') 2. Updating the mode property in the stored object 3. Saving back to localStorage 4. Immediately applying the theme by adding/removing the dark class\nThis approach integrates seamlessly with MonsterUI’s theme system while providing better visual alignment with navigation buttons.\n\n\nUsage\nCreate navigation with active page indicator\nnav = create_nav(topic=\"home\")\nUse in your FastHTML route\n@rt('/') def get(): return Title(\"My Site\"), nav, Main(...)\nThis pattern can be extended to other UI components like sidebars, footers, and forms.\n\nsource\n\n\ncreate_nav\n\n create_nav (topic:str=None)\n\nCreate main navigation with MonsterUI NavBar for current topic\n\nfull_nav = create_nav('home')\nHTML(str(full_nav))\n\nMatthew Redrup's BlogRamblings on AI & CybersecurityHomeRBE SeriesFuture TopicsAbout☀️🌙HomeRBE SeriesFuture TopicsAbout☀️🌙\n\n\n\n# Test create_nav - simplified for debugging\nnav = create_nav(\"home\")\nprint(f\"NavBar type: {type(nav)}\")\nprint(f\"NavBar children count: {len(nav.children)}\")\nfor i, child in enumerate(nav.children):\n    print(f\"Child {i}: {type(child).__name__} - {getattr(child, 'cls', 'no cls')}\")\n\n# Basic test that it's a NavBar\nassert hasattr(nav, 'brand'), \"Should have brand attribute\"\nassert hasattr(nav, 'children'), \"Should have children attribute\"\n\nNavBar type: &lt;class 'fastcore.xml.FT'&gt;\nNavBar children count: 2\nChild 0: FT - None\nChild 1: FT - None\n\n\n\nsource\n\n\ntopic_card\n\n topic_card (title:str, desc:str, url:str, status:str='available')\n\nCreate a card for blog title with description and url\n\n# Test topic_card\ncard = topic_card(\"Test Topic\", \"A test description\", \"/test/\", \"available\")\ntest_eq(card.children[0].children[0], \"Test Topic\")\ntest_eq(card.children[1].children[0], \"A test description\")\ntest_eq(card.children[2].href, \"/test/\")\n\n# Test coming soon status\ncard_soon = topic_card(\"Future\", \"Coming later\", \"/future/\", \"coming soon\")\ntest_eq(card_soon.children[2].children[0], \"Coming Soon\")\n\n\nsource\n\n\nmath_block\n\n math_block (tex:str, block:bool=True)\n\nRender LaTeX tex using KatexMarkdownJS\n\n# Test math_block\nmath = math_block(\"x^2 + y^2 = z^2\")\ntest_eq(math.children[0], \"$$x^2 + y^2 = z^2$$\")\n# FastHTML components store class in attrs dict, not directly as cls\ntest_eq(math.attrs.get('class'), \"marked math-content\")\n\n# Test inline math\ninline = math_block(\"E = mc^2\", block=False)\ntest_eq(inline.children[0], \"$E = mc^2$\")\ntest_eq(inline.attrs.get('class'), \"marked math-inline\")",
+    "crumbs": [
+      "Blog Components"
+    ]
+  },
+  {
+    "objectID": "blog_components.html#code-display-components",
+    "href": "blog_components.html#code-display-components",
+    "title": "Blog Components",
+    "section": "Code Display Components",
+    "text": "Code Display Components\n\nsource\n\ncode_block\n\n code_block (code:str, language:str='python', title:str=None)\n\nCreate a syntax-highlighted code block using FastHTML’s HighlightJS",
+    "crumbs": [
+      "Blog Components"
+    ]
+  },
+  {
+    "objectID": "rbe/bayes_theorem.html",
+    "href": "rbe/bayes_theorem.html",
+    "title": "RBE Part 2: Bayes Theorem Interactive Calculator",
+    "section": "",
+    "text": "Before building our interactive tools, let’s derive Bayes’ theorem from first principles and understand its profound implications for cybersecurity.\n\n\nStart with the definition of conditional probability:\n\\[P(A|B) = \\frac{P(A \\cap B)}{P(B)}\\]\nSimilarly: \\[P(B|A) = \\frac{P(A \\cap B)}{P(A)}\\]\nSince \\(P(A \\cap B) = P(B \\cap A)\\), we can equate: \\[P(A|B) \\cdot P(B) = P(B|A) \\cdot P(A)\\]\nRearranging gives us Bayes’ theorem: \\[P(A|B) = \\frac{P(B|A) \\cdot P(A)}{P(B)}\\]\n\n\n\nLet’s translate this into cybersecurity terms: - \\(A\\) = “System is under attack” - \\(B\\) = “Suspicious activity detected”\nThen: - \\(P(A)\\) = Prior: Base rate of attacks (before seeing evidence) - \\(P(B|A)\\) = Likelihood: Probability of detecting suspicious activity given an attack - \\(P(B)\\) = Evidence: Overall probability of detecting suspicious activity - \\(P(A|B)\\) = Posterior: Probability of attack given suspicious activity detected\n\nsource\n\n\n\n\n bayes_theorem_step_by_step (prior, likelihood, evidence=None,\n                             labels=None)\n\nStep-by-step Bayes theorem calculation with detailed explanations\n\n\n\nBayes’ theorem can be visualized as updating probability distributions:\n\nsource\n\n\n\n\n visualize_bayes_update (prior, likelihood, title=\"Bayes' Theorem\n                         Visualization\")\n\nVisualize how Bayes’ theorem updates probability distributions\n\nsource\n\n\n\n\n bayes_calculator_component ()\n\nCreate interactive Bayes theorem calculator using FastHTML",
+    "crumbs": [
+      "rbe",
+      "RBE Part 2: Bayes Theorem Interactive Calculator"
+    ]
+  },
+  {
+    "objectID": "rbe/bayes_theorem.html#mathematical-foundation-deriving-bayes-theorem",
+    "href": "rbe/bayes_theorem.html#mathematical-foundation-deriving-bayes-theorem",
+    "title": "RBE Part 2: Bayes Theorem Interactive Calculator",
+    "section": "",
+    "text": "Before building our interactive tools, let’s derive Bayes’ theorem from first principles and understand its profound implications for cybersecurity.\n\n\nStart with the definition of conditional probability:\n\\[P(A|B) = \\frac{P(A \\cap B)}{P(B)}\\]\nSimilarly: \\[P(B|A) = \\frac{P(A \\cap B)}{P(A)}\\]\nSince \\(P(A \\cap B) = P(B \\cap A)\\), we can equate: \\[P(A|B) \\cdot P(B) = P(B|A) \\cdot P(A)\\]\nRearranging gives us Bayes’ theorem: \\[P(A|B) = \\frac{P(B|A) \\cdot P(A)}{P(B)}\\]\n\n\n\nLet’s translate this into cybersecurity terms: - \\(A\\) = “System is under attack” - \\(B\\) = “Suspicious activity detected”\nThen: - \\(P(A)\\) = Prior: Base rate of attacks (before seeing evidence) - \\(P(B|A)\\) = Likelihood: Probability of detecting suspicious activity given an attack - \\(P(B)\\) = Evidence: Overall probability of detecting suspicious activity - \\(P(A|B)\\) = Posterior: Probability of attack given suspicious activity detected\n\nsource\n\n\n\n\n bayes_theorem_step_by_step (prior, likelihood, evidence=None,\n                             labels=None)\n\nStep-by-step Bayes theorem calculation with detailed explanations\n\n\n\nBayes’ theorem can be visualized as updating probability distributions:\n\nsource\n\n\n\n\n visualize_bayes_update (prior, likelihood, title=\"Bayes' Theorem\n                         Visualization\")\n\nVisualize how Bayes’ theorem updates probability distributions\n\nsource\n\n\n\n\n bayes_calculator_component ()\n\nCreate interactive Bayes theorem calculator using FastHTML",
+    "crumbs": [
+      "rbe",
+      "RBE Part 2: Bayes Theorem Interactive Calculator"
+    ]
+  },
+  {
+    "objectID": "rbe/bayes_theorem.html#sensitivity-analysis-how-robust-are-our-conclusions",
+    "href": "rbe/bayes_theorem.html#sensitivity-analysis-how-robust-are-our-conclusions",
+    "title": "RBE Part 2: Bayes Theorem Interactive Calculator",
+    "section": "Sensitivity Analysis: How Robust Are Our Conclusions?",
+    "text": "Sensitivity Analysis: How Robust Are Our Conclusions?\nA critical aspect of Bayesian reasoning is understanding how sensitive our conclusions are to our assumptions. Let’s build tools to explore this:\n\nsource\n\nplot_sensitivity_heatmap\n\n plot_sensitivity_heatmap (priors, likelihoods, posteriors,\n                           title='Posterior Sensitivity Analysis')\n\nPlot sensitivity analysis as a heatmap\n\nsource\n\n\nsensitivity_analysis\n\n sensitivity_analysis (prior_range, likelihood_range, n_points=50)\n\nAnalyze sensitivity of posterior to changes in prior and likelihood",
+    "crumbs": [
+      "rbe",
+      "RBE Part 2: Bayes Theorem Interactive Calculator"
+    ]
+  },
+  {
+    "objectID": "rbe/bayes_theorem.html#advanced-cybersecurity-applications",
+    "href": "rbe/bayes_theorem.html#advanced-cybersecurity-applications",
+    "title": "RBE Part 2: Bayes Theorem Interactive Calculator",
+    "section": "Advanced Cybersecurity Applications",
+    "text": "Advanced Cybersecurity Applications\nNow let’s explore sophisticated applications of Bayes’ theorem in cybersecurity contexts:\n\nsource\n\nthreat_intelligence_fusion\n\n threat_intelligence_fusion (intelligence_sources, reliabilities,\n                             rng=None)\n\nFuse multiple threat intelligence sources using Bayesian updating\n\n\nFalse Positive/Negative Analysis\nUnderstanding the trade-offs between false positives and false negatives is crucial in cybersecurity:\n\nsource\n\n\nplot_roc_and_precision_recall\n\n plot_roc_and_precision_recall (base_rate, sensitivity, specificity)\n\nPlot ROC curve and Precision-Recall curve\n\nsource\n\n\nfalse_rate_analysis\n\n false_rate_analysis (base_rate, sensitivity, specificity,\n                      threshold_range=(0.1, 0.9))\n\nAnalyze false positive and false negative rates across decision thresholds",
+    "crumbs": [
+      "rbe",
+      "RBE Part 2: Bayes Theorem Interactive Calculator"
+    ]
+  },
+  {
+    "objectID": "rbe/bayes_theorem.html#common-pitfalls-and-misconceptions",
+    "href": "rbe/bayes_theorem.html#common-pitfalls-and-misconceptions",
+    "title": "RBE Part 2: Bayes Theorem Interactive Calculator",
+    "section": "Common Pitfalls and Misconceptions",
+    "text": "Common Pitfalls and Misconceptions\nLet’s address the most common mistakes people make when applying Bayes’ theorem:\n\nsource\n\ndemonstrate_conjunction_fallacy\n\n demonstrate_conjunction_fallacy ()\n\nDemonstrate conjunction fallacy in threat assessment\n\nsource\n\n\ndemonstrate_base_rate_neglect\n\n demonstrate_base_rate_neglect ()\n\nDemonstrate the base rate neglect fallacy with cybersecurity examples",
+    "crumbs": [
+      "rbe",
+      "RBE Part 2: Bayes Theorem Interactive Calculator"
+    ]
+  },
+  {
+    "objectID": "rbe/bayes_theorem.html#model-comparison-with-bayes-factors",
+    "href": "rbe/bayes_theorem.html#model-comparison-with-bayes-factors",
+    "title": "RBE Part 2: Bayes Theorem Interactive Calculator",
+    "section": "Model Comparison with Bayes Factors",
+    "text": "Model Comparison with Bayes Factors\nBayes factors provide a principled way to compare different hypotheses:\n\nsource\n\ninterpret_bayes_factor\n\n interpret_bayes_factor (bf)\n\nInterpret Bayes factor strength of evidence\n\nsource\n\n\nmodel_comparison_cybersec\n\n model_comparison_cybersec (evidence_data, rng=None)\n\nCompare different threat models using Bayes factors",
+    "crumbs": [
+      "rbe",
+      "RBE Part 2: Bayes Theorem Interactive Calculator"
+    ]
+  },
+  {
+    "objectID": "rbe/bayes_theorem.html#integration-with-rbe-framework",
+    "href": "rbe/bayes_theorem.html#integration-with-rbe-framework",
+    "title": "RBE Part 2: Bayes Theorem Interactive Calculator",
+    "section": "Integration with RBE Framework",
+    "text": "Integration with RBE Framework\nLet’s connect our Bayes theorem tools with the existing RBE core functions:\n\nsource\n\nintegrated_threat_tracking\n\n integrated_threat_tracking (observations, rng=None)\n\nDemonstrate integration of Bayes theorem with RBE particle filtering",
+    "crumbs": [
+      "rbe",
+      "RBE Part 2: Bayes Theorem Interactive Calculator"
+    ]
+  },
+  {
+    "objectID": "rbe/bayes_theorem.html#summary-key-takeaways",
+    "href": "rbe/bayes_theorem.html#summary-key-takeaways",
+    "title": "RBE Part 2: Bayes Theorem Interactive Calculator",
+    "section": "Summary: Key Takeaways",
+    "text": "Summary: Key Takeaways\nWe’ve built a comprehensive understanding of Bayes’ theorem and its applications in cybersecurity:\n\nCore Mathematical Insights\n\nBayes’ Theorem: \\(P(H|E) = \\frac{P(E|H) \\cdot P(H)}{P(E)}\\)\nComponents: Prior beliefs + Evidence → Posterior beliefs\n\nSensitivity Analysis: Understanding how assumptions affect conclusions\nModel Comparison: Using Bayes factors to choose between hypotheses\n\n\n\nPractical Applications\n\nInteractive calculators for real-time threat assessment\nThreat intelligence fusion from multiple sources\nFalse positive/negative analysis for system tuning\nMulti-model comparison for complex scenarios\n\n\n\nCommon Pitfalls Addressed\n\nBase rate neglect: Low base rates → many false positives\nConjunction fallacy: P(A and B) ≤ P(A) always\nLikelihood confusion: P(E|H) ≠ P(H|E)\n\n\n\nIntegration with RBE\n\nDiscrete updates for categorical threat classification\nContinuous estimation for threat level tracking\nHybrid approaches combining both paradigms\n\n\n\nNext Steps\nIn the next notebook, we’ll explore how these Bayesian foundations enable sophisticated Recursive Bayesian Estimation techniques for real-time cybersecurity monitoring and adaptive threat detection systems.",
+    "crumbs": [
+      "rbe",
+      "RBE Part 2: Bayes Theorem Interactive Calculator"
+    ]
+  },
+  {
+    "objectID": "rbe/index.html",
+    "href": "rbe/index.html",
+    "title": "Recursive Bayesian Estimators in Cybersecurity",
+    "section": "",
+    "text": "This comprehensive series takes you from the fundamental mathematical principles of Bayesian inference to practical implementations of Recursive Bayesian Estimators (RBE) in cybersecurity applications.\n\n\n\nMathematical Foundations: Bayes’ theorem, probability theory, and sequential inference\nRecursive Updating: How beliefs evolve over time with new evidence\nParticle Filters: Advanced Monte Carlo methods for complex distributions\nCybersecurity Applications: Network anomaly detection and threat assessment\nPractical Implementation: Complete Python implementations with performance optimization\nModern Context: How RBE fits with current AI/ML approaches\n\n\n\n\n\nPython programming experience\nBasic probability and statistics\nFamiliarity with NumPy and matplotlib\nUnderstanding of network concepts (helpful but not required)\n\n\n\n\nEach part builds progressively on previous concepts while including complete, runnable code examples and interactive visualizations.",
+    "crumbs": [
+      "rbe"
+    ]
+  },
+  {
+    "objectID": "rbe/index.html#series-overview",
+    "href": "rbe/index.html#series-overview",
+    "title": "Recursive Bayesian Estimators in Cybersecurity",
+    "section": "",
+    "text": "This comprehensive series takes you from the fundamental mathematical principles of Bayesian inference to practical implementations of Recursive Bayesian Estimators (RBE) in cybersecurity applications.\n\n\n\nMathematical Foundations: Bayes’ theorem, probability theory, and sequential inference\nRecursive Updating: How beliefs evolve over time with new evidence\nParticle Filters: Advanced Monte Carlo methods for complex distributions\nCybersecurity Applications: Network anomaly detection and threat assessment\nPractical Implementation: Complete Python implementations with performance optimization\nModern Context: How RBE fits with current AI/ML approaches\n\n\n\n\n\nPython programming experience\nBasic probability and statistics\nFamiliarity with NumPy and matplotlib\nUnderstanding of network concepts (helpful but not required)\n\n\n\n\nEach part builds progressively on previous concepts while including complete, runnable code examples and interactive visualizations.",
+    "crumbs": [
+      "rbe"
+    ]
+  },
+  {
+    "objectID": "rbe/index.html#table-of-contents",
+    "href": "rbe/index.html#table-of-contents",
+    "title": "Recursive Bayesian Estimators in Cybersecurity",
+    "section": "Table of Contents",
+    "text": "Table of Contents\n\nPart 1: Fundamentals\n\nUncertainty Fundamentals - Why reasoning under uncertainty matters\nBayes’ Theorem - Mathematical foundation and intuition\nRecursive Updating - Sequential belief updating\nRBE Mathematics - Particle filters and Monte Carlo methods\n\n\n\nPart 2: Applications\n\nNetwork Anomaly Detection - Practical cybersecurity implementation\nDynamic Environments - Handling concept drift and adaptation\n\n\n\nPart 3: Advanced Topics\n\nAdvanced Techniques - Multi-model estimation and optimization\nImplementation Considerations - Production deployment and scaling\n\n\n\nPart 4: Modern Context\n\nModern AI Comparison - RBE vs deep learning approaches\nFuture Directions - Current research and emerging applications",
+    "crumbs": [
+      "rbe"
+    ]
+  },
+  {
+    "objectID": "rbe/index.html#interactive-features",
+    "href": "rbe/index.html#interactive-features",
+    "title": "Recursive Bayesian Estimators in Cybersecurity",
+    "section": "Interactive Features",
+    "text": "Interactive Features\nThroughout this series, you’ll find:\n\nLive Demonstrations: Interactive particle filters and Bayesian updating\nParameter Exploration: Widgets to experiment with algorithm settings\nPerformance Analysis: Benchmarking tools and computational analysis\nReal-World Data: Synthetic network traffic and anomaly scenarios\nComparative Studies: Side-by-side algorithm comparisons",
+    "crumbs": [
+      "rbe"
+    ]
+  },
+  {
+    "objectID": "rbe/index.html#getting-started",
+    "href": "rbe/index.html#getting-started",
+    "title": "Recursive Bayesian Estimators in Cybersecurity",
+    "section": "Getting Started",
+    "text": "Getting Started\nReady to dive in? Start with Part 1: Uncertainty Fundamentals to build the foundational understanding needed for the entire series.\nOr jump to any specific topic that interests you - each part is designed to be as self-contained as possible while building on the overall narrative.",
+    "crumbs": [
+      "rbe"
+    ]
+  }
+]
