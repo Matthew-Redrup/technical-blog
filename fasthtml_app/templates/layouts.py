@@ -2,7 +2,7 @@
 
 from fasthtml.common import *
 from monsterui.all import *
-from technical_blog.blog_components import create_navigation
+from technical_blog.blog_components import create_nav
 
 def base_layout(title: str = "Matthew Redrup's Technical Blog", 
                 current_section: str = None,
@@ -26,13 +26,11 @@ def base_layout(title: str = "Matthew Redrup's Technical Blog",
                 *Theme.blue.headers(),
                 HighlightJS(),
                 KatexMarkdownJS(),
-                Link(rel="stylesheet", href="/static/css/main.css"),
-                Link(rel="stylesheet", href="/static/css/utilities.css"),
                 *extra_headers
             ),
             Body(
                 Div(
-                    create_navigation(current_section),
+                    create_nav(current_section),
                     content,
                     cls="min-h-screen bg-gray-50",
                     id="app"
@@ -68,7 +66,7 @@ def error_layout(error_code: int, error_message: str):
     """
     return (
         Title(f"Error {error_code} - Matthew Redrup's Technical Blog"),
-        create_navigation(None),
+        create_nav(None),
         Container(
             Card(
                 Div(

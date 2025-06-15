@@ -2,7 +2,7 @@
 
 from fasthtml.common import *
 from monsterui.all import *
-from technical_blog.blog_components import create_navigation, topic_card, math_block, code_block
+from technical_blog.blog_components import create_nav, topic_card, math_block, code_block
 
 def topics_routes(rt):
     """Register topic-related routes"""
@@ -12,7 +12,7 @@ def topics_routes(rt):
         """Future topics overview page"""
         return (
             Title("Future Topics - Matthew Redrup's Technical Blog"),
-            create_navigation("Future Topics"),
+            create_nav("Future Topics"),
             Container(
                 Card(
                     H1("Future Topics", cls="text-3xl font-bold mb-6"),
@@ -88,13 +88,13 @@ print(f"Updated belief: {updated_belief:.3f}")"""
         
         return (
             Title("Blog Components Demo"),
-            create_navigation("Demo"),
+            create_nav("Demo"),
             Container(
                 Card(
                     H1("Blog Components Demo", cls="text-3xl font-bold mb-6"),
                     
                     H2("Navigation Component", cls="text-2xl font-semibold mb-4"),
-                    P("The navigation bar above is generated using the create_navigation() component.", cls="mb-6"),
+                    P("The navigation bar above is generated using the create_nav() component.", cls="mb-6"),
                     
                     H2("Code Block Component", cls="text-2xl font-semibold mb-4"),
                     P("Syntax-highlighted code with copy functionality:", cls="mb-4"),

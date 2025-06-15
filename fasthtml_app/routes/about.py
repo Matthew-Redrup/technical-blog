@@ -2,7 +2,7 @@
 
 from fasthtml.common import *
 from monsterui.all import *
-from technical_blog.blog_components import create_navigation
+from technical_blog.blog_components import create_nav
 
 def about_routes(rt):
     """Register about page routes"""
@@ -12,7 +12,7 @@ def about_routes(rt):
         """About page"""
         return (
             Title("About - Matthew Redrup's Technical Blog"),
-            create_navigation("About"),
+            create_nav("About"),
             Container(
                 Card(
                     H1("About This Blog", cls="text-3xl font-bold mb-6"),

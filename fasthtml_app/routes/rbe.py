@@ -2,7 +2,7 @@
 
 from fasthtml.common import *
 from monsterui.all import *
-from technical_blog.blog_components import create_navigation
+from technical_blog.blog_components import create_nav
 
 def rbe_routes(rt):
     """Register RBE series routes"""
@@ -12,7 +12,7 @@ def rbe_routes(rt):
         """RBE series index page"""
         return (
             Title("Recursive Bayesian Estimators in Cybersecurity"),
-            create_navigation("RBE"),
+            create_nav("RBE"),
             Container(
                 Card(
                     H1("Recursive Bayesian Estimators", cls="text-3xl font-bold mb-6"),
@@ -66,7 +66,7 @@ def rbe_routes(rt):
         """RBE mathematical foundations"""
         return (
             Title("RBE: Mathematical Foundations"),
-            create_navigation("RBE"),
+            create_nav("RBE"),
             Container(
                 Card(
                     H1("Mathematical Foundations of RBE", cls="text-3xl font-bold mb-6"),
@@ -87,7 +87,7 @@ def rbe_routes(rt):
         """RBE implementation strategies"""
         return (
             Title("RBE: Implementation Strategies"),
-            create_navigation("RBE"),
+            create_nav("RBE"),
             Container(
                 Card(
                     H1("Implementation Strategies", cls="text-3xl font-bold mb-6"),
@@ -108,7 +108,7 @@ def rbe_routes(rt):
         """RBE cybersecurity applications"""
         return (
             Title("RBE: Cybersecurity Applications"),
-            create_navigation("RBE"),
+            create_nav("RBE"),
             Container(
                 Card(
                     H1("Cybersecurity Applications", cls="text-3xl font-bold mb-6"),

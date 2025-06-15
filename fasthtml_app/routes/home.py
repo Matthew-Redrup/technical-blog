@@ -2,7 +2,7 @@
 
 from fasthtml.common import *
 from monsterui.all import *
-from technical_blog.blog_components import create_navigation, topic_card
+from technical_blog.blog_components import create_nav, topic_card
 
 def home_routes(rt):
     """Register home page routes"""
@@ -18,7 +18,7 @@ def home_routes(rt):
         
         return (
             Title("Matthew Redrup's Technical Blog - Ramblings on AI & Cybersecurity"),
-            create_navigation("Home"),
+            create_nav("Home"),
             Container(
                 # Hero Section
                 Card(
