@@ -28,30 +28,17 @@ import time
 from collections import defaultdict
 
 # %% ../../nbs/rbe/03_recursive_updating.ipynb 6
-def recursive_bayes_demo(prior, evidence_sequence, likelihoods, labels=None):
-    """Demonstrate recursive Bayesian updating with evidence sequence"""
-    if labels is None:
-        labels = [f'H{i+1}' for i in range(len(prior))]
+def recursive_bayes_demo(prior, evidence_seq, likelihoods, labels=None):
+    "Demonstrate recursive Bayesian updating"
+    if labels is None: labels = [f'H{i}' for i in range(len(prior))]
     
-    print("=== RECURSIVE BAYESIAN UPDATING ===")
-    print(f"\nInitial Prior: {dict(zip(labels, prior))}")
+    beliefs, current = [np.array(prior)], np.array(prior)
     
-    # Track beliefs over time
-    beliefs = [np.array(prior)]
-    current_belief = np.array(prior)
-    
-    for i, (evidence, likelihood) in enumerate(zip(evidence_sequence, likelihoods)):
-        print(f"\n--- Time Step {i+1}: Evidence = {evidence} ---")
-        
-        # Recursive update: current belief becomes prior for this step
-        updated_belief = bayes_update(current_belief, np.array(likelihood))
-        
-        print(f"Likelihood: {dict(zip(labels, likelihood))}")
-        print(f"Updated Belief: {dict(zip(labels, updated_belief))}")
-        
-        # Store and update
-        beliefs.append(updated_belief.copy())
-        current_belief = updated_belief
+    for i, (ev, like) in enumerate(zip(evidence_seq, likelihoods)):
+        print(f"\nStep {i+1}: {ev}")
+        current = bayes_update(current, like)
+        print(f"  {dict(zip(labels, current.round(3)))}")
+        beliefs.append(current.copy())
     
     return np.array(beliefs)
 
@@ -68,7 +55,7 @@ likelihoods = [
 belief_evolution = recursive_bayes_demo(prior, evidence_sequence, likelihoods, 
                                        labels=['Attack', 'Normal'])
 
-# %% ../../nbs/rbe/03_recursive_updating.ipynb 8
+# %% ../../nbs/rbe/03_recursive_updating.ipynb 9
 def state_space_tracker(initial_state, observations, transition_fn, 
                        observation_fn, n_particles=1000, rng=None):
     """Generic state space tracker using particle filtering"""
@@ -168,7 +155,7 @@ print(f"Final position estimate: {tracking_result['estimates'][-1][0]:.3f}")
 print(f"True final position: {true_positions[-1]:.3f}")
 print(f"Tracking error: {abs(tracking_result['estimates'][-1][0] - true_positions[-1]):.3f}")
 
-# %% ../../nbs/rbe/03_recursive_updating.ipynb 10
+# %% ../../nbs/rbe/03_recursive_updating.ipynb 11
 def markov_chain_demo(transition_matrix, n_steps, initial_dist=None, 
                      state_labels=None, rng=None):
     """Demonstrate Markov chain evolution and properties"""
@@ -231,7 +218,7 @@ markov_result = markov_chain_demo(
     state_labels=['Normal', 'Suspicious', 'Compromised']
 )
 
-# %% ../../nbs/rbe/03_recursive_updating.ipynb 12
+# %% ../../nbs/rbe/03_recursive_updating.ipynb 13
 def belief_evolution_visualizer(beliefs, time_steps=None, title="Belief Evolution",
                                labels=None, figsize=(12, 6)):
     """Visualize how beliefs evolve over time with interactive features"""
@@ -281,7 +268,7 @@ fig, axes = belief_evolution_visualizer(
 )
 plt.show()
 
-# %% ../../nbs/rbe/03_recursive_updating.ipynb 13
+# %% ../../nbs/rbe/03_recursive_updating.ipynb 14
 def recursive_update_component():
     """Interactive FastHTML component for exploring recursive updates"""
     
@@ -392,7 +379,7 @@ print("Features: Step-by-step Bayesian updating with network security scenario")
 from IPython.display import HTML
 HTML(str(recursive_update_component()))
 
-# %% ../../nbs/rbe/03_recursive_updating.ipynb 15
+# %% ../../nbs/rbe/03_recursive_updating.ipynb 16
 def batch_vs_recursive_comparison(data_sizes, n_trials=10, rng=None):
     """Compare performance of batch vs recursive Bayesian updating"""
     if rng is None: rng = np.random.default_rng()
@@ -515,7 +502,7 @@ perf_results = batch_vs_recursive_comparison([10, 25, 50, 100], n_trials=3)
 fig = plot_performance_comparison(perf_results)
 plt.show()
 
-# %% ../../nbs/rbe/03_recursive_updating.ipynb 17
+# %% ../../nbs/rbe/03_recursive_updating.ipynb 18
 def memory_analysis(evidence_sequence, likelihoods, lookback_windows, 
                    initial_prior=None):
     """Analyze how much historical evidence affects current beliefs"""
@@ -603,7 +590,7 @@ memory_results = memory_analysis(
 fig = plot_memory_analysis(memory_results)
 plt.show()
 
-# %% ../../nbs/rbe/03_recursive_updating.ipynb 19
+# %% ../../nbs/rbe/03_recursive_updating.ipynb 20
 def update_baseline(current_baseline, observation, adaptation_rate):
     """Update baseline using exponential moving average"""
     return (1 - adaptation_rate) * current_baseline + adaptation_rate * observation
@@ -763,7 +750,7 @@ attack_results = multi_step_attack_detection(
 detected_patterns = set([p for patterns in attack_results['detected_patterns'] for p in patterns])
 print(f"\nDetected attack patterns: {detected_patterns if detected_patterns else 'None'}")
 
-# %% ../../nbs/rbe/03_recursive_updating.ipynb 21
+# %% ../../nbs/rbe/03_recursive_updating.ipynb 22
 def non_stationary_demo(change_points, segment_patterns, n_observations=100):
     """Demonstrate challenges with non-stationary data"""
     rng = np.random.default_rng(42)
@@ -894,7 +881,7 @@ print("- Forgetting factors help adapt to new regimes")
 print("- Sliding windows provide good balance of adaptation and stability")
 print("- Choice depends on expected change frequency and noise levels")
 
-# %% ../../nbs/rbe/03_recursive_updating.ipynb 23
+# %% ../../nbs/rbe/03_recursive_updating.ipynb 24
 __all__ = [
     # Core recursive functions
     'recursive_bayes_demo', 'state_space_tracker', 'markov_chain_demo',

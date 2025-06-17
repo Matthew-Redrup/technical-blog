@@ -43,8 +43,9 @@ def prob_kl_div(p, q):
 # %% ../../nbs/rbe/00_rbe_core.ipynb 8
 def bayes_update(prior, likelihood, evidence=None):
     "Update `prior` with `likelihood` and optional `evidence`"
-    if evidence is None:
-        evidence = np.sum(prior * likelihood)
+    prior, likelihood = np.array(prior), np.array(likelihood)
+    if evidence is None: evidence = (prior * likelihood).sum()
+    if evidence == 0: raise ValueError("Impossible observation")
     return (prior * likelihood) / evidence
 
 def bayes_sequential(priors, likelihoods, evidences=None):
