@@ -19,12 +19,16 @@ from fastcore.all import *
 def prob_normalize(probs):
     "Normalize `probs` to sum to 1"
     probs = np.asarray(probs)
-    return probs / np.sum(probs)
+    s = np.sum(probs)
+    if s == 0: raise ValueError("Cannot normalize zero probabilities")
+    return probs / s
 
 def prob_sample(probs, n=1, rng=None):
     "Sample `n` indices from `probs` distribution"
     if rng is None: rng = np.random.default_rng()
-    probs = prob_normalize(probs)
+    probs = np.asarray(probs)
+    if np.any(probs < 0): raise ValueError("Probabilities must be non-negative")
+    probs = prob_normalize(probs)  # Handle normalization and zero-sum check
     return rng.choice(len(probs), size=n, p=probs)
 
 def prob_entropy(probs):
@@ -141,7 +145,8 @@ def pf_resample(particles, weights, method='systematic', rng=None):
     return new_particles, new_weights
 
 def pf_effective_size(weights):
-    "Calculate effective sample size of `weights`"
+    "Calculate effective sample size of normalized `weights`"
+    weights = prob_normalize(weights)  # Ensure weights are normalized
     return 1.0 / np.sum(weights**2)
 
 def pf_step(particles, weights, observation, transition_fn, likelihood_fn, 
