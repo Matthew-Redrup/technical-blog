@@ -4,13 +4,14 @@
 
 # %% auto 0
 __all__ = ['prior', 'evidence_sequence', 'likelihoods', 'belief_evolution', 'fig', 'axes', 'current_step', 'beliefs', 'app', 'rt',
-           'long_evidence', 'long_likelihoods', 'memory_results', 'baseline', 'traffic_data', 'monitoring_results',
-           'attack_patterns', 'event_sequence', 'attack_results', 'detected_patterns', 'change_points',
-           'segment_patterns', 'obs_data', 'true_regimes', 'strategies', 'adaptation_results', 'time_steps',
-           'recursive_bayes_demo', 'particle_filter', 'motion_model', 'position_likelihood', 'markov_chain_demo',
-           'belief_evolution_visualizer', 'belief_state_component', 'control_buttons', 'recursive_update_component',
-           'get', 'post', 'batch_vs_recursive_comparison', 'memory_analysis', 'plot_memory_analysis', 'update_baseline',
-           'adaptive_threat_monitor', 'multi_step_attack_detection', 'non_stationary_demo',
+           'mixed_evidence', 'balanced_likelihoods', 'corrected_results', 'insights_fig', 'decision_fig', 'baseline',
+           'traffic_data', 'monitoring_results', 'attack_patterns', 'event_sequence', 'attack_results',
+           'detected_patterns', 'change_points', 'segment_patterns', 'obs_data', 'true_regimes', 'strategies',
+           'adaptation_results', 'time_steps', 'recursive_bayes_demo', 'particle_filter', 'motion_model',
+           'position_likelihood', 'markov_chain_demo', 'belief_evolution_visualizer', 'belief_state_component',
+           'control_buttons', 'recursive_update_component', 'get', 'post', 'batch_vs_recursive_comparison',
+           'memory_analysis_corrected', 'rolling_memory_analysis', 'plot_memory_insights', 'plot_memory_decision_guide',
+           'update_baseline', 'adaptive_threat_monitor', 'multi_step_attack_detection', 'non_stationary_demo',
            'compare_adaptation_strategies', 'forgetting_factor_filter', 'windowed_filter', 'standard_recursive_filter']
 
 # %% ../../nbs/rbe/03_recursive_updating.ipynb 3
@@ -432,13 +433,27 @@ def batch_vs_recursive_comparison(data_sizes, n_trials=10, rng=None):
     return results
 
 # %% ../../nbs/rbe/03_recursive_updating.ipynb 25
-def memory_analysis(evidence_sequence, likelihoods, lookback_windows, 
-                   initial_prior=None):
-    """Analyze how much historical evidence affects current beliefs"""
+mixed_evidence = ['event'] * 25
+balanced_likelihoods = (
+        [[0.7, 0.4]] * 6 +    # Moderate evidence for H1
+        [[0.4, 0.7]] * 8 +    # Moderate evidence for H2  
+        [[0.6, 0.45]] * 6 +   # Weak evidence for H1
+        [[0.45, 0.6]] * 5     # Weak evidence for H2
+    )
+
+def memory_analysis_corrected(evidence_sequence, likelihoods, lookback_windows, 
+                            initial_prior=None):
+    """Corrected memory analysis - simulate true memory limitations"""
     if initial_prior is None:
         initial_prior = np.array([0.5, 0.5])
     
     n_evidence = len(evidence_sequence)
+    
+    # Full memory baseline - use ALL evidence from initial prior
+    full_belief = initial_prior.copy()
+    for likelihood in likelihoods:
+        full_belief = bayes_update(full_belief, np.array(likelihood))
+    
     results = {
         'lookback_windows': lookback_windows,
         'final_beliefs': [],
@@ -446,28 +461,24 @@ def memory_analysis(evidence_sequence, likelihoods, lookback_windows,
         'information_loss': []
     }
     
-    # Full recursive update (baseline)
-    full_belief = initial_prior.copy()
-    for likelihood in likelihoods:
-        full_belief = bayes_update(full_belief, np.array(likelihood))
+    print(f"Full memory final belief: {full_belief}")
     
-    print(f"Full recursive belief: {full_belief}")
-    
-    # Test different lookback windows
+    # Test different memory limitations
     for window in lookback_windows:
         if window >= n_evidence:
-            # Use all evidence
+            # Use all evidence - same as full case
             windowed_belief = full_belief.copy()
         else:
-            # Use only last 'window' pieces of evidence
+            # TRUE memory limitation: start from initial prior,
+            # but only use the LAST 'window' pieces of evidence
             windowed_belief = initial_prior.copy()
-            start_idx = max(0, n_evidence - window)
+            start_idx = n_evidence - window
             
+            # Only apply the last 'window' pieces of evidence
             for i in range(start_idx, n_evidence):
-                windowed_belief = bayes_update(windowed_belief, 
-                                             np.array(likelihoods[i]))
+                windowed_belief = bayes_update(windowed_belief, np.array(likelihoods[i]))
         
-        # Calculate differences
+        # Calculate differences from full-memory result
         belief_diff = np.linalg.norm(full_belief - windowed_belief)
         info_loss = prob_kl_div(full_belief, windowed_belief)
         
@@ -475,51 +486,303 @@ def memory_analysis(evidence_sequence, likelihoods, lookback_windows,
         results['belief_differences'].append(belief_diff)
         results['information_loss'].append(info_loss)
         
-        print(f"Window {window}: belief = {windowed_belief}, "
-              f"diff = {belief_diff:.4f}, KL = {info_loss:.4f}")
+        print(f"Window {window}: belief = {windowed_belief.round(6)}, "
+              f"diff = {belief_diff:.6f}, KL = {info_loss:.6f}")
     
     return results
 
-def plot_memory_analysis(results):
-    """Plot memory analysis results"""
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 5))
+# Test the corrected version
+print("=== CORRECTED MEMORY ANALYSIS ===")
+corrected_results = memory_analysis_corrected(
+    ['event'] * len(balanced_likelihoods), 
+    balanced_likelihoods,
+    lookback_windows=[1, 3, 5, 8, 12, 16, 20, 25],
+    initial_prior=[0.5, 0.5]
+)
+
+
+# %% ../../nbs/rbe/03_recursive_updating.ipynb 26
+def rolling_memory_analysis(evidence_sequence, likelihoods, window_size, 
+                          initial_prior=None):
+    """Analyze performance with a fixed rolling memory window"""
+    if initial_prior is None:
+        initial_prior = np.array([0.5, 0.5])
+    
+    # Full memory baseline
+    full_belief = initial_prior.copy()
+    for likelihood in likelihoods:
+        full_belief = bayes_update(full_belief, np.array(likelihood))
+    
+    # Rolling window simulation
+    rolling_belief = initial_prior.copy()
+    recent_evidence = []
+    
+    for i, likelihood in enumerate(likelihoods):
+        recent_evidence.append(likelihood)
+        
+        # Keep only last 'window_size' pieces of evidence
+        if len(recent_evidence) > window_size:
+            recent_evidence.pop(0)
+        
+        # Recompute belief from scratch using only recent evidence
+        rolling_belief = initial_prior.copy()
+        for recent_like in recent_evidence:
+            rolling_belief = bayes_update(rolling_belief, np.array(recent_like))
+    
+    return {
+        'full_belief': full_belief,
+        'rolling_belief': rolling_belief,
+        'difference': np.linalg.norm(full_belief - rolling_belief),
+        'kl_divergence': prob_kl_div(full_belief, rolling_belief)
+    }
+
+
+# %% ../../nbs/rbe/03_recursive_updating.ipynb 28
+def plot_memory_insights(results, likelihoods):
+    """Create insightful visualizations of memory effects"""
+    
+    fig = plt.figure(figsize=(16, 12))
+    gs = fig.add_gridspec(3, 2, height_ratios=[1, 1, 1], hspace=0.3, wspace=0.3)
     
     windows = results['lookback_windows']
+    final_beliefs = np.array(results['final_beliefs'])
+    belief_diffs = results['belief_differences']
+    info_losses = results['information_loss']
     
-    # Belief difference vs lookback window
-    ax1.plot(windows, results['belief_differences'], 'b-o', linewidth=2, markersize=8)
-    ax1.set_xlabel('Lookback Window Size')
-    ax1.set_ylabel('Belief Difference from Full History')
-    ax1.set_title('Effect of Limited Memory on Beliefs')
+    # 1. Memory window effects on final beliefs
+    ax1 = fig.add_subplot(gs[0, :])
+    ax1.plot(windows, final_beliefs[:, 0], 'bo-', label='Hypothesis 1', markersize=8, linewidth=2)
+    ax1.plot(windows, final_beliefs[:, 1], 'ro-', label='Hypothesis 2', markersize=8, linewidth=2)
+    
+    # Add full memory reference lines
+    full_memory_h1 = final_beliefs[-1, 0]  # Last entry should be full memory
+    full_memory_h2 = final_beliefs[-1, 1]
+    ax1.axhline(y=full_memory_h1, color='blue', linestyle='--', alpha=0.7, label='Full Memory H1')
+    ax1.axhline(y=full_memory_h2, color='red', linestyle='--', alpha=0.7, label='Full Memory H2')
+    
+    ax1.set_xlabel('Memory Window Size')
+    ax1.set_ylabel('Final Belief Probability')
+    ax1.set_title('How Memory Limitations Affect Final Beliefs')
+    ax1.legend()
+    ax1.grid(True, alpha=0.3)
+    ax1.set_ylim(0, 1)
+    
+    # 2. Accuracy vs Memory Trade-off
+    ax2 = fig.add_subplot(gs[1, 0])
+    ax2.semilogy(windows, belief_diffs, 'g-o', label='L2 Difference', markersize=6, linewidth=2)
+    ax2.semilogy(windows, info_losses, 'purple', marker='s', label='KL Divergence', 
+                markersize=6, linewidth=2)
+    ax2.set_xlabel('Memory Window Size')
+    ax2.set_ylabel('Error from Full Memory (log scale)')
+    ax2.set_title('Memory vs Accuracy Trade-off')
+    ax2.legend()
+    ax2.grid(True, alpha=0.3)
+    
+    # 3. Memory efficiency analysis
+    ax3 = fig.add_subplot(gs[1, 1])
+    # Efficiency = accuracy per unit of memory
+    # Higher is better (low error per memory unit)
+    efficiency = []
+    for i, window in enumerate(windows):
+        if window == 0:
+            eff = 0
+        else:
+            # Inverse of error per memory unit (higher = more efficient)
+            error = max(belief_diffs[i], 1e-10)  # Avoid division by zero
+            eff = 1 / (error * window)
+        efficiency.append(eff)
+    
+    ax3.plot(windows, efficiency, 'orange', marker='D', markersize=6, linewidth=2)
+    ax3.set_xlabel('Memory Window Size')
+    ax3.set_ylabel('Efficiency (Accuracy/Memory)')
+    ax3.set_title('Memory Efficiency Analysis')
+    ax3.grid(True, alpha=0.3)
+    
+    # Find and highlight the most efficient window
+    max_eff_idx = np.argmax(efficiency[:-1])  # Exclude full memory
+    ax3.axvline(x=windows[max_eff_idx], color='red', linestyle='--', alpha=0.7)
+    ax3.text(windows[max_eff_idx], max(efficiency) * 0.8, 
+             f'Most Efficient\nWindow: {windows[max_eff_idx]}', 
+             ha='center', bbox=dict(boxstyle='round', facecolor='yellow', alpha=0.7))
+    
+    # 4. Evidence pattern analysis
+    ax4 = fig.add_subplot(gs[2, 0])
+    evidence_strength = [l[0] - l[1] for l in likelihoods]
+    colors = ['red' if x < 0 else 'blue' for x in evidence_strength]
+    
+    bars = ax4.bar(range(1, len(evidence_strength) + 1), evidence_strength, 
+                   color=colors, alpha=0.7)
+    ax4.axhline(y=0, color='black', linestyle='-', alpha=0.5)
+    ax4.set_xlabel('Evidence Step')
+    ax4.set_ylabel('Evidence Strength (H1 - H2)')
+    ax4.set_title('Evidence Pattern: Blue=Pro-H1, Red=Pro-H2')
+    ax4.grid(True, alpha=0.3)
+    
+    # 5. Memory sensitivity heatmap
+    ax5 = fig.add_subplot(gs[2, 1])
+    
+    # Create a sensitivity matrix: how much does each piece of evidence matter
+    # for different memory windows?
+    n_evidence = len(likelihoods)
+    sensitivity_matrix = np.zeros((len(windows[:-1]), n_evidence))  # Exclude full memory
+    
+    for i, window in enumerate(windows[:-1]):  # Exclude full memory
+        if window >= n_evidence:
+            continue
+        start_idx = n_evidence - window
+        
+        # Test removing each piece of evidence within the window
+        for j in range(start_idx, n_evidence):
+            # Compute belief without evidence j
+            test_belief = np.array([0.5, 0.5])
+            for k in range(start_idx, n_evidence):
+                if k != j:  # Skip evidence j
+                    test_belief = bayes_update(test_belief, np.array(likelihoods[k]))
+            
+            # Sensitivity = how much removing this evidence changes the result
+            original_belief = final_beliefs[i]
+            sensitivity = np.linalg.norm(original_belief - test_belief)
+            sensitivity_matrix[i, j] = sensitivity
+    
+    im = ax5.imshow(sensitivity_matrix, cmap='YlOrRd', aspect='auto')
+    ax5.set_xlabel('Evidence Step')
+    ax5.set_ylabel('Memory Window Size')
+    ax5.set_title('Evidence Sensitivity by Memory Window')
+    ax5.set_yticks(range(len(windows[:-1])))
+    ax5.set_yticklabels([str(w) for w in windows[:-1]])
+    
+    # Add colorbar
+    cbar = plt.colorbar(im, ax=ax5)
+    cbar.set_label('Sensitivity (Impact if Removed)')
+    
+    plt.suptitle('Comprehensive Memory Analysis: Key Insights', fontsize=16, y=0.98)
+    return fig
+
+# Create the comprehensive insights plot
+insights_fig = plot_memory_insights(corrected_results, balanced_likelihoods)
+plt.show()
+
+
+# %% ../../nbs/rbe/03_recursive_updating.ipynb 29
+def plot_memory_decision_guide(results):
+    """Create a practical decision guide for choosing memory window size"""
+    
+    fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, figsize=(14, 10))
+    
+    windows = results['lookback_windows']
+    belief_diffs = results['belief_differences']
+    info_losses = results['information_loss']
+    
+    # 1. Error tolerance guide
+    ax1.plot(windows, belief_diffs, 'b-o', linewidth=2, markersize=6)
+    
+    # Add tolerance threshold lines
+    tolerances = [0.01, 0.05, 0.1, 0.2]
+    colors = ['green', 'yellow', 'orange', 'red']
+    
+    for tol, color in zip(tolerances, colors):
+        ax1.axhline(y=tol, color=color, linestyle='--', alpha=0.7, 
+                   label=f'{tol:.0%} tolerance')
+        
+        # Find minimum window size for this tolerance
+        valid_windows = [w for w, diff in zip(windows, belief_diffs) if diff <= tol]
+        if valid_windows:
+            min_window = min(valid_windows)
+            ax1.axvline(x=min_window, color=color, linestyle=':', alpha=0.5)
+    
+    ax1.set_xlabel('Memory Window Size')
+    ax1.set_ylabel('L2 Error from Full Memory')
+    ax1.set_title('Memory Requirements by Error Tolerance')
+    ax1.legend()
     ax1.grid(True, alpha=0.3)
     ax1.set_yscale('log')
     
-    # Information loss (KL divergence)
-    ax2.plot(windows, results['information_loss'], 'r-s', linewidth=2, markersize=8)
-    ax2.set_xlabel('Lookback Window Size')
-    ax2.set_ylabel('Information Loss (KL Divergence)')
-    ax2.set_title('Information Loss with Limited Memory')
+    # 2. Diminishing returns analysis
+    ax2.plot(windows[1:], np.diff(belief_diffs), 'r-s', linewidth=2, markersize=6)
+    ax2.axhline(y=0, color='black', linestyle='-', alpha=0.5)
+    ax2.set_xlabel('Memory Window Size')
+    ax2.set_ylabel('Marginal Error Reduction')
+    ax2.set_title('Diminishing Returns of Additional Memory')
     ax2.grid(True, alpha=0.3)
-    ax2.set_yscale('log')
     
+    # 3. Cost-benefit analysis
+    ax3.scatter(windows, belief_diffs, s=[w*10 for w in windows], 
+               c=windows, cmap='viridis', alpha=0.7)
+    ax3.set_xlabel('Memory Window Size')
+    ax3.set_ylabel('Error from Full Memory')
+    ax3.set_title('Cost-Benefit: Bubble Size = Memory Cost')
+    ax3.grid(True, alpha=0.3)
+    ax3.set_yscale('log')
+    
+    # Add pareto frontier
+    pareto_points = []
+    for i, (w, err) in enumerate(zip(windows, belief_diffs)):
+        is_pareto = True
+        for j, (w2, err2) in enumerate(zip(windows, belief_diffs)):
+            if i != j and w2 <= w and err2 <= err and (w2 < w or err2 < err):
+                is_pareto = False
+                break
+        if is_pareto:
+            pareto_points.append((w, err))
+    
+    if pareto_points:
+        pareto_points.sort()
+        pareto_w, pareto_err = zip(*pareto_points)
+        ax3.plot(pareto_w, pareto_err, 'r--', linewidth=2, alpha=0.8, label='Pareto Frontier')
+        ax3.legend()
+    
+    # 4. Practical recommendations
+    ax4.axis('off')
+    
+    # Generate recommendations based on the data
+    recommendations = []
+    
+    # Find minimum viable window (< 5% error)
+    viable_windows = [w for w, diff in zip(windows, belief_diffs) if diff <= 0.05]
+    if viable_windows:
+        min_viable = min(viable_windows)
+        recommendations.append(f"• Minimum viable memory: {min_viable} steps (< 5% error)")
+    
+    # Find efficiency sweet spot
+    efficiency = [1/(d*w) if d > 0 else 0 for d, w in zip(belief_diffs[:-1], windows[:-1])]
+    if efficiency:
+        best_eff_idx = np.argmax(efficiency)
+        recommendations.append(f"• Most efficient: {windows[best_eff_idx]} steps")
+    
+    # Find diminishing returns point
+    if len(belief_diffs) > 1:
+        improvements = [-np.diff(belief_diffs)[i] for i in range(len(windows)-1)]
+        if improvements:
+            # Find where improvement drops below 10% of maximum
+            max_improvement = max(improvements)
+            threshold = max_improvement * 0.1
+            diminishing_idx = next((i for i, imp in enumerate(improvements) 
+                                  if imp < threshold), len(improvements)-1)
+            recommendations.append(f"• Diminishing returns after: {windows[diminishing_idx+1]} steps")
+    
+    recommendations.append(f"• Full accuracy requires: {windows[-1]} steps")
+    
+    # Display recommendations
+    rec_text = "PRACTICAL RECOMMENDATIONS:\n\n" + "\n".join(recommendations)
+    rec_text += "\n\nCHOOSE BASED ON:\n"
+    rec_text += "• Real-time systems: Use minimum viable\n"
+    rec_text += "• Resource-constrained: Use most efficient\n" 
+    rec_text += "• High-accuracy needs: Use full memory\n"
+    rec_text += "• Balanced systems: Stop at diminishing returns"
+    
+    ax4.text(0.05, 0.95, rec_text, transform=ax4.transAxes, fontsize=11,
+             verticalalignment='top', bbox=dict(boxstyle='round', facecolor='lightblue', alpha=0.8))
+    
+    plt.suptitle('Memory Window Decision Guide', fontsize=16)
     plt.tight_layout()
     return fig
 
-# Example: How much history do we need?
-print("Memory Analysis: How much history matters?")
-long_evidence = ['event'] * 20
-long_likelihoods = [[0.8, 0.3]] * 10 + [[0.9, 0.1]] * 10  # Pattern change
-
-memory_results = memory_analysis(
-    long_evidence, long_likelihoods, 
-    lookback_windows=[1, 2, 5, 10, 15, 20, 25],
-    initial_prior=[0.2, 0.8]
-)
-
-fig = plot_memory_analysis(memory_results)
+# Create the decision guide
+decision_fig = plot_memory_decision_guide(corrected_results)
 plt.show()
 
-# %% ../../nbs/rbe/03_recursive_updating.ipynb 27
+
+# %% ../../nbs/rbe/03_recursive_updating.ipynb 31
 def update_baseline(current_baseline, observation, adaptation_rate):
     """Update baseline using exponential moving average"""
     return (1 - adaptation_rate) * current_baseline + adaptation_rate * observation
@@ -679,7 +942,7 @@ attack_results = multi_step_attack_detection(
 detected_patterns = set([p for patterns in attack_results['detected_patterns'] for p in patterns])
 print(f"\nDetected attack patterns: {detected_patterns if detected_patterns else 'None'}")
 
-# %% ../../nbs/rbe/03_recursive_updating.ipynb 29
+# %% ../../nbs/rbe/03_recursive_updating.ipynb 33
 def non_stationary_demo(change_points, segment_patterns, n_observations=100):
     """Demonstrate challenges with non-stationary data"""
     rng = np.random.default_rng(42)
@@ -810,7 +1073,7 @@ print("- Forgetting factors help adapt to new regimes")
 print("- Sliding windows provide good balance of adaptation and stability")
 print("- Choice depends on expected change frequency and noise levels")
 
-# %% ../../nbs/rbe/03_recursive_updating.ipynb 31
+# %% ../../nbs/rbe/03_recursive_updating.ipynb 35
 __all__ = [
     # Core recursive functions
     'recursive_bayes_demo', 'particle_filter', 'markov_chain_demo',
