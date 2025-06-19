@@ -19,12 +19,16 @@ from fastcore.all import *
 def prob_normalize(probs):
     "Normalize `probs` to sum to 1"
     probs = np.asarray(probs)
-    return probs / np.sum(probs)
+    s = np.sum(probs)
+    if s == 0: raise ValueError("Cannot normalize zero probabilities")
+    return probs / s
 
 def prob_sample(probs, n=1, rng=None):
     "Sample `n` indices from `probs` distribution"
     if rng is None: rng = np.random.default_rng()
-    probs = prob_normalize(probs)
+    probs = np.asarray(probs)
+    if np.any(probs < 0): raise ValueError("Probabilities must be non-negative")
+    probs = prob_normalize(probs)  # Handle normalization and zero-sum check
     return rng.choice(len(probs), size=n, p=probs)
 
 def prob_entropy(probs):
@@ -43,8 +47,9 @@ def prob_kl_div(p, q):
 # %% ../../nbs/rbe/00_rbe_core.ipynb 8
 def bayes_update(prior, likelihood, evidence=None):
     "Update `prior` with `likelihood` and optional `evidence`"
-    if evidence is None:
-        evidence = np.sum(prior * likelihood)
+    prior, likelihood = np.array(prior), np.array(likelihood)
+    if evidence is None: evidence = (prior * likelihood).sum()
+    if evidence == 0: raise ValueError("Impossible observation")
     return (prior * likelihood) / evidence
 
 def bayes_sequential(priors, likelihoods, evidences=None):
@@ -140,7 +145,8 @@ def pf_resample(particles, weights, method='systematic', rng=None):
     return new_particles, new_weights
 
 def pf_effective_size(weights):
-    "Calculate effective sample size of `weights`"
+    "Calculate effective sample size of normalized `weights`"
+    weights = prob_normalize(weights)  # Ensure weights are normalized
     return 1.0 / np.sum(weights**2)
 
 def pf_step(particles, weights, observation, transition_fn, likelihood_fn, 
