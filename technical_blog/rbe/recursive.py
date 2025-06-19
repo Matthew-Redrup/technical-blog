@@ -4,14 +4,13 @@
 
 # %% auto 0
 __all__ = ['prior', 'evidence_sequence', 'likelihoods', 'belief_evolution', 'fig', 'axes', 'current_step', 'beliefs', 'app', 'rt',
-           'mixed_evidence', 'balanced_likelihoods', 'corrected_results', 'insights_fig', 'decision_fig', 'baseline',
-           'traffic_data', 'monitoring_results', 'attack_patterns', 'event_sequence', 'attack_results',
-           'detected_patterns', 'change_points', 'segment_patterns', 'obs_data', 'true_regimes', 'strategies',
-           'adaptation_results', 'time_steps', 'recursive_bayes_demo', 'particle_filter', 'motion_model',
-           'position_likelihood', 'markov_chain_demo', 'belief_evolution_visualizer', 'belief_state_component',
-           'control_buttons', 'recursive_update_component', 'get', 'post', 'batch_vs_recursive_comparison',
-           'memory_analysis_corrected', 'rolling_memory_analysis', 'plot_memory_insights', 'plot_memory_decision_guide',
-           'update_baseline', 'adaptive_threat_monitor', 'multi_step_attack_detection', 'non_stationary_demo',
+           'mixed_evidence', 'balanced_likelihoods', 'corrected_results', 'insights_fig', 'decision_fig',
+           'change_points', 'segment_patterns', 'obs_data', 'true_regimes', 'strategies', 'adaptation_results',
+           'time_steps', 'recursive_bayes_demo', 'particle_filter', 'motion_model', 'position_likelihood',
+           'markov_chain_demo', 'belief_evolution_visualizer', 'belief_state_component', 'control_buttons',
+           'recursive_update_component', 'get', 'post', 'batch_vs_recursive_comparison', 'memory_analysis_corrected',
+           'rolling_memory_analysis', 'plot_memory_insights', 'plot_memory_decision_guide', 'update_baseline',
+           'multi_step_attack_detection', 'adaptive_threat_monitor', 'non_stationary_demo',
            'compare_adaptation_strategies', 'forgetting_factor_filter', 'windowed_filter', 'standard_recursive_filter']
 
 # %% ../../nbs/rbe/03_recursive_updating.ipynb 3
@@ -787,78 +786,15 @@ def update_baseline(current_baseline, observation, adaptation_rate):
     """Update baseline using exponential moving average"""
     return (1 - adaptation_rate) * current_baseline + adaptation_rate * observation
 
-def adaptive_threat_monitor(baseline_behavior, 
-                            time_series_data,
-                            adaptation_rate=0.1, 
-                            threshold=0.7):    
-    """Adaptive threat monitoring with evolving baseline"""
-    # Initialize beliefs: [normal, anomalous]   
-    threat_belief = np.array([0.9, 0.1])    
-    # Handle both numeric and array baselines   
-    if hasattr(baseline_behavior, 'copy'):
-        current_baseline = baseline_behavior.copy()
-    else:
-        current_baseline = float(baseline_behavior)
-            
-    results = {
-        'time_steps': [],
-        'threat_probabilities': [],
-        'baselines': [],
-        'alerts': [],
-        'observations': []
-        }
-    
-    print("=== ADAPTIVE THREAT MONITORING ===")
-    for t, observation in enumerate(time_series_data):
-        # Calculate deviation from current baseline
-        deviation = abs(observation - current_baseline)
-        
-        # Likelihood based on deviation (more reasonable scaling)
-        # Scale deviation by baseline to get relative change
-        relative_deviation = deviation / max(current_baseline, 1.0)
-        
-        # More moderate likelihood functions
-        if relative_deviation < 0.1:  # Small deviation
-            normal_likelihood = 0.9
-            anomaly_likelihood = 0.1
-        elif relative_deviation < 0.3:  # Medium deviation
-            normal_likelihood = 0.6
-            anomaly_likelihood = 0.4
-        else:  # Large deviation
-            normal_likelihood = 0.2
-            anomaly_likelihood = 0.8
-            
-        likelihood = np.array([normal_likelihood, anomaly_likelihood])
-        
-        # Recursive Bayesian update
-        threat_belief = bayes_update(threat_belief, likelihood)
-        
-        # Alert if threat probability exceeds threshold
-        alert = threat_belief[1] > threshold
-        
-        # Update baseline
-        current_baseline = update_baseline(current_baseline, observation, adaptation_rate)
-        
-        # Store results
-        results['time_steps'].append(t)
-        results['threat_probabilities'].append(threat_belief[1])
-        results['baselines'].append(current_baseline)
-        results['alerts'].append(alert)
-        results['observations'].append(observation)
-        
-        # Print progress
-        print(f"Time step {t}: Obs={observation:.1f}, Baseline={current_baseline:.1f}, " +
-              f"RelDev={relative_deviation:.2f}, Threat={threat_belief[1]:.3f}, Alert={alert}")
-        
-    return results
-
+# %% ../../nbs/rbe/03_recursive_updating.ipynb 32
 def multi_step_attack_detection(event_sequence, attack_patterns, 
-                               window_size=5, threshold=0.8):
-    """Detect multi-step attacks using pattern matching with recursive updates"""
-    # Initialize beliefs for each attack pattern
+                                       window_size=5, threshold=0.6):
+    """Improved multi-step attack detection with better calibration"""
+    
+    # Start with more neutral beliefs - less confident about benign state
     pattern_beliefs = {}
     for pattern_name in attack_patterns:
-        pattern_beliefs[pattern_name] = np.array([0.9, 0.1])  # [benign, attack] - start less certain
+        pattern_beliefs[pattern_name] = np.array([0.7, 0.3])  # Less confident start
     
     results = {
         'time_steps': [],
@@ -867,7 +803,7 @@ def multi_step_attack_detection(event_sequence, attack_patterns,
         'detected_patterns': []
     }
     
-    print("=== MULTI-STEP ATTACK DETECTION ===")
+    print("=== IMPROVED MULTI-STEP ATTACK DETECTION ===")
     
     for t, event in enumerate(event_sequence):
         alerts_this_step = []
@@ -876,16 +812,14 @@ def multi_step_attack_detection(event_sequence, attack_patterns,
         print(f"\nTime step {t}: Event = {event}")
         
         for pattern_name, pattern_steps in attack_patterns.items():
-            # Check if current event matches any step in this pattern
             current_belief = pattern_beliefs[pattern_name]
             
             if event in pattern_steps:
-                # Event matches pattern - increase attack probability
-                # More moderate likelihood that still provides evidence
-                likelihood = np.array([0.3, 0.7])  # Moderate evidence for attack
+                # Strong evidence for attack when event matches pattern
+                likelihood = np.array([0.1, 0.9])  # 90% evidence for attack
             else:
-                # Event doesn't match - slightly decrease attack probability  
-                likelihood = np.array([0.7, 0.3])  # Moderate evidence for benign
+                # Moderate evidence against attack when no match
+                likelihood = np.array([0.8, 0.2])  # 80% evidence for benign
             
             # Recursive Bayesian update
             updated_belief = bayes_update(current_belief, likelihood)
@@ -901,7 +835,6 @@ def multi_step_attack_detection(event_sequence, attack_patterns,
             
             print(f"  {pattern_name}: Match={event in pattern_steps}, P(attack)={attack_prob:.3f}, Alert={alert}")
             
-            # Store results
             results['pattern_probabilities'][pattern_name].append(attack_prob)
         
         results['time_steps'].append(t)
@@ -910,39 +843,54 @@ def multi_step_attack_detection(event_sequence, attack_patterns,
     
     return results
 
-# Demonstrate adaptive threat monitoring
-print("Example: Network Traffic Monitoring")
-baseline = 100  # Baseline network traffic (packets/sec)
-traffic_data = [95, 102, 98, 105, 150, 180, 160, 110, 95, 200, 220, 190, 100, 98]
-
-monitoring_results = adaptive_threat_monitor(
-    baseline, traffic_data, 
-    adaptation_rate=0.2, threshold=0.6
-)
-
-print(f"\nSummary: {sum(monitoring_results['alerts'])} alerts generated")
-
-# Demonstrate multi-step attack detection  
-print("\n" + "="*50)
-print("Example: Multi-step Attack Detection")
-
-attack_patterns = {
-    'Reconnaissance': ['port_scan', 'dns_lookup', 'service_enum'],
-    'Lateral_Movement': ['credential_theft', 'remote_login', 'privilege_escalation'], 
-    'Data_Exfiltration': ['database_access', 'file_compression', 'network_transfer']
-}
-
-event_sequence = ['port_scan', 'normal_traffic', 'dns_lookup', 'credential_theft', 
-                 'service_enum', 'remote_login', 'normal_traffic', 'database_access']
-
-attack_results = multi_step_attack_detection(
-    event_sequence, attack_patterns, threshold=0.7
-)
-
-detected_patterns = set([p for patterns in attack_results['detected_patterns'] for p in patterns])
-print(f"\nDetected attack patterns: {detected_patterns if detected_patterns else 'None'}")
-
 # %% ../../nbs/rbe/03_recursive_updating.ipynb 33
+def adaptive_threat_monitor(baseline_behavior, time_series_data, 
+                         adaptation_rate=0.01, threshold=0.6,
+                         decay_rate=0.1):  # Add memory decay
+    """Refined version with better memory management"""
+    
+    threat_belief = np.array([0.6, 0.4])  # Slightly less neutral start
+    original_baseline = float(baseline_behavior)
+    
+    results = {'time_steps': [], 'threat_probabilities': [], 'alerts': [], 'observations': []}
+    
+    print("=== REFINED THREAT MONITORING ===")
+    
+    for t, observation in enumerate(time_series_data):
+        absolute_deviation = abs(observation - original_baseline)
+        deviation_percentage = (absolute_deviation / original_baseline) * 100
+        
+        # More balanced likelihood functions
+        if deviation_percentage < 5:     # Very close to baseline
+            likelihood = np.array([0.9, 0.1])
+        elif deviation_percentage < 15:  # Small deviation
+            likelihood = np.array([0.7, 0.3])
+        elif deviation_percentage < 40:  # Moderate deviation
+            likelihood = np.array([0.3, 0.7])
+        else:  # Large deviation
+            likelihood = np.array([0.1, 0.9])
+        
+        # Bayesian update
+        threat_belief = bayes_update(threat_belief, likelihood)
+        
+        # Add memory decay - gradually return toward neutral when no strong evidence
+        if deviation_percentage < 10:  # Only decay during normal periods
+            threat_belief[1] = threat_belief[1] * (1 - decay_rate) + 0.4 * decay_rate
+            threat_belief[0] = 1 - threat_belief[1]
+        
+        alert = threat_belief[1] > threshold
+        
+        results['time_steps'].append(t)
+        results['threat_probabilities'].append(threat_belief[1])
+        results['alerts'].append(alert)
+        results['observations'].append(observation)
+        
+        print(f"Time {t}: Obs={observation:.1f}, DevPct={deviation_percentage:.1f}%, " +
+              f"Threat={threat_belief[1]:.3f}, Alert={alert}")
+    
+    return results
+
+# %% ../../nbs/rbe/03_recursive_updating.ipynb 37
 def non_stationary_demo(change_points, segment_patterns, n_observations=100):
     """Demonstrate challenges with non-stationary data"""
     rng = np.random.default_rng(42)
@@ -1073,7 +1021,7 @@ print("- Forgetting factors help adapt to new regimes")
 print("- Sliding windows provide good balance of adaptation and stability")
 print("- Choice depends on expected change frequency and noise levels")
 
-# %% ../../nbs/rbe/03_recursive_updating.ipynb 35
+# %% ../../nbs/rbe/03_recursive_updating.ipynb 39
 __all__ = [
     # Core recursive functions
     'recursive_bayes_demo', 'particle_filter', 'markov_chain_demo',
