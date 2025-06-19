@@ -890,7 +890,7 @@ def adaptive_threat_monitor(baseline_behavior, time_series_data,
     
     return results
 
-# %% ../../nbs/rbe/03_recursive_updating.ipynb 37
+# %% ../../nbs/rbe/03_recursive_updating.ipynb 39
 def non_stationary_demo(change_points, segment_patterns, n_observations=100):
     """Demonstrate challenges with non-stationary data"""
     rng = np.random.default_rng(42)
@@ -1021,7 +1021,7 @@ print("- Forgetting factors help adapt to new regimes")
 print("- Sliding windows provide good balance of adaptation and stability")
 print("- Choice depends on expected change frequency and noise levels")
 
-# %% ../../nbs/rbe/03_recursive_updating.ipynb 39
+# %% ../../nbs/rbe/03_recursive_updating.ipynb 41
 __all__ = [
     # Core recursive functions
     'recursive_bayes_demo', 'particle_filter', 'markov_chain_demo',
