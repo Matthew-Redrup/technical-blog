@@ -19,7 +19,6 @@ import matplotlib.pyplot as plt
 from fastcore.test import test_eq, test_close
 from fastcore.all import *
 from .core import bayes_update, bayes_sequential, pf_init, pf_step, pf_effective_size, prob_normalize, prob_sample, prob_entropy, prob_kl_div, viz_beliefs
-from .bayes import bayes_theorem_step_by_step
 from fasthtml.common import *
 from monsterui.all import *
 from typing import List, Dict, Tuple, Optional, Callable
