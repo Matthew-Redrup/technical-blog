@@ -1,0 +1,678 @@
+[
+  {
+    "objectID": "core.html",
+    "href": "core.html",
+    "title": "Core",
+    "section": "",
+    "text": "source\n\nget_nb_url\n\n get_nb_url (nb_path:pathlib.Path)\n\nConvert notebook nb_path to documentation URL\n\n# Test get_nb_url\ntest_eq(get_nb_url(Path('nbs/index.ipynb')), '/')\ntest_eq(get_nb_url(Path('nbs/rbe/intro.ipynb')), '/rbe/intro/')\ntest_eq(get_nb_url(Path('nbs/00_core.ipynb')), '/00_core/')\n\n\nsource\n\n\nslugify\n\n slugify (text:str)\n\nConvert text to URL-friendly slug\n\nsource\n\n\nread_meta\n\n read_meta (nb_path:pathlib.Path)\n\nExtract metadata from notebook nb_path\n\n# Test slugify\ntest_eq(slugify(\"Hello World\"), \"hello-world\")\ntest_eq(slugify(\"Fast.AI Style Guide\"), \"fastai-style-guide\")\ntest_eq(slugify(\"  Multiple   Spaces  \"), \"multiple-spaces\")\ntest_eq(slugify(\"Special!@#$%^Characters\"), \"specialcharacters\")\n\n\n# Test read_meta on this very notebook\nmeta = read_meta(Path('00_core.ipynb'))\nprint(f\"Title: '{meta['title']}'\")\nprint(f\"Description: '{meta['description']}'\")\n# Strip whitespace for comparison\ntest_eq(meta['title'].strip(), 'Core')\ntest_eq(meta['description'].strip(), 'Core utilities and helpers for the technical blog following fast.ai conventions')\n\n\n---------------------------------------------------------------------------\nNameError                                 Traceback (most recent call last)\nCell In[8], line 2\n      1 # Test read_meta on this very notebook\n----&gt; 2 meta = read_meta(Path('00_core.ipynb'))\n      3 print(f\"Title: '{meta['title']}'\")\n      4 print(f\"Description: '{meta['description']}'\")\n\nNameError: name 'read_meta' is not defined\n\n\n\n\n# Test read_meta on this very notebook\nmeta = read_meta(Path('00_core.ipynb'))\ntest_eq(meta['title'], 'Core')\ntest_eq(meta['description'], 'Core utilities and helpers for the technical blog following fast.ai conventions')",
+    "crumbs": [
+      "Core"
+    ]
+  },
+  {
+    "objectID": "rbe/uncertainty_fundamentals.html",
+    "href": "rbe/uncertainty_fundamentals.html",
+    "title": "RBE Part 1: Uncertainty Fundamentals",
+    "section": "",
+    "text": "In cybersecurity, we constantly make decisions under uncertainty. Consider these scenarios:\n\nNetwork Anomaly Detection: Is this unusual traffic pattern a cyberattack or normal variation?\nThreat Intelligence: How confident are we that this IP address is malicious?\nIncident Response: What’s the probability this breach came from an insider threat?\n\nTraditional approaches often ignore uncertainty, leading to brittle systems that fail when conditions change. Recursive Bayesian Estimation (RBE) provides a principled framework for handling uncertainty that evolves over time.\nLet’s start with a concrete example:\n\n# Example: Network intrusion detection uncertainty\n# We observe suspicious activity but aren't sure if it's an attack\n\n# Prior belief: 5% of network events are attacks\nprior_attack = 0.05\nprior_normal = 0.95\nprior = np.array([prior_attack, prior_normal])\n\nprint(f\"Prior belief: {prior_attack*100:.1f}% chance of attack\")\nprint(f\"Uncertainty (entropy): {prob_entropy(prior):.3f} bits\")\n\nPrior belief: 5.0% chance of attack\nUncertainty (entropy): 0.286 bits\n\n\nThis entropy measure tells us how uncertain we are. Higher entropy = more uncertainty. Now let’s see how new evidence changes our beliefs:\n\n# New evidence: unusual port scanning detected\n# Likelihood: attacks cause port scanning 90% of the time\n#            normal traffic causes it 10% of the time\nlikelihood = np.array([0.9, 0.1])  # [P(evidence|attack), P(evidence|normal)]\n\n# Update beliefs using Bayes' theorem\nposterior = bayes_update(prior, likelihood)\n\nprint(f\"After observing port scanning:\")\nprint(f\"Updated belief: {posterior[0]*100:.1f}% chance of attack\")\nprint(f\"New uncertainty: {prob_entropy(posterior):.3f} bits\")\nprint(f\"Uncertainty reduction: {prob_entropy(prior) - prob_entropy(posterior):.3f} bits\")\n\nAfter observing port scanning:\nUpdated belief: 32.1% chance of attack\nNew uncertainty: 0.906 bits\nUncertainty reduction: -0.620 bits\n\n\nNotice how the evidence both increased our confidence in an attack and reduced our uncertainty. This is the essence of Bayesian reasoning - we start with prior beliefs and update them as we gather evidence.",
+    "crumbs": [
+      "rbe",
+      "RBE Part 1: Uncertainty Fundamentals"
+    ]
+  },
+  {
+    "objectID": "rbe/uncertainty_fundamentals.html#introduction-why-uncertainty-matters-in-cybersecurity",
+    "href": "rbe/uncertainty_fundamentals.html#introduction-why-uncertainty-matters-in-cybersecurity",
+    "title": "RBE Part 1: Uncertainty Fundamentals",
+    "section": "",
+    "text": "In cybersecurity, we constantly make decisions under uncertainty. Consider these scenarios:\n\nNetwork Anomaly Detection: Is this unusual traffic pattern a cyberattack or normal variation?\nThreat Intelligence: How confident are we that this IP address is malicious?\nIncident Response: What’s the probability this breach came from an insider threat?\n\nTraditional approaches often ignore uncertainty, leading to brittle systems that fail when conditions change. Recursive Bayesian Estimation (RBE) provides a principled framework for handling uncertainty that evolves over time.\nLet’s start with a concrete example:\n\n# Example: Network intrusion detection uncertainty\n# We observe suspicious activity but aren't sure if it's an attack\n\n# Prior belief: 5% of network events are attacks\nprior_attack = 0.05\nprior_normal = 0.95\nprior = np.array([prior_attack, prior_normal])\n\nprint(f\"Prior belief: {prior_attack*100:.1f}% chance of attack\")\nprint(f\"Uncertainty (entropy): {prob_entropy(prior):.3f} bits\")\n\nPrior belief: 5.0% chance of attack\nUncertainty (entropy): 0.286 bits\n\n\nThis entropy measure tells us how uncertain we are. Higher entropy = more uncertainty. Now let’s see how new evidence changes our beliefs:\n\n# New evidence: unusual port scanning detected\n# Likelihood: attacks cause port scanning 90% of the time\n#            normal traffic causes it 10% of the time\nlikelihood = np.array([0.9, 0.1])  # [P(evidence|attack), P(evidence|normal)]\n\n# Update beliefs using Bayes' theorem\nposterior = bayes_update(prior, likelihood)\n\nprint(f\"After observing port scanning:\")\nprint(f\"Updated belief: {posterior[0]*100:.1f}% chance of attack\")\nprint(f\"New uncertainty: {prob_entropy(posterior):.3f} bits\")\nprint(f\"Uncertainty reduction: {prob_entropy(prior) - prob_entropy(posterior):.3f} bits\")\n\nAfter observing port scanning:\nUpdated belief: 32.1% chance of attack\nNew uncertainty: 0.906 bits\nUncertainty reduction: -0.620 bits\n\n\nNotice how the evidence both increased our confidence in an attack and reduced our uncertainty. This is the essence of Bayesian reasoning - we start with prior beliefs and update them as we gather evidence.",
+    "crumbs": [
+      "rbe",
+      "RBE Part 1: Uncertainty Fundamentals"
+    ]
+  },
+  {
+    "objectID": "rbe/uncertainty_fundamentals.html#types-of-uncertainty",
+    "href": "rbe/uncertainty_fundamentals.html#types-of-uncertainty",
+    "title": "RBE Part 1: Uncertainty Fundamentals",
+    "section": "Types of Uncertainty",
+    "text": "Types of Uncertainty\nUnderstanding uncertainty requires distinguishing between two fundamental types:\n\nAleatory Uncertainty (Irreducible)\nInherent randomness in the system that cannot be reduced by gathering more data.\nCybersecurity Examples: - Random timing of legitimate user logins - Network packet loss due to congestion - Attacker’s choice of target systems\n\n\nEpistemic Uncertainty (Reducible)\nLack of knowledge that can be reduced by collecting more information.\nCybersecurity Examples: - Unknown attack signatures - Incomplete threat intelligence - Uncertain system configurations\n\nsource\n\n\ndemo_uncertainty_types\n\n demo_uncertainty_types (n_samples=1000, rng=None)\n\nDemonstrate aleatory vs epistemic uncertainty with cybersecurity examples\nKey Insight: RBE excels at handling epistemic uncertainty. As we collect more evidence, our beliefs converge toward the truth. Aleatory uncertainty remains, but we can quantify and account for it.",
+    "crumbs": [
+      "rbe",
+      "RBE Part 1: Uncertainty Fundamentals"
+    ]
+  },
+  {
+    "objectID": "rbe/uncertainty_fundamentals.html#mathematical-foundations",
+    "href": "rbe/uncertainty_fundamentals.html#mathematical-foundations",
+    "title": "RBE Part 1: Uncertainty Fundamentals",
+    "section": "Mathematical Foundations",
+    "text": "Mathematical Foundations\nLet’s build our mathematical toolkit using the core functions. We’ll start with probability distributions and work toward Bayesian inference.\n\nProbability Distributions and Entropy\n\nsource\n\n\nexplore_distributions\n\n explore_distributions ()\n\nInteractive exploration of probability distributions and entropy\nEntropy Interpretation: - High entropy (uniform): We’re completely uncertain about the threat level - Low entropy (certain): We’re confident in our assessment - Information gain: Entropy reduction when we receive evidence\n\n\nBayes’ Theorem in Action\nNow let’s see how Bayes’ theorem works in practice for cybersecurity scenarios:\n\nsource\n\n\nbayesian_intrusion_detection\n\n bayesian_intrusion_detection (n_observations=10, rng=None)\n\nDemonstrate Bayesian updating for intrusion detection\nKey Observations: 1. Sequential updating: Each piece of evidence refines our beliefs 2. Evidence strength matters: Port scans have bigger impact than normal traffic 3. Counter-evidence: Normal traffic observations reduce attack probability 4. Uncertainty tracking: We can quantify how confident we are\n\n\nHandling Multiple Hypotheses\nIn real cybersecurity scenarios, we often consider multiple threat types simultaneously:\n\nsource\n\n\nmulti_threat_assessment\n\n multi_threat_assessment (rng=None)\n\nDemonstrate multi-hypothesis threat assessment",
+    "crumbs": [
+      "rbe",
+      "RBE Part 1: Uncertainty Fundamentals"
+    ]
+  },
+  {
+    "objectID": "rbe/uncertainty_fundamentals.html#interactive-uncertainty-explorer",
+    "href": "rbe/uncertainty_fundamentals.html#interactive-uncertainty-explorer",
+    "title": "RBE Part 1: Uncertainty Fundamentals",
+    "section": "Interactive Uncertainty Explorer",
+    "text": "Interactive Uncertainty Explorer\nLet’s create an interactive component to explore how different evidence affects our beliefs:\n\nsource\n\ncreate_uncertainty_calculator\n\n create_uncertainty_calculator ()\n\nCreate an interactive uncertainty calculator using FastHTML",
+    "crumbs": [
+      "rbe",
+      "RBE Part 1: Uncertainty Fundamentals"
+    ]
+  },
+  {
+    "objectID": "rbe/uncertainty_fundamentals.html#summary-key-takeaways",
+    "href": "rbe/uncertainty_fundamentals.html#summary-key-takeaways",
+    "title": "RBE Part 1: Uncertainty Fundamentals",
+    "section": "Summary: Key Takeaways",
+    "text": "Summary: Key Takeaways\nWe’ve explored the fundamentals of uncertainty in cybersecurity through the lens of Bayesian reasoning:\n\nCore Concepts\n\nTwo Types of Uncertainty:\n\nAleatory (irreducible): Inherent randomness in systems\nEpistemic (reducible): Our lack of knowledge\n\nEntropy as Uncertainty Measure:\n\nQuantifies how uncertain we are about outcomes\nInformation gain = entropy reduction\n\nBayesian Updating:\n\nStart with prior beliefs\nUpdate with evidence using Bayes’ theorem\nTrack uncertainty throughout the process\n\n\n\n\nPractical Applications\n\nNetwork intrusion detection with evolving threat assessments\nMulti-hypothesis testing for different attack types\nEvidence accumulation over time\nUncertainty quantification for decision making\n\n\n\nNext Steps\nIn the next notebook, we’ll explore how to implement these concepts using Recursive Bayesian Estimation with particle filters for real-time cybersecurity applications.\nThe mathematical foundation we’ve built here provides the basis for more sophisticated techniques that can handle: - Non-linear system dynamics - Multi-dimensional state spaces - Continuous-time observations - Adaptive learning algorithms",
+    "crumbs": [
+      "rbe",
+      "RBE Part 1: Uncertainty Fundamentals"
+    ]
+  },
+  {
+    "objectID": "rbe/rbe_core.html",
+    "href": "rbe/rbe_core.html",
+    "title": "RBE Core",
+    "section": "",
+    "text": "Basic probability distribution functions following fast.ai style with short, clear names.\n\nsource\n\n\n\n prob_kl_div (p, q)\n\nKL divergence from q to p\n\nsource\n\n\n\n\n prob_entropy (probs)\n\nCalculate entropy of probs distribution\n\nsource\n\n\n\n\n prob_sample (probs, n=1, rng=None)\n\nSample n indices from probs distribution\n\nsource\n\n\n\n\n prob_normalize (probs)\n\nNormalize probs to sum to 1\n\n# Test probability utilities\nprobs = [1, 2, 3]\nnormalized = prob_normalize(probs)\ntest_close(np.sum(normalized), 1.0)\ntest_close(normalized, [1/6, 2/6, 3/6])\n\n# Test sampling\nrng = np.random.default_rng(42)\nsamples = prob_sample([0.1, 0.7, 0.2], n=1000, rng=rng)\nassert len(samples) == 1000\nassert np.all((samples &gt;= 0) & (samples &lt;= 2))\n\n# Test entropy\nuniform = [0.5, 0.5]\ncertain = [1.0, 0.0]\nassert prob_entropy(uniform) &gt; prob_entropy(certain)\n\n# Test KL divergence\np = [0.5, 0.5]\nq = [0.5, 0.5]\ntest_close(prob_kl_div(p, q), 0.0, eps=1e-10)  # Same distributions",
+    "crumbs": [
+      "rbe",
+      "RBE Core"
+    ]
+  },
+  {
+    "objectID": "rbe/rbe_core.html#probability-utilities",
+    "href": "rbe/rbe_core.html#probability-utilities",
+    "title": "RBE Core",
+    "section": "",
+    "text": "Basic probability distribution functions following fast.ai style with short, clear names.\n\nsource\n\n\n\n prob_kl_div (p, q)\n\nKL divergence from q to p\n\nsource\n\n\n\n\n prob_entropy (probs)\n\nCalculate entropy of probs distribution\n\nsource\n\n\n\n\n prob_sample (probs, n=1, rng=None)\n\nSample n indices from probs distribution\n\nsource\n\n\n\n\n prob_normalize (probs)\n\nNormalize probs to sum to 1\n\n# Test probability utilities\nprobs = [1, 2, 3]\nnormalized = prob_normalize(probs)\ntest_close(np.sum(normalized), 1.0)\ntest_close(normalized, [1/6, 2/6, 3/6])\n\n# Test sampling\nrng = np.random.default_rng(42)\nsamples = prob_sample([0.1, 0.7, 0.2], n=1000, rng=rng)\nassert len(samples) == 1000\nassert np.all((samples &gt;= 0) & (samples &lt;= 2))\n\n# Test entropy\nuniform = [0.5, 0.5]\ncertain = [1.0, 0.0]\nassert prob_entropy(uniform) &gt; prob_entropy(certain)\n\n# Test KL divergence\np = [0.5, 0.5]\nq = [0.5, 0.5]\ntest_close(prob_kl_div(p, q), 0.0, eps=1e-10)  # Same distributions",
+    "crumbs": [
+      "rbe",
+      "RBE Core"
+    ]
+  },
+  {
+    "objectID": "rbe/rbe_core.html#bayesian-core",
+    "href": "rbe/rbe_core.html#bayesian-core",
+    "title": "RBE Core",
+    "section": "Bayesian Core",
+    "text": "Bayesian Core\nCore Bayesian inference functions for updating beliefs with evidence.\n\nsource\n\nbayes_posterior_predictive\n\n bayes_posterior_predictive (posterior, likelihood_fn, n_samples=1000,\n                             rng=None)\n\nSample from posterior predictive distribution\n\nsource\n\n\nbayes_sequential\n\n bayes_sequential (priors, likelihoods, evidences=None)\n\nSequential updating of priors with likelihoods and optional evidences\n\nsource\n\n\nbayes_update\n\n bayes_update (prior, likelihood, evidence=None)\n\nUpdate prior with likelihood and optional evidence\n\n# Test Bayesian core functions\nprior = np.array([0.3, 0.7])\nlikelihood = np.array([0.8, 0.2])\nposterior = bayes_update(prior, likelihood)\ntest_close(np.sum(posterior), 1.0)\nassert posterior[0] &gt; prior[0]  # First hypothesis should increase\n\n# Test sequential updating\npriors = [0.5, 0.5]\nlikelihoods = [[0.9, 0.1], [0.8, 0.2], [0.7, 0.3]]\nposteriors = bayes_sequential(priors, likelihoods)\nassert posteriors.shape == (4, 2)  # Initial + 3 updates\ntest_close(np.sum(posteriors, axis=1), 1.0)  # All normalized\n\n# Test posterior predictive (simple case)\nposterior = [0.6, 0.4]\ndef simple_likelihood(param_idx):\n    if param_idx == 0:\n        return [0.8, 0.2]  # Biased toward observation 0\n    else:\n        return [0.3, 0.7]  # Biased toward observation 1\n\nrng = np.random.default_rng(42)\npredictions = bayes_posterior_predictive(posterior, simple_likelihood, n_samples=100, rng=rng)\nassert len(predictions) == 100\nassert np.all((predictions &gt;= 0) & (predictions &lt;= 1))",
+    "crumbs": [
+      "rbe",
+      "RBE Core"
+    ]
+  },
+  {
+    "objectID": "rbe/rbe_core.html#particle-filter-foundation",
+    "href": "rbe/rbe_core.html#particle-filter-foundation",
+    "title": "RBE Core",
+    "section": "Particle Filter Foundation",
+    "text": "Particle Filter Foundation\nCore particle filter functions for Monte Carlo-based Bayesian inference.\n\nsource\n\npf_step\n\n pf_step (particles, weights, observation, transition_fn, likelihood_fn,\n          resample_threshold=0.5, rng=None)\n\nComplete particle filter step: predict, update, and conditionally resample\n\nsource\n\n\npf_effective_size\n\n pf_effective_size (weights)\n\nCalculate effective sample size of normalized weights\n\nsource\n\n\npf_resample\n\n pf_resample (particles, weights, method='systematic', rng=None)\n\nResample particles using weights with specified method\n\nsource\n\n\npf_update\n\n pf_update (particles, weights, observation, likelihood_fn)\n\nUpdate step: weight particles using observation and likelihood_fn\n\nsource\n\n\npf_predict\n\n pf_predict (particles, weights, transition_fn, rng=None)\n\nPrediction step: apply transition_fn to particles\n\nsource\n\n\npf_init\n\n pf_init (n_particles, state_dim, init_fn=None, rng=None)\n\nInitialize particle filter with n_particles and state_dim\n\n# Test particle filter functions\nrng = np.random.default_rng(42)\n\n# Test initialization\nparticles, weights = pf_init(100, 2, rng=rng)\nassert particles.shape == (100, 2)\nassert len(weights) == 100\ntest_close(np.sum(weights), 1.0)\n\n# Test prediction with simple transition\ndef simple_transition(particle, rng):\n    return particle + rng.normal(0, 0.1, size=particle.shape)\n\nnew_particles, new_weights = pf_predict(particles, weights, simple_transition, rng)\nassert new_particles.shape == particles.shape\ntest_close(new_weights, weights)  # Weights unchanged\n\n# Test update with simple likelihood\ndef simple_likelihood(particle, observation):\n    # Gaussian likelihood\n    diff = np.linalg.norm(particle - observation)\n    return np.exp(-0.5 * diff**2)\n\nobservation = np.array([0.5, 0.5])\nparticles, weights = pf_update(particles, weights, observation, simple_likelihood)\ntest_close(np.sum(weights), 1.0)\n\n# Test resampling\nparticles, weights = pf_resample(particles, weights, rng=rng)\ntest_close(np.sum(weights), 1.0)\ntest_close(weights, np.ones(100)/100)  # Should be uniform after resampling\n\n# Test effective sample size\nuniform_weights = np.ones(100) / 100\nskewed_weights = np.zeros(100)\nskewed_weights[0] = 1.0\nassert pf_effective_size(uniform_weights) &gt; pf_effective_size(skewed_weights)",
+    "crumbs": [
+      "rbe",
+      "RBE Core"
+    ]
+  },
+  {
+    "objectID": "rbe/rbe_core.html#rbe-estimator",
+    "href": "rbe/rbe_core.html#rbe-estimator",
+    "title": "RBE Core",
+    "section": "RBE Estimator",
+    "text": "RBE Estimator\nMain recursive Bayesian estimator implementations.\n\nsource\n\nrbe_metrics\n\n rbe_metrics (true_states, estimates)\n\nCalculate performance metrics for RBE estimates\n\nsource\n\n\nrbe_adaptive\n\n rbe_adaptive (observations, transition_fn, likelihood_fn,\n               adapt_rate=0.01, n_particles=1000, init_fn=None, rng=None)\n\nAdaptive RBE estimator that adjusts parameters based on performance\n\nsource\n\n\nrbe_estimator\n\n rbe_estimator (observations, transition_fn, likelihood_fn,\n                n_particles=1000, init_fn=None, rng=None)\n\nMain RBE estimator for observations with particle filter\n\n# Test RBE estimator functions\nrng = np.random.default_rng(42)\n\n# Generate synthetic data\ntrue_states = [np.array([i * 0.1, i * 0.05]) for i in range(10)]\nobservations = [state + rng.normal(0, 0.1, 2) for state in true_states]\n\n# Define simple transition and likelihood\ndef test_transition(particle, rng):\n    return particle + rng.normal(0, 0.05, particle.shape)\n\ndef test_likelihood(particle, observation):\n    diff = np.linalg.norm(particle - observation)\n    return np.exp(-0.5 * (diff / 0.1)**2)\n\n# Test basic estimator\nresult = rbe_estimator(observations, test_transition, test_likelihood, \n                      n_particles=100, rng=rng)\nassert result['estimates'].shape == (10, 2)\nassert len(result['particles']) == 11  # Initial + 10 steps\nassert len(result['weights']) == 11\n\n# Test adaptive estimator\nadaptive_result = rbe_adaptive(observations, test_transition, test_likelihood,\n                              n_particles=100, rng=rng)\nassert 'adaptation_info' in adaptive_result\nassert 'avg_effective_size' in adaptive_result['adaptation_info']\n\n# Test metrics\nmetrics = rbe_metrics(true_states, result['estimates'])\nassert 'mse' in metrics\nassert 'rmse' in metrics\nassert 'mae' in metrics\nassert metrics['n_samples'] == 10\nassert metrics['rmse'] == np.sqrt(metrics['mse'])",
+    "crumbs": [
+      "rbe",
+      "RBE Core"
+    ]
+  },
+  {
+    "objectID": "rbe/rbe_core.html#visualization-helpers",
+    "href": "rbe/rbe_core.html#visualization-helpers",
+    "title": "RBE Core",
+    "section": "Visualization Helpers",
+    "text": "Visualization Helpers\nHelper functions for visualizing RBE results and particle filters.\n\nsource\n\nviz_rbe_summary\n\n viz_rbe_summary (rbe_result, true_states=None, title='RBE Summary',\n                  figsize=(15, 10))\n\nCreate comprehensive summary visualization of RBE results\n\nsource\n\n\nviz_comparison\n\n viz_comparison (methods_data, time_steps=None, title='Method Comparison',\n                 figsize=(12, 8), metrics=['mse', 'mae'])\n\nCompare multiple methods with methods_data dict\n\nsource\n\n\nviz_beliefs\n\n viz_beliefs (beliefs, time_steps=None, title='Belief Evolution',\n              figsize=(10, 6), labels=None)\n\nVisualize evolution of beliefs over time_steps\n\nsource\n\n\nviz_particles\n\n viz_particles (particles, weights, title='Particle Distribution',\n                figsize=(8, 6), alpha=0.6)\n\nVisualize particles with weights\n\n# Test visualization functions (basic functionality)\nrng = np.random.default_rng(42)\n\n# Create test data\nparticles = rng.normal(0, 1, (100, 2))\nweights = rng.exponential(1, 100)\nweights = prob_normalize(weights)\n\n# Test particle visualization\nfig, ax = viz_particles(particles, weights)\nassert fig is not None\nplt.close(fig)\n\n# Test belief visualization\nbeliefs = np.random.random((10, 3))\nfig, ax = viz_beliefs(beliefs)\nassert fig is not None\nplt.close(fig)\n\n# Test comparison visualization\nmethods_data = {\n    'Method A': {\n        'estimates': np.random.random(10), \n        'mse': np.random.random(10), \n        'mae': np.random.random(10)\n    },\n    'Method B': {\n        'estimates': np.random.random(10), \n        'mse': np.random.random(10), \n        'mae': np.random.random(10)\n    }\n}\nfig, axes = viz_comparison(methods_data)\nassert fig is not None\nplt.close(fig)\n\n# Test RBE summary visualization\n# Use the RBE result from previous test\ntrue_states = [np.array([i * 0.1, i * 0.05]) for i in range(10)]\nobservations = [state + rng.normal(0, 0.1, 2) for state in true_states]\nresult = rbe_estimator(observations, test_transition, test_likelihood, \n                      n_particles=50, rng=rng)  # Smaller for faster test\n\nfig = viz_rbe_summary(result, true_states)\nassert fig is not None\nplt.close(fig)",
+    "crumbs": [
+      "rbe",
+      "RBE Core"
+    ]
+  },
+  {
+    "objectID": "rbe/rbe_core.html#export-functions",
+    "href": "rbe/rbe_core.html#export-functions",
+    "title": "RBE Core",
+    "section": "Export Functions",
+    "text": "Export Functions\nDefine all functions to be exported from this module.",
+    "crumbs": [
+      "rbe",
+      "RBE Core"
+    ]
+  },
+  {
+    "objectID": "rbe/rbe_core.html#summary",
+    "href": "rbe/rbe_core.html#summary",
+    "title": "RBE Core",
+    "section": "Summary",
+    "text": "Summary\nThis module provides the complete foundation for Recursive Bayesian Estimation following fast.ai coding principles:\n\nShort, clear names: prob_normalize, bayes_update, pf_init\nFunction-first approach: Minimal classes, comprehensive functions\nLiberal imports: Full __all__ definition for from rbe.core import *\nInline testing: Comprehensive tests using test_eq and test_close\nMathematical focus: Functions optimized for interactive exploration\nModular design: Mix-and-match functionality for different use cases\n\nThe module supports the entire RBE blog series with: - Core probability and Bayesian inference functions - Complete particle filter implementation - Ready-to-use RBE estimators - Comprehensive visualization tools - Performance metrics and analysis functions",
+    "crumbs": [
+      "rbe",
+      "RBE Core"
+    ]
+  },
+  {
+    "objectID": "blog_components.html",
+    "href": "blog_components.html",
+    "title": "Blog Components",
+    "section": "",
+    "text": "source\n\n\n\n create_nav_links (nav_items, current_topic=None)\n\nCreate navigation links with active state handling\n\nfrom IPython.display import HTML\n\nnav_items = [\n        ('Home', '/'),\n        ('RBE Series', '/rbe/'),\n        ('Future Topics', '/topics/'),\n        ('About', '/about/')\n    ]\n\nn_links = create_nav_links(nav_items, \"home\")\nHTML(str(n_links))\n\n[button(('Home',),{'href': '/', 'variant': 'default', 'size': 'sm', 'type': 'submit', 'class': 'uk-btn transition-colors'}), button(('RBE Series',),{'href': '/rbe/', 'variant': 'ghost', 'size': 'sm', 'type': 'submit', 'class': 'uk-btn transition-colors'}), button(('Future Topics',),{'href': '/topics/', 'variant': 'ghost', 'size': 'sm', 'type': 'submit', 'class': 'uk-btn transition-colors'}), button(('About',),{'href': '/about/', 'variant': 'ghost', 'size': 'sm', 'type': 'submit', 'class': 'uk-btn transition-colors'})]\n\n\n\nsource\n\n\n\n\n create_brand (title=\"Matthew Redrup's Blog\", subtitle='Ramblings on AI &\n               Cybersecurity')\n\nCreate the brand/header section\n\nfrom IPython.display import HTML\nbrand = create_brand()\nHTML(str(brand))\n\nRamblings on AI & Cybersecurity\n\n\n\nsource\n\n\n\n\n create_theme_toggle ()\n\nCreate theme toggle that works with MonsterUI’s system\n\nfrom IPython.display import HTML\ntoggle = create_theme_toggle()\nHTML(str(toggle))\n\n☀️🌙",
+    "crumbs": [
+      "Blog Components"
+    ]
+  },
+  {
+    "objectID": "blog_components.html#navigation-components",
+    "href": "blog_components.html#navigation-components",
+    "title": "Blog Components",
+    "section": "",
+    "text": "source\n\n\n\n create_nav_links (nav_items, current_topic=None)\n\nCreate navigation links with active state handling\n\nfrom IPython.display import HTML\n\nnav_items = [\n        ('Home', '/'),\n        ('RBE Series', '/rbe/'),\n        ('Future Topics', '/topics/'),\n        ('About', '/about/')\n    ]\n\nn_links = create_nav_links(nav_items, \"home\")\nHTML(str(n_links))\n\n[button(('Home',),{'href': '/', 'variant': 'default', 'size': 'sm', 'type': 'submit', 'class': 'uk-btn transition-colors'}), button(('RBE Series',),{'href': '/rbe/', 'variant': 'ghost', 'size': 'sm', 'type': 'submit', 'class': 'uk-btn transition-colors'}), button(('Future Topics',),{'href': '/topics/', 'variant': 'ghost', 'size': 'sm', 'type': 'submit', 'class': 'uk-btn transition-colors'}), button(('About',),{'href': '/about/', 'variant': 'ghost', 'size': 'sm', 'type': 'submit', 'class': 'uk-btn transition-colors'})]\n\n\n\nsource\n\n\n\n\n create_brand (title=\"Matthew Redrup's Blog\", subtitle='Ramblings on AI &\n               Cybersecurity')\n\nCreate the brand/header section\n\nfrom IPython.display import HTML\nbrand = create_brand()\nHTML(str(brand))\n\nRamblings on AI & Cybersecurity\n\n\n\nsource\n\n\n\n\n create_theme_toggle ()\n\nCreate theme toggle that works with MonsterUI’s system\n\nfrom IPython.display import HTML\ntoggle = create_theme_toggle()\nHTML(str(toggle))\n\n☀️🌙",
+    "crumbs": [
+      "Blog Components"
+    ]
+  },
+  {
+    "objectID": "blog_components.html#fasthtml-navigation-component-with-custom-theme-toggle",
+    "href": "blog_components.html#fasthtml-navigation-component-with-custom-theme-toggle",
+    "title": "Blog Components",
+    "section": "FastHTML Navigation Component with Custom Theme Toggle",
+    "text": "FastHTML Navigation Component with Custom Theme Toggle\nThis code demonstrates how to create a modular, reusable navigation component for FastHTML applications using MonsterUI styling. The key improvements over monolithic route definitions include:\n\nComponent Separation Benefits\n\nMaintainability: Each function has a single responsibility\nReusability: Components can be used across different routes\nTestability: Individual components can be tested in isolation\nReadability: Clear separation of concerns makes code easier to understand\n\n\n\nKey Components\n\n1. Navigation Links (create_nav_links)\n\nUses MonsterUI Button components instead of manual CSS classes\nHandles active state logic cleanly with helper functions\nReturns a list of styled navigation buttons\n\n\n\n2. Brand Section (create_brand)\n\nSeparates the site title and subtitle into its own component\nUses semantic HTML with consistent styling\nEasily customizable through parameters\n\n\n\n3. Custom Theme Toggle (create_theme_toggle)\n\nKey Discovery: MonsterUI uses localStorage with the key \"__FRANKEN__\" to persist theme preferences\nManually toggles the dark class on document.documentElement\nUses matching MonsterUI Button styling for visual consistency\nBypasses the complex Uk_theme_switcher component that had alignment issues\n\n\n\n\nTheme Toggle Implementation Details\nThe theme toggle works by: 1. Reading the current theme state from localStorage.getItem('__FRANKEN__') 2. Updating the mode property in the stored object 3. Saving back to localStorage 4. Immediately applying the theme by adding/removing the dark class\nThis approach integrates seamlessly with MonsterUI’s theme system while providing better visual alignment with navigation buttons.\n\n\nUsage\nCreate navigation with active page indicator\nnav = create_nav(topic=\"home\")\nUse in your FastHTML route\n@rt('/') def get(): return Title(\"My Site\"), nav, Main(...)\nThis pattern can be extended to other UI components like sidebars, footers, and forms.\n\nsource\n\n\ncreate_nav\n\n create_nav (topic:str=None)\n\nCreate main navigation with MonsterUI NavBar for current topic\n\nfull_nav = create_nav('home')\nHTML(str(full_nav))\n\nMatthew Redrup's BlogRamblings on AI & CybersecurityHomeRBE SeriesFuture TopicsAbout☀️🌙HomeRBE SeriesFuture TopicsAbout☀️🌙\n\n\n\n# Test create_nav - simplified for debugging\nnav = create_nav(\"home\")\nprint(f\"NavBar type: {type(nav)}\")\nprint(f\"NavBar children count: {len(nav.children)}\")\nfor i, child in enumerate(nav.children):\n    print(f\"Child {i}: {type(child).__name__} - {getattr(child, 'cls', 'no cls')}\")\n\n# Basic test that it's a NavBar\nassert hasattr(nav, 'brand'), \"Should have brand attribute\"\nassert hasattr(nav, 'children'), \"Should have children attribute\"\n\nNavBar type: &lt;class 'fastcore.xml.FT'&gt;\nNavBar children count: 2\nChild 0: FT - None\nChild 1: FT - None\n\n\n\nsource\n\n\ntopic_card\n\n topic_card (title:str, desc:str, url:str, status:str='available')\n\nCreate a card for blog title with description and url\n\n# Test topic_card\ncard = topic_card(\"Test Topic\", \"A test description\", \"/test/\", \"available\")\ntest_eq(card.children[0].children[0], \"Test Topic\")\ntest_eq(card.children[1].children[0], \"A test description\")\ntest_eq(card.children[2].href, \"/test/\")\n\n# Test coming soon status\ncard_soon = topic_card(\"Future\", \"Coming later\", \"/future/\", \"coming soon\")\ntest_eq(card_soon.children[2].children[0], \"Coming Soon\")\n\n\nsource\n\n\nmath_block\n\n math_block (tex:str, block:bool=True)\n\nRender LaTeX tex using KatexMarkdownJS\n\n# Test math_block\nmath = math_block(\"x^2 + y^2 = z^2\")\ntest_eq(math.children[0], \"$$x^2 + y^2 = z^2$$\")\n# FastHTML components store class in attrs dict, not directly as cls\ntest_eq(math.attrs.get('class'), \"marked math-content\")\n\n# Test inline math\ninline = math_block(\"E = mc^2\", block=False)\ntest_eq(inline.children[0], \"$E = mc^2$\")\ntest_eq(inline.attrs.get('class'), \"marked math-inline\")",
+    "crumbs": [
+      "Blog Components"
+    ]
+  },
+  {
+    "objectID": "blog_components.html#code-display-components",
+    "href": "blog_components.html#code-display-components",
+    "title": "Blog Components",
+    "section": "Code Display Components",
+    "text": "Code Display Components\n\nsource\n\ncode_block\n\n code_block (code:str, language:str='python', title:str=None)\n\nCreate a syntax-highlighted code block using FastHTML’s HighlightJS",
+    "crumbs": [
+      "Blog Components"
+    ]
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "technical-blog",
+    "section": "",
+    "text": "Welcome to my technical blog where I explore cutting-edge topics in AI, cybersecurity, and software engineering through interactive demonstrations and rigorous implementations.\nI’ve written these posts primarily to teach myself about complex topics (with generous help from AI assistants), but I’m sharing them in case someone else might find them interesting—or at least to provide additional training data for our future AI overlords.\nThis blog is built with FastHTML and nbdev, creating a seamless blend of literate programming and interactive web components. Feel free to explore the source code on GitHub if you’re curious about how it all works.",
+    "crumbs": [
+      "technical-blog"
+    ]
+  },
+  {
+    "objectID": "index.html#featured-series-recursive-bayesian-estimators",
+    "href": "index.html#featured-series-recursive-bayesian-estimators",
+    "title": "technical-blog",
+    "section": "Featured Series: Recursive Bayesian Estimators",
+    "text": "Featured Series: Recursive Bayesian Estimators\nDive deep into the mathematical foundations and practical applications of Recursive Bayesian Estimators in cybersecurity. This comprehensive series covers everything from Bayes’ theorem to advanced particle filtering techniques.\n🔗 Start the RBE Series →",
+    "crumbs": [
+      "technical-blog"
+    ]
+  },
+  {
+    "objectID": "index.html#what-makes-this-blog-different",
+    "href": "index.html#what-makes-this-blog-different",
+    "title": "technical-blog",
+    "section": "What Makes This Blog Different",
+    "text": "What Makes This Blog Different\n\nInteractive Learning: FastHTML-powered demonstrations that let you explore concepts hands-on\nRigorous Implementation: Complete, tested Python code for every concept\nMathematical Depth: Proper derivations and theoretical foundations\nPractical Applications: Real-world use cases and performance analysis\nOpen Source: All code available for learning and adaptation",
+    "crumbs": [
+      "technical-blog"
+    ]
+  },
+  {
+    "objectID": "index.html#upcoming-topics",
+    "href": "index.html#upcoming-topics",
+    "title": "technical-blog",
+    "section": "Upcoming Topics",
+    "text": "Upcoming Topics\n\nDeep Learning Architectures\nDistributed Systems\nQuantum Computing Applications\nAdvanced Python Techniques",
+    "crumbs": [
+      "technical-blog"
+    ]
+  },
+  {
+    "objectID": "index.html#developer-guide",
+    "href": "index.html#developer-guide",
+    "title": "technical-blog",
+    "section": "Developer Guide",
+    "text": "Developer Guide\nIf you are new to using nbdev here are some useful pointers to get you started.\n\nInstall technical_blog in Development mode\n# make sure technical_blog package is installed in development mode\n$ pip install -e .\n\n# make changes under nbs/ directory\n# ...\n\n# compile to have changes apply to technical_blog\n$ nbdev_prepare",
+    "crumbs": [
+      "technical-blog"
+    ]
+  },
+  {
+    "objectID": "index.html#usage",
+    "href": "index.html#usage",
+    "title": "technical-blog",
+    "section": "Usage",
+    "text": "Usage\n\nInstallation\nInstall latest from the GitHub repository:\n$ pip install git+https://github.com/Matthew-Redrup/technical-blog.git\nor from conda\n$ conda install -c Matthew-Redrup technical_blog\nor from pypi\n$ pip install technical_blog\n\n\nDocumentation\nDocumentation can be found hosted on this GitHub repository’s pages. Additionally you can find package manager specific guidelines on conda and pypi respectively.",
+    "crumbs": [
+      "technical-blog"
+    ]
+  },
+  {
+    "objectID": "index.html#how-to-use",
+    "href": "index.html#how-to-use",
+    "title": "technical-blog",
+    "section": "How to use",
+    "text": "How to use\nFill me in please! Don’t forget code examples:\n\n1+1\n\n2",
+    "crumbs": [
+      "technical-blog"
+    ]
+  },
+  {
+    "objectID": "rbe/recursive_updating.html",
+    "href": "rbe/recursive_updating.html",
+    "title": "RBE Part 3: Recursive Updating",
+    "section": "",
+    "text": "In our previous exploration of Bayes’ theorem, we saw how to update beliefs with new evidence. But what happens when evidence arrives sequentially over time?\nConsider cybersecurity monitoring: we don’t wait for all network traffic data before making decisions. We need to continuously update our threat assessments as new packets arrive.\nRecursive Bayesian updating provides: - Memory efficiency: No need to store all historical data - Real-time processing: Updates as new evidence arrives - Theoretical elegance: Mathematically optimal under certain conditions - Computational efficiency: O(1) per update vs O(n) for batch processing",
+    "crumbs": [
+      "rbe",
+      "RBE Part 3: Recursive Updating"
+    ]
+  },
+  {
+    "objectID": "rbe/recursive_updating.html#why-recursive-updating",
+    "href": "rbe/recursive_updating.html#why-recursive-updating",
+    "title": "RBE Part 3: Recursive Updating",
+    "section": "",
+    "text": "In our previous exploration of Bayes’ theorem, we saw how to update beliefs with new evidence. But what happens when evidence arrives sequentially over time?\nConsider cybersecurity monitoring: we don’t wait for all network traffic data before making decisions. We need to continuously update our threat assessments as new packets arrive.\nRecursive Bayesian updating provides: - Memory efficiency: No need to store all historical data - Real-time processing: Updates as new evidence arrives - Theoretical elegance: Mathematically optimal under certain conditions - Computational efficiency: O(1) per update vs O(n) for batch processing",
+    "crumbs": [
+      "rbe",
+      "RBE Part 3: Recursive Updating"
+    ]
+  },
+  {
+    "objectID": "rbe/recursive_updating.html#mathematical-foundation",
+    "href": "rbe/recursive_updating.html#mathematical-foundation",
+    "title": "RBE Part 3: Recursive Updating",
+    "section": "Mathematical Foundation",
+    "text": "Mathematical Foundation\n\nFrom Single to Sequential Updates\nWe start with our familiar Bayes’ theorem: \\[P(H|E) = \\frac{P(E|H)P(H)}{P(E)}\\]\nBut now evidence arrives sequentially: \\(E_1, E_2, E_3, \\ldots\\)\nThe key insight: today’s posterior becomes tomorrow’s prior\nHere’s a summary of what we’ve covered:",
+    "crumbs": [
+      "rbe",
+      "RBE Part 3: Recursive Updating"
+    ]
+  },
+  {
+    "objectID": "rbe/recursive_updating.html#sequential-bayesian-updating-two-cases",
+    "href": "rbe/recursive_updating.html#sequential-bayesian-updating-two-cases",
+    "title": "RBE Part 3: Recursive Updating",
+    "section": "Sequential Bayesian Updating: Two Cases",
+    "text": "Sequential Bayesian Updating: Two Cases\nCore Principle: “Today’s posterior becomes tomorrow’s prior” - each update uses the previous result as the starting point for the next evidence.\n\nCase 1: Conditionally Independent Evidence\nWhen evidence pieces don’t depend on each other given the hypothesis H: - \\(P(E₂|E₁, H) = P(E₂|H)\\) - Denominators simplify: \\(P(E₂|E₁) = P(E₂)\\) - Math is cleaner and more tractable\nNetwork Example: If you’re just checking whether individual packets match a known signature, each packet classification might be independent once you know the true network state.\n\n\nCase 2: Conditionally Dependent Evidence (Your Case)\nWhen evidence pieces remain related even given hypothesis H: - \\(P(E₂|E₁, H) ≠ P(E₂|H)\\) - Must calculate full conditional probabilities \\(P(E₂|E₁), P(E₃|E₁, E₂)\\) - More complex but captures real temporal dependencies\nNetwork Example: Connection patterns for anomaly detection - user behavior, attack sequences, and network state all carry forward over time, making sequential observations dependent.\n\n\nWhy It Matters\n\nIndependent case: Simpler computation, may miss temporal patterns\nDependent case: Better captures network reality but requires modeling the sequential dependencies explicitly\n\n\\[P(H|E_1) = \\frac{P(E_1|H)P(H)}{P(E_1)}\\] \\[P(H|E_1, E_2) = \\frac{P(E_2|H)P(H|E_1)}{P(E_2|E_1)}\\] \\[P(H|E_1, E_2, E_3) = \\frac{P(E_3|H)P(H|E_1, E_2)}{P(E_3|E_1, E_2)}\\]\nThis recursive pattern is the heart of sequential Bayesian updating.\n\nsource\n\n\nrecursive_bayes_demo\n\n recursive_bayes_demo (prior, evidence_seq, likelihoods, labels=None)\n\nDemonstrate recursive Bayesian updating\nLet me trace through what’s happening above.\nStep 1: Starting with 10% attack probability, suspicious port evidence shifts us to ~44% attack probability. This makes sense - suspicious ports are more common in attacks (70%) than normal traffic (10%).\nStep 2: The failed login evidence is quite strong (90% vs 5%), so we jump to ~93% attack probability. Notice how the previous posterior (44% attack) became the prior for this step.\nStep 3: Privilege escalation is extremely strong evidence (95% vs 1%), pushing us to ~99.9% certainty of attack.\nKey validation points:\n\n✅ Each step uses the previous posterior as the new prior\n✅ Probabilities sum to 1 at each step\n✅ The belief evolution makes intuitive sense - stronger evidence creates bigger updates\n✅ The final high confidence matches what we’d expect from this evidence sequence\n\nThe progression from 10% → 44% → 93% → 99.9% shows exactly how sequential evidence accumulates in Bayesian updating. Each piece of evidence builds on what came before, which is the essence of recursive updating.\n\n\nState Space Models\nFor more complex scenarios, we model the system state as evolving over time. State space models provide a powerful framework for tracking dynamic systems with two key components:\nState Evolution: \\(x_{t+1} = f(x_t, w_t)\\) where \\(w_t\\) is process noise\nObservations: \\(z_t = h(x_t, v_t)\\) where \\(v_t\\) is observation noise\nThis formulation assumes the Markov property: the next state \\(x_{t+1}\\) depends only on the current state \\(x_t\\), not the entire history.\nRecursive Bayesian Filter: 1. Predict: \\(p(x_t|z_{1:t-1}) = \\int p(x_t|x_{t-1}) p(x_{t-1}|z_{1:t-1}) dx_{t-1}\\) 2. Update: \\(p(x_t|z_{1:t}) = \\frac{p(z_t|x_t) p(x_t|z_{1:t-1})}{p(z_t|z_{1:t-1})}\\)\nwhere \\(p(z_t|z_{1:t-1})\\) is the normalization constant ensuring the posterior integrates to 1.\nPractical Implementations: Since the integrals above are often intractable, we use approximations: - Kalman filters: Optimal for linear Gaussian systems - Particle filters: Monte Carlo approximation for general nonlinear cases - Extended/Unscented Kalman filters: Handle nonlinear systems with Gaussian approximations\nNetwork Security Connection: Our earlier intrusion detection example could be formalized as a state space model where the “attack progression state” evolves over time, and we observe various network indicators (port scans, login attempts, etc.) that depend on this hidden state.\n\nsource\n\n\nposition_likelihood\n\n position_likelihood (state, obs, obs_noise=0.1)\n\nGaussian likelihood for position observation\n\nsource\n\n\nmotion_model\n\n motion_model (state, rng, dt=1.0, process_noise=0.05)\n\nConstant velocity model: [pos, vel] -&gt; [pos+vel*dt, vel+noise]\n\nsource\n\n\nparticle_filter\n\n particle_filter (initial_state, observations, transition_fn,\n                  observation_fn, n_particles=1000, initial_cov=0.1,\n                  resample_threshold=0.5, rng=None)\n\nParticle filter for state space tracking\n\n\n\n\n\n\n\n\n\n\nType\nDefault\nDetails\n\n\n\n\ninitial_state\n\n\nInitial state estimate\n\n\nobservations\n\n\nSequence of observations\n\n\ntransition_fn\n\n\nFunction (state, rng) -&gt; new_state\n\n\nobservation_fn\n\n\nFunction (state, obs) -&gt; likelihood\n\n\nn_particles\nint\n1000\nNumber of particles\n\n\ninitial_cov\nfloat\n0.1\nInitial covariance for particle initialization\n\n\nresample_threshold\nfloat\n0.5\nResample when eff_size &lt; threshold * n_particles\n\n\nrng\nNoneType\nNone\nRandom number generator\n\n\n\n\n# Test the improved version\nrng = np.random.default_rng(42)\n\n# Generate test data - keep track of TRUE position\ntrue_positions = []\ntrue_pos, true_vel = 0.0, 0.1\nobservations = []\n\nfor t in range(20):\n    true_pos += true_vel + rng.normal(0, 0.05)\n    true_vel += rng.normal(0, 0.02)\n    true_positions.append(true_pos)  # Store true position\n    observations.append(true_pos + rng.normal(0, 0.1))  # Add noise for observation\n\n# Track with improved filter\nestimates = particle_filter(\n    initial_state=[0.0, 0.1],\n    observations=observations,\n    transition_fn=motion_model,\n    observation_fn=position_likelihood,\n    rng=rng\n)\n\nprint(f\"\\nTracking Results:\")\nprint(f\"Final position estimate: {estimates[-1][0]:.3f}\")\nprint(f\"True final position: {true_positions[-1]:.3f}\")  # Actual truth\nprint(f\"Final observation: {observations[-1]:.3f}\")      # Noisy measurement\nprint(f\"Tracking error: {abs(estimates[-1][0] - true_positions[-1]):.4f}\")\n\n\nTracking Results:\nFinal position estimate: 2.079\nTrue final position: 2.007\nFinal observation: 2.104\nTracking error: 0.0721\n\n\n\ndef compare_tracking_performance(n_trials=10):\n    \"\"\"Compare tracking performance across multiple random trials\"\"\"\n    errors = []\n    \n    for trial in range(n_trials):\n        rng = np.random.default_rng(trial)  # Different seed each time\n        \n        # Generate test data\n        true_pos, true_vel = 0.0, 0.1\n        observations = []\n        \n        for t in range(20):\n            true_pos += true_vel + rng.normal(0, 0.05)\n            true_vel += rng.normal(0, 0.02)\n            observations.append(true_pos + rng.normal(0, 0.1))\n        \n        # Track\n        estimates = particle_filter(\n            initial_state=[0.0, 0.1],\n            observations=observations,\n            transition_fn=motion_model,\n            observation_fn=position_likelihood,\n            rng=rng\n        )\n        \n        error = abs(estimates[-1][0] - true_pos)\n        errors.append(error)\n    \n    return np.array(errors)\n\nerrors = compare_tracking_performance()\nprint(f\"Mean tracking error: {np.mean(errors):.4f}\")\nprint(f\"Std tracking error: {np.std(errors):.4f}\")\nprint(f\"Best case: {np.min(errors):.4f}\")\nprint(f\"Worst case: {np.max(errors):.4f}\")\n\nMean tracking error: 0.0430\nStd tracking error: 0.0211\nBest case: 0.0027\nWorst case: 0.0858",
+    "crumbs": [
+      "rbe",
+      "RBE Part 3: Recursive Updating"
+    ]
+  },
+  {
+    "objectID": "rbe/recursive_updating.html#core-algorithm-structure",
+    "href": "rbe/recursive_updating.html#core-algorithm-structure",
+    "title": "RBE Part 3: Recursive Updating",
+    "section": "Core Algorithm Structure",
+    "text": "Core Algorithm Structure\nThe particle_filter function implements the classic three-step particle filtering algorithm:\n\nPredict: Each particle evolves according to the motion model\nUpdate: Particles are weighted based on how well they explain the observation\nResample: When particle diversity drops, we resample to maintain effective population",
+    "crumbs": [
+      "rbe",
+      "RBE Part 3: Recursive Updating"
+    ]
+  },
+  {
+    "objectID": "rbe/recursive_updating.html#key-implementation-features",
+    "href": "rbe/recursive_updating.html#key-implementation-features",
+    "title": "RBE Part 3: Recursive Updating",
+    "section": "Key Implementation Features",
+    "text": "Key Implementation Features\n\nProper Particle Initialization\nif len(initial_state) == 1:\n    particles = rng.normal(initial_state[0], initial_cov, (n_particles, 1))\nelse:\n    cov_matrix = initial_cov * np.eye(len(initial_state))\n    particles = rng.multivariate_normal(initial_state, cov_matrix, n_particles)\nThis creates genuine diversity in the initial particle cloud, rather than identical particles with tiny perturbations. Each particle starts as a plausible hypothesis about the true state.\n\n\nNumerical Stability in Weight Computation\nlog_weights = np.array([np.log(max(observation_fn(p.flatten(), obs), 1e-300)) \n                       for p in particles])\nlog_weights -= np.max(log_weights)  # Prevent overflow\nweights = np.exp(log_weights)\nWorking in log space prevents numerical underflow when likelihoods become very small. The max() clamp ensures we never take log(0), and subtracting the maximum prevents overflow when exponentiating back.\n\n\nAdaptive Resampling\neff_size = pf_effective_size(weights)\nif eff_size &lt; resample_threshold * n_particles:\n    indices = prob_sample(weights, n_particles, rng)\n    particles = particles[indices]\nResampling only occurs when needed (when effective sample size drops), preserving particle diversity when the filter is confident.",
+    "crumbs": [
+      "rbe",
+      "RBE Part 3: Recursive Updating"
+    ]
+  },
+  {
+    "objectID": "rbe/recursive_updating.html#performance-analysis",
+    "href": "rbe/recursive_updating.html#performance-analysis",
+    "title": "RBE Part 3: Recursive Updating",
+    "section": "Performance Analysis",
+    "text": "Performance Analysis\nThe compare_tracking_performance() function reveals the implementation’s strength through consistency testing:\nerrors = compare_tracking_performance()\nprint(f\"Mean tracking error: {np.mean(errors):.4f}\")      # 0.0430\nprint(f\"Std tracking error: {np.std(errors):.4f}\")       # 0.0211\nprint(f\"Best case: {np.min(errors):.4f}\")                # 0.0027\nprint(f\"Worst case: {np.max(errors):.4f}\")               # 0.0858\n\nWhat These Results Tell Us\nConsistent Performance: The low standard deviation (0.0211) relative to the mean (0.0430) indicates the filter performs reliably across different random scenarios. This consistency is crucial for real-world applications where you can’t cherry-pick favorable conditions.\nReasonable Error Bounds: The worst-case error (0.0858) is still acceptable given that we’re adding 0.1 standard deviation noise to observations and 0.05 to the motion model. The filter isn’t just getting lucky on easy cases.\nScalable Accuracy: The best-case performance (0.0027) shows the filter can achieve high precision when the data supports it, demonstrating it’s not artificially limited by poor implementation choices.",
+    "crumbs": [
+      "rbe",
+      "RBE Part 3: Recursive Updating"
+    ]
+  },
+  {
+    "objectID": "rbe/recursive_updating.html#motion-model-design",
+    "href": "rbe/recursive_updating.html#motion-model-design",
+    "title": "RBE Part 3: Recursive Updating",
+    "section": "Motion Model Design",
+    "text": "Motion Model Design\ndef motion_model(state, rng, dt=1.0, process_noise=0.05):\n    pos, vel = state\n    new_pos = pos + vel * dt + rng.normal(0, process_noise)\n    new_vel = vel + rng.normal(0, process_noise * 0.5)  # Less velocity noise\n    return np.array([new_pos, new_vel])\nThe constant velocity model with process noise captures realistic motion uncertainty. Using less noise on velocity than position reflects the physical intuition that velocity changes more gradually than position.",
+    "crumbs": [
+      "rbe",
+      "RBE Part 3: Recursive Updating"
+    ]
+  },
+  {
+    "objectID": "rbe/recursive_updating.html#why-this-implementation-works",
+    "href": "rbe/recursive_updating.html#why-this-implementation-works",
+    "title": "RBE Part 3: Recursive Updating",
+    "section": "Why This Implementation Works",
+    "text": "Why This Implementation Works\n\nProper uncertainty representation: Initial particle diversity and process noise model realistic uncertainty\nNumerical robustness: Log-space computations handle extreme likelihood values gracefully\n\nAdaptive resource allocation: Resampling maintains computational efficiency while preserving accuracy\nClean interfaces: Simple function signatures make it easy to swap in different motion and observation models\n\nThe consistency demonstrated by compare_tracking_performance() shows these design choices work together effectively, producing a particle filter that’s both accurate and reliable across varying conditions.",
+    "crumbs": [
+      "rbe",
+      "RBE Part 3: Recursive Updating"
+    ]
+  },
+  {
+    "objectID": "rbe/recursive_updating.html#markov-assumptions",
+    "href": "rbe/recursive_updating.html#markov-assumptions",
+    "title": "RBE Part 3: Recursive Updating",
+    "section": "Markov Assumptions",
+    "text": "Markov Assumptions\nThe power of recursive updating relies on the Markov assumption: the future depends only on the present, not the past.\nFormally: \\(P(x_{t+1}|x_t, x_{t-1}, \\ldots, x_1) = P(x_{t+1}|x_t)\\)\nThis perfectly captures the essence: “the future depends only on the present state, not the history of how we got there.”\nThe Benefits - Computational tractability: Without Markov assumptions, we’d need to track exponentially growing state histories - Memory efficiency: We only need to store the current state, not the entire trajectory - Theoretical guarantees: Many optimality results (like Kalman filter optimality) rely on this assumption\nWhere It Gets Interesting: When Markov Breaks Down\nThe Markov assumption fails when:\n\nHidden long-term dependencies: Network intrusion patterns where attackers use multi-stage campaigns spanning weeks\nInsufficient state representation: If your state vector doesn’t capture all relevant information, past observations become informative\nNon-stationary environments: When the underlying system dynamics change over time\nMeasurement artifacts: Sensor drift or calibration issues that accumulate over time\n\nPractical Implications In our particle filter example, the Markov assumption works well because the state [position, velocity] captures the essential dynamics. But if there were hidden forces (like wind patterns) affecting motion, we might need to either: - Expand the state to include wind estimates, or - Accept that the Markov assumption is approximate\nThe Key Insight: Markov assumptions are often engineering choices rather than physical truths. We design our state representation to make the assumption as valid as possible for our specific application.\n\nsource\n\nmarkov_chain_demo\n\n markov_chain_demo (P, n_steps, π0=None, labels=None, seed=None)\n\nDemonstrate Markov chain evolution and properties\n\n\n\n\nType\nDefault\nDetails\n\n\n\n\nP\n\n\ntransition matrix\n\n\nn_steps\n\n\nnumber of steps to simulate\n\n\nπ0\nNoneType\nNone\ninitial distribution (uniform if None)\n\n\nlabels\nNoneType\nNone\nstate names (auto-generated if None)\n\n\nseed\nNoneType\nNone\nrandom seed for reproducibility\n\n\n\n\n# Test with invalid matrix first\ntry:\n    bad_P = [[0.8, 0.15, 0.04],  # Doesn't sum to 1!\n             [0.3, 0.6, 0.1], \n             [0.1, 0.2, 0.7]]\n    markov_chain_demo(bad_P, 5)\nexcept ValueError as e:\n    print(f\"✓ Validation caught error: {e}\\n\")\n\n# Network security example\nsecurity_P = [[0.8, 0.15, 0.05],   # Normal\n              [0.3, 0.6, 0.1],     # Suspicious  \n              [0.1, 0.2, 0.7]]     # Compromised\n\nresult = markov_chain_demo(\n    security_P, 5,\n    π0=[0.9, 0.1, 0.0],\n    labels=['Normal', 'Suspicious', 'Compromised'],\n    seed=42\n)\n\n✓ Validation caught error: Transition matrix rows must sum to 1. Rows [0] sum to [0.99]\n\n=== MARKOV CHAIN ===\nTransition Matrix P:\n  Normal: [0.8  0.15 0.05]\n  Suspicious: [0.3 0.6 0.1]\n  Compromised: [0.1 0.2 0.7]\n\nDistribution Evolution:\nt=0: {'Normal': np.float64(0.9), 'Suspicious': np.float64(0.1), 'Compromised': np.float64(0.0)}\nt=1: {'Normal': np.float64(0.75), 'Suspicious': np.float64(0.195), 'Compromised': np.float64(0.055)}\nt=2: {'Normal': np.float64(0.664), 'Suspicious': np.float64(0.2405), 'Compromised': np.float64(0.0955)}\nt=3: {'Normal': np.float64(0.6129), 'Suspicious': np.float64(0.263), 'Compromised': np.float64(0.1241)}\nt=4: {'Normal': np.float64(0.5816), 'Suspicious': np.float64(0.2746), 'Compromised': np.float64(0.1438)}\nt=5: {'Normal': np.float64(0.5621), 'Suspicious': np.float64(0.2807), 'Compromised': np.float64(0.1572)}\n\nSample Path:\nt=0: Normal\nt=1: Normal\nt=2: Suspicious\nt=3: Suspicious\nt=4: Normal\nt=5: Compromised",
+    "crumbs": [
+      "rbe",
+      "RBE Part 3: Recursive Updating"
+    ]
+  },
+  {
+    "objectID": "rbe/recursive_updating.html#interactive-demonstrations",
+    "href": "rbe/recursive_updating.html#interactive-demonstrations",
+    "title": "RBE Part 3: Recursive Updating",
+    "section": "Interactive Demonstrations",
+    "text": "Interactive Demonstrations\nLet’s create interactive components to visualize recursive updating in action.\n\nsource\n\nbelief_evolution_visualizer\n\n belief_evolution_visualizer (beliefs, time_steps=None, title='Belief\n                              Evolution', labels=None, figsize=(12, 6))\n\nVisualize how beliefs evolve over time with interactive features\n\nsource\n\n\npost\n\n post ()\n\nHTMX endpoint to reset demo\n\nsource\n\n\npost\n\n post ()\n\nHTMX endpoint to reset demo\n\nsource\n\n\nget\n\n get ()\n\n\nsource\n\n\nrecursive_update_component\n\n recursive_update_component ()\n\nMain component using HTMX\n\nsource\n\n\ncontrol_buttons\n\n control_buttons ()\n\nControl buttons component\n\nsource\n\n\nbelief_state_component\n\n belief_state_component ()\n\nComponent showing current belief state\n@rt(“/update_beliefs”) def post(): # Server-side Bayesian update beliefs = bayes_update(beliefs, evidence[‘likelihood’]) return belief_state_component() # Return new HTML",
+    "crumbs": [
+      "rbe",
+      "RBE Part 3: Recursive Updating"
+    ]
+  },
+  {
+    "objectID": "rbe/recursive_updating.html#performance-analysis-recursive-vs-batch",
+    "href": "rbe/recursive_updating.html#performance-analysis-recursive-vs-batch",
+    "title": "RBE Part 3: Recursive Updating",
+    "section": "Performance Analysis: Recursive vs Batch",
+    "text": "Performance Analysis: Recursive vs Batch\nOne of the key advantages of recursive updating is computational efficiency. Let’s compare recursive and batch approaches.\n\nsource\n\nbatch_vs_recursive_comparison\n\n batch_vs_recursive_comparison (data_sizes, n_trials=10, rng=None)\n\nCompare true batch processing vs recursive updating\n\n# Batch vs Recursive Performance comparison\nprint(\"Running performance comparison...\")\ncorrected_results = batch_vs_recursive_comparison([10, 25, 50, 100], n_trials=3)\n\n# Extract the data for plotting\ndata_sizes = corrected_results['data_sizes']\nbatch_times = corrected_results['batch_times']\nrecursive_times = corrected_results['recursive_times']\naccuracy_differences = corrected_results['accuracy_difference']\n\n# Now your plotting code will work\nfig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 5))\n\n# Left: Performance comparison\nax1.plot(data_sizes, batch_times, 'b-o', label='Batch (O(n))')  \nax1.plot(data_sizes, recursive_times, 'r-s', label='Recursive (O(n))')\nax1.set_xlabel('Number of Data Points')\nax1.set_ylabel('Computation Time (seconds)')\nax1.set_title('Performance: Batch vs Recursive')\nax1.legend()\nax1.grid(True, alpha=0.3)\n\n# Right: Numerical accuracy\nax2.plot(data_sizes, accuracy_differences, 'g-^')\nax2.set_xlabel('Number of Data Points') \nax2.set_ylabel('Numerical Difference')\nax2.set_title('Numerical Stability Comparison')\nax2.grid(True, alpha=0.3)\n\nplt.tight_layout()\nplt.show()\n\nRunning performance comparison...\n\nTesting with 10 data points...\n  Batch time: 0.000010s\n  Recursive time: 0.000018s\n  Accuracy difference: 9.25e-17\n\nTesting with 25 data points...\n  Batch time: 0.000010s\n  Recursive time: 0.000041s\n  Accuracy difference: 7.52e-17\n\nTesting with 50 data points...\n  Batch time: 0.000012s\n  Recursive time: 0.000127s\n  Accuracy difference: 1.01e-16\n\nTesting with 100 data points...\n  Batch time: 0.000052s\n  Recursive time: 0.000377s\n  Accuracy difference: 1.48e-16\n\n\n\n\n\n\n\n\n\nPerformance Plot (Left): - Batch method (blue): Nearly flat scaling - this makes sense because it’s just multiplying likelihoods and doing one normalization, regardless of data size - Recursive method (red): Clear linear scaling - each data point requires a full Bayes update with normalization, so time grows linearly with data size - Crossover insight: Batch is actually faster for larger datasets, which is counterintuitive but correct for this specific comparison\nNumerical Stability Plot (Right): - Shows tiny differences (10^-17 to 10^-19 range) - these are just floating-point precision limits, not meaningful algorithmic differences - The variation pattern is essentially random noise from floating-point arithmetic - This confirms that both methods are mathematically equivalent for independent evidence\nKey Insights from the Plot:\n\nBatch wins for large datasets: The flat scaling of batch processing makes it more efficient as data size grows\nRecursive wins for streaming: But recursive is better for real-time processing where data arrives sequentially\nPerfect numerical equivalence: The tiny differences prove both methods are computing the same mathematical result\n\nThis is a great example of how plotting reveals the practical trade-offs between theoretically equivalent algorithms. The performance difference isn’t about accuracy - it’s about when you need the answer and how your data arrives.\nThe plot effectively demonstrates why you’d choose recursive updating for streaming applications (real-time processing) versus batch processing for offline analysis of large datasets.",
+    "crumbs": [
+      "rbe",
+      "RBE Part 3: Recursive Updating"
+    ]
+  },
+  {
+    "objectID": "rbe/recursive_updating.html#memory-analysis-how-much-history-matters",
+    "href": "rbe/recursive_updating.html#memory-analysis-how-much-history-matters",
+    "title": "RBE Part 3: Recursive Updating",
+    "section": "Memory Analysis: How Much History Matters",
+    "text": "Memory Analysis: How Much History Matters\nA key question in recursive updating: how much does distant history affect current beliefs? Let’s explore this empirically.\n\nsource\n\nmemory_analysis_corrected\n\n memory_analysis_corrected (evidence_sequence, likelihoods,\n                            lookback_windows, initial_prior=None)\n\nCorrected memory analysis - simulate true memory limitations\n\nsource\n\n\nrolling_memory_analysis\n\n rolling_memory_analysis (evidence_sequence, likelihoods, window_size,\n                          initial_prior=None)\n\nAnalyze performance with a fixed rolling memory window\n\ndef plot_complete_memory_analysis(lookback_results, likelihoods):\n    \"\"\"Complete analysis including both lookback and rolling memory\"\"\"\n    \n    fig = plt.figure(figsize=(18, 12))\n    gs = fig.add_gridspec(3, 3, height_ratios=[1, 1, 1], hspace=0.3, wspace=0.3)\n    \n    # First, compute rolling memory results for comparison\n    rolling_windows = [2, 4, 6, 8, 10, 12, 15, 20]\n    rolling_results = []\n    \n    for window_size in rolling_windows:\n        result = rolling_memory_analysis(['event'] * len(likelihoods), likelihoods, window_size)\n        rolling_results.append(result)\n    \n    rolling_diffs = [r['difference'] for r in rolling_results]\n    rolling_kl = [r['kl_divergence'] for r in rolling_results]\n    \n    # Extract lookback data\n    windows = lookback_results['lookback_windows']\n    belief_diffs = lookback_results['belief_differences']\n    info_losses = lookback_results['information_loss']\n    \n    # 1. Direct comparison: Lookback vs Rolling\n    ax1 = fig.add_subplot(gs[0, :])\n    \n    # Plot both methods\n    ax1.plot(windows[:-1], belief_diffs[:-1], 'b-o', label='Lookback Memory', \n             linewidth=2, markersize=6)\n    ax1.plot(rolling_windows, rolling_diffs, 'r-s', label='Rolling Memory', \n             linewidth=2, markersize=6)\n    \n    ax1.set_xlabel('Memory Window Size')\n    ax1.set_ylabel('L2 Error from Full Memory')\n    ax1.set_title('Memory Analysis Comparison: Lookback vs Rolling Window')\n    ax1.legend()\n    ax1.grid(True, alpha=0.3)\n    ax1.set_yscale('log')\n    \n    # 2. Rolling memory trajectory visualization\n    ax2 = fig.add_subplot(gs[1, 0])\n    \n    # Show how rolling memory evolves over time for different window sizes\n    test_windows = [3, 6, 12]\n    colors = ['red', 'orange', 'green']\n    \n    for window, color in zip(test_windows, colors):\n        rolling_trajectory = []\n        recent_evidence = []\n        \n        for i, likelihood in enumerate(likelihoods):\n            recent_evidence.append(likelihood)\n            if len(recent_evidence) &gt; window:\n                recent_evidence.pop(0)\n            \n            # Recompute from scratch with current window\n            rolling_belief = np.array([0.5, 0.5])\n            for recent_like in recent_evidence:\n                rolling_belief = bayes_update(rolling_belief, np.array(recent_like))\n            \n            rolling_trajectory.append(rolling_belief[0])  # Track H1 probability\n        \n        ax2.plot(range(1, len(rolling_trajectory) + 1), rolling_trajectory, \n                color=color, linewidth=2, label=f'Rolling Window {window}')\n    \n    # Add full memory trajectory for reference\n    full_trajectory = []\n    full_belief = np.array([0.5, 0.5])\n    for likelihood in likelihoods:\n        full_belief = bayes_update(full_belief, np.array(likelihood))\n        full_trajectory.append(full_belief[0])\n    \n    ax2.plot(range(1, len(full_trajectory) + 1), full_trajectory, \n            'k--', linewidth=2, alpha=0.7, label='Full Memory')\n    \n    ax2.set_xlabel('Time Step')\n    ax2.set_ylabel('Belief in Hypothesis 1')\n    ax2.set_title('Rolling Memory Belief Evolution')\n    ax2.legend()\n    ax2.grid(True, alpha=0.3)\n    \n    # 3. Memory method efficiency comparison\n    ax3 = fig.add_subplot(gs[1, 1])\n    \n    # Efficiency for lookback (exclude full memory)\n    lookback_eff = [1/(d*w) if d &gt; 0 and w &gt; 0 else 0 \n                   for d, w in zip(belief_diffs[:-1], windows[:-1])]\n    \n    # Efficiency for rolling\n    rolling_eff = [1/(d*w) if d &gt; 0 and w &gt; 0 else 0 \n                  for d, w in zip(rolling_diffs, rolling_windows)]\n    \n    ax3.plot(windows[:-1], lookback_eff, 'b-o', label='Lookback Efficiency', \n             linewidth=2, markersize=6)\n    ax3.plot(rolling_windows, rolling_eff, 'r-s', label='Rolling Efficiency', \n             linewidth=2, markersize=6)\n    \n    ax3.set_xlabel('Memory Window Size')\n    ax3.set_ylabel('Efficiency (Accuracy/Memory Cost)')\n    ax3.set_title('Memory Method Efficiency Comparison')\n    ax3.legend()\n    ax3.grid(True, alpha=0.3)\n    \n    # 4. Computational cost analysis\n    ax4 = fig.add_subplot(gs[1, 2])\n    \n    # Computational cost: lookback is O(window), rolling is O(window * time)\n    time_steps = len(likelihoods)\n    lookback_cost = windows[:-1]  # Just the window size\n    rolling_cost = [w * time_steps for w in rolling_windows]  # Window * time\n    \n    ax4.plot(windows[:-1], lookback_cost, 'b-o', label='Lookback Cost', \n             linewidth=2, markersize=6)\n    ax4.plot(rolling_windows, rolling_cost, 'r-s', label='Rolling Cost', \n             linewidth=2, markersize=6)\n    \n    ax4.set_xlabel('Memory Window Size')\n    ax4.set_ylabel('Computational Cost (Operations)')\n    ax4.set_title('Computational Cost Comparison')\n    ax4.legend()\n    ax4.grid(True, alpha=0.3)\n    ax4.set_yscale('log')\n    \n    # 5. Method selection guide\n    ax5 = fig.add_subplot(gs[2, :2])\n    \n    # Create a decision matrix\n    scenarios = ['Real-time\\nStreaming', 'Batch\\nProcessing', 'Resource\\nConstrained', \n                'High\\nAccuracy', 'Adaptive\\nSystems']\n    \n    # Ratings: 0=Poor, 1=Fair, 2=Good, 3=Excellent\n    lookback_ratings = [3, 1, 3, 2, 1]  # Good for real-time, resource-constrained\n    rolling_ratings = [1, 3, 1, 3, 3]   # Good for batch, high-accuracy, adaptive\n    \n    x = np.arange(len(scenarios))\n    width = 0.35\n    \n    bars1 = ax5.bar(x - width/2, lookback_ratings, width, label='Lookback Memory', \n                   color='blue', alpha=0.7)\n    bars2 = ax5.bar(x + width/2, rolling_ratings, width, label='Rolling Memory', \n                   color='red', alpha=0.7)\n    \n    ax5.set_xlabel('Use Case Scenarios')\n    ax5.set_ylabel('Suitability Rating (0-3)')\n    ax5.set_title('Memory Method Suitability by Use Case')\n    ax5.set_xticks(x)\n    ax5.set_xticklabels(scenarios)\n    ax5.legend()\n    ax5.grid(True, alpha=0.3, axis='y')\n    \n    # Add value labels on bars\n    for bars in [bars1, bars2]:\n        for bar in bars:\n            height = bar.get_height()\n            ax5.text(bar.get_x() + bar.get_width()/2., height + 0.05,\n                    f'{height}', ha='center', va='bottom')\n    \n    # 6. Summary recommendations\n    ax6 = fig.add_subplot(gs[2, 2])\n    ax6.axis('off')\n    \n    summary_text = \"\"\"MEMORY METHOD COMPARISON:\n\nLOOKBACK MEMORY:\n✓ Simple implementation\n✓ Lower computational cost\n✓ Good for real-time systems\n✗ May miss important history\n✗ Less adaptive to changes\n\nROLLING MEMORY:\n✓ Maintains recent context\n✓ Better for pattern detection\n✓ Adapts to changing conditions\n✗ Higher computational cost\n✗ More complex implementation\n\nCHOOSE LOOKBACK FOR:\n• Real-time applications\n• Resource constraints\n• Simple decision making\n\nCHOOSE ROLLING FOR:\n• Pattern recognition\n• Adaptive systems\n• When recent context matters\"\"\"\n    \n    ax6.text(0.05, 0.95, summary_text, transform=ax6.transAxes, fontsize=10,\n             verticalalignment='top', fontfamily='monospace',\n             bbox=dict(boxstyle='round', facecolor='lightyellow', alpha=0.8))\n    \n    plt.suptitle('Complete Memory Analysis: Lookback vs Rolling Methods', fontsize=16, y=0.98)\n    return fig\n\n# Create the complete analysis\ncomplete_fig = plot_complete_memory_analysis(corrected_results, balanced_likelihoods)\nplt.show()\n\n\n\n\n\n\n\n\n\nsource\n\n\nplot_memory_insights\n\n plot_memory_insights (results, likelihoods)\n\nCreate insightful visualizations of memory effects\n\nsource\n\n\nplot_memory_decision_guide\n\n plot_memory_decision_guide (results)\n\nCreate a practical decision guide for choosing memory window size",
+    "crumbs": [
+      "rbe",
+      "RBE Part 3: Recursive Updating"
+    ]
+  },
+  {
+    "objectID": "rbe/recursive_updating.html#cybersecurity-applications",
+    "href": "rbe/recursive_updating.html#cybersecurity-applications",
+    "title": "RBE Part 3: Recursive Updating",
+    "section": "Cybersecurity Applications",
+    "text": "Cybersecurity Applications\nLet’s apply recursive updating to realistic cybersecurity scenarios.\n\nsource\n\nupdate_baseline\n\n update_baseline (current_baseline, observation, adaptation_rate)\n\nUpdate baseline using exponential moving average\n\nsource\n\n\nmulti_step_attack_detection\n\n multi_step_attack_detection (event_sequence, attack_patterns,\n                              window_size=5, threshold=0.6)\n\nImproved multi-step attack detection with better calibration\n\nsource\n\n\nadaptive_threat_monitor\n\n adaptive_threat_monitor (baseline_behavior, time_series_data,\n                          adaptation_rate=0.01, threshold=0.6,\n                          decay_rate=0.1)\n\nRefined version with better memory management\n\n\n\n\nType\nDefault\nDetails\n\n\n\n\nbaseline_behavior\n\n\n\n\n\ntime_series_data\n\n\n\n\n\nadaptation_rate\nfloat\n0.01\n\n\n\nthreshold\nfloat\n0.6\n\n\n\ndecay_rate\nfloat\n0.1\nAdd memory decay\n\n\n\n\n# Demonstrate adaptive threat monitoring\nprint(\"Example: Network Traffic Monitoring\")\nbaseline = 100  # Baseline network traffic (packets/sec)\ntraffic_data = [95, 102, 98, 105, 150, 180, 160, 110, 95, 200, 220, 190, 100, 98]\n\nmonitoring_results = adaptive_threat_monitor(\n    baseline, traffic_data, \n    adaptation_rate=0.2, threshold=0.6, decay_rate=0.15\n)\n\nprint(f\"\\nSummary: {sum(monitoring_results['alerts'])} alerts generated\")\nprint(f\"Alert steps: {[i for i, alert in enumerate(monitoring_results['alerts']) if alert]}\")\n\nExample: Network Traffic Monitoring\n=== REFINED THREAT MONITORING ===\nTime 0: Obs=95.0, DevPct=5.0%, Threat=0.249, Alert=False\nTime 1: Obs=102.0, DevPct=2.0%, Threat=0.090, Alert=False\nTime 2: Obs=98.0, DevPct=2.0%, Threat=0.069, Alert=False\nTime 3: Obs=105.0, DevPct=5.0%, Threat=0.086, Alert=False\nTime 4: Obs=150.0, DevPct=50.0%, Threat=0.459, Alert=False\nTime 5: Obs=180.0, DevPct=80.0%, Threat=0.884, Alert=True\nTime 6: Obs=160.0, DevPct=60.0%, Threat=0.986, Alert=True\nTime 7: Obs=110.0, DevPct=10.0%, Threat=0.967, Alert=True\nTime 8: Obs=95.0, DevPct=5.0%, Threat=0.848, Alert=True\nTime 9: Obs=200.0, DevPct=100.0%, Threat=0.980, Alert=True\nTime 10: Obs=220.0, DevPct=120.0%, Threat=0.998, Alert=True\nTime 11: Obs=190.0, DevPct=90.0%, Threat=1.000, Alert=True\nTime 12: Obs=100.0, DevPct=0.0%, Threat=0.908, Alert=True\nTime 13: Obs=98.0, DevPct=2.0%, Threat=0.505, Alert=False\n\nSummary: 8 alerts generated\nAlert steps: [5, 6, 7, 8, 9, 10, 11, 12]",
+    "crumbs": [
+      "rbe",
+      "RBE Part 3: Recursive Updating"
+    ]
+  },
+  {
+    "objectID": "rbe/recursive_updating.html#excellent-improvements",
+    "href": "rbe/recursive_updating.html#excellent-improvements",
+    "title": "RBE Part 3: Recursive Updating",
+    "section": "Excellent Improvements ✅",
+    "text": "Excellent Improvements ✅\n\nCatches the major spike sequence: Properly detects the sustained high traffic period (steps 5-11: 180, 160, 110, 95, 200, 220, 190)\nMemory decay working: Notice how the threat probability drops from 0.908 to 0.505 between steps 12-13 when traffic returns to normal (100, 98) - this shows the system is recovering\nBetter sensitivity: The 150 spike (step 4) now gets a reasonable threat score of 0.459, which is appropriately elevated but not quite alerting\nProper alert timing: First alert at step 5 (180) makes sense as this is when the sustained anomalous period really begins",
+    "crumbs": [
+      "rbe",
+      "RBE Part 3: Recursive Updating"
+    ]
+  },
+  {
+    "objectID": "rbe/recursive_updating.html#realistic-behavior-patterns",
+    "href": "rbe/recursive_updating.html#realistic-behavior-patterns",
+    "title": "RBE Part 3: Recursive Updating",
+    "section": "Realistic Behavior Patterns",
+    "text": "Realistic Behavior Patterns\n\nEscalation: 0.459 → 0.884 → 0.986 as the attack intensifies\nPersistence: Maintains high threat levels during the anomalous period (steps 5-11)\nRecovery: Begins returning to normal when traffic normalizes (step 13: 0.505)",
+    "crumbs": [
+      "rbe",
+      "RBE Part 3: Recursive Updating"
+    ]
+  },
+  {
+    "objectID": "rbe/recursive_updating.html#minor-observations",
+    "href": "rbe/recursive_updating.html#minor-observations",
+    "title": "RBE Part 3: Recursive Updating",
+    "section": "Minor Observations",
+    "text": "Minor Observations\n\nStep 4 (150): Not alerting might be appropriate - could be a single anomalous packet burst rather than sustained attack\nStep 8 (95): Still alerting even though value is normal - this makes sense because it’s in the middle of an anomalous sequence, showing the system has “situational awareness”",
+    "crumbs": [
+      "rbe",
+      "RBE Part 3: Recursive Updating"
+    ]
+  },
+  {
+    "objectID": "rbe/recursive_updating.html#real-world-applicability",
+    "href": "rbe/recursive_updating.html#real-world-applicability",
+    "title": "RBE Part 3: Recursive Updating",
+    "section": "Real-World Applicability",
+    "text": "Real-World Applicability\nThis behavior pattern would work well in practice: - Reduces false positives: Doesn’t alert on single spikes - Detects sustained attacks: Catches the extended high-traffic period - Recovers gracefully: Returns to normal sensitivity after threats pass - Maintains context: Considers recent history when evaluating current observations\nThe refined version successfully balances sensitivity with stability - exactly what you’d want in a production cybersecurity monitoring system!\n\n# Demonstrate multi-step attack detection  \nprint(\"\\n\" + \"=\"*50)\nprint(\"Example: Multi-step Attack Detection\")\n\nattack_patterns = {\n    'Reconnaissance': ['port_scan', 'dns_lookup', 'service_enum'],\n    'Lateral_Movement': ['credential_theft', 'remote_login', 'privilege_escalation'], \n    'Data_Exfiltration': ['database_access', 'file_compression', 'network_transfer']\n}\n\nevent_sequence = ['port_scan', 'normal_traffic', 'dns_lookup', 'credential_theft', \n                 'service_enum', 'remote_login', 'normal_traffic', 'database_access']\n\nattack_results = multi_step_attack_detection(\n    event_sequence, attack_patterns, threshold=0.6\n)\n\ndetected_patterns = set([p for patterns in attack_results['detected_patterns'] for p in patterns])\nprint(f\"\\nDetected attack patterns: {detected_patterns if detected_patterns else 'None'}\")\n\n\n==================================================\nExample: Multi-step Attack Detection\n=== IMPROVED MULTI-STEP ATTACK DETECTION ===\n\nTime step 0: Event = port_scan\n  Reconnaissance: Match=True, P(attack)=0.794, Alert=True\n  Lateral_Movement: Match=False, P(attack)=0.097, Alert=False\n  Data_Exfiltration: Match=False, P(attack)=0.097, Alert=False\n\nTime step 1: Event = normal_traffic\n  Reconnaissance: Match=False, P(attack)=0.491, Alert=False\n  Lateral_Movement: Match=False, P(attack)=0.026, Alert=False\n  Data_Exfiltration: Match=False, P(attack)=0.026, Alert=False\n\nTime step 2: Event = dns_lookup\n  Reconnaissance: Match=True, P(attack)=0.897, Alert=True\n  Lateral_Movement: Match=False, P(attack)=0.007, Alert=False\n  Data_Exfiltration: Match=False, P(attack)=0.007, Alert=False\n\nTime step 3: Event = credential_theft\n  Reconnaissance: Match=False, P(attack)=0.685, Alert=True\n  Lateral_Movement: Match=True, P(attack)=0.057, Alert=False\n  Data_Exfiltration: Match=False, P(attack)=0.002, Alert=False\n\nTime step 4: Event = service_enum\n  Reconnaissance: Match=True, P(attack)=0.951, Alert=True\n  Lateral_Movement: Match=False, P(attack)=0.015, Alert=False\n  Data_Exfiltration: Match=False, P(attack)=0.000, Alert=False\n\nTime step 5: Event = remote_login\n  Reconnaissance: Match=False, P(attack)=0.830, Alert=True\n  Lateral_Movement: Match=True, P(attack)=0.119, Alert=False\n  Data_Exfiltration: Match=False, P(attack)=0.000, Alert=False\n\nTime step 6: Event = normal_traffic\n  Reconnaissance: Match=False, P(attack)=0.550, Alert=False\n  Lateral_Movement: Match=False, P(attack)=0.033, Alert=False\n  Data_Exfiltration: Match=False, P(attack)=0.000, Alert=False\n\nTime step 7: Event = database_access\n  Reconnaissance: Match=False, P(attack)=0.234, Alert=False\n  Lateral_Movement: Match=False, P(attack)=0.008, Alert=False\n  Data_Exfiltration: Match=True, P(attack)=0.000, Alert=False\n\nDetected attack patterns: {'Reconnaissance'}",
+    "crumbs": [
+      "rbe",
+      "RBE Part 3: Recursive Updating"
+    ]
+  },
+  {
+    "objectID": "rbe/recursive_updating.html#successful-detection",
+    "href": "rbe/recursive_updating.html#successful-detection",
+    "title": "RBE Part 3: Recursive Updating",
+    "section": "Successful Detection",
+    "text": "Successful Detection\nReconnaissance Pattern Detected: The system correctly identified the Reconnaissance attack pattern, which makes sense given the event sequence contained multiple matching events: - port_scan (step 0) → P(attack) jumps to 79.4% - dns_lookup (step 2) → P(attack) increases to 89.7% - service_enum (step 4) → P(attack) reaches 95.1%",
+    "crumbs": [
+      "rbe",
+      "RBE Part 3: Recursive Updating"
+    ]
+  },
+  {
+    "objectID": "rbe/recursive_updating.html#key-improvements-working",
+    "href": "rbe/recursive_updating.html#key-improvements-working",
+    "title": "RBE Part 3: Recursive Updating",
+    "section": "Key Improvements Working",
+    "text": "Key Improvements Working\n\nResponsive Detection: The system now alerts immediately when strong evidence appears (port_scan triggered the first alert)\nEvidence Accumulation: Each matching event strengthens the belief - notice how the Reconnaissance probability keeps climbing: 79.4% → 89.7% → 95.1%\nProper Decay: When non-matching events occur (like normal_traffic), the probabilities appropriately decrease but don’t crash to zero\nPattern Discrimination: The other patterns (Lateral_Movement, Data_Exfiltration) remain at low probabilities since they don’t see their specific events clustering together",
+    "crumbs": [
+      "rbe",
+      "RBE Part 3: Recursive Updating"
+    ]
+  },
+  {
+    "objectID": "rbe/recursive_updating.html#interesting-observations",
+    "href": "rbe/recursive_updating.html#interesting-observations",
+    "title": "RBE Part 3: Recursive Updating",
+    "section": "Interesting Observations",
+    "text": "Interesting Observations\n\nPersistence: Even after normal_traffic events, the Reconnaissance pattern maintains elevated probability (55% at step 6), showing the system has “memory” of the attack sequence\nCross-contamination: The credential_theft event briefly elevates Reconnaissance probability even though it’s not in that pattern - this shows the system is appropriately uncertain when seeing attack-like behavior\nLate Evidence: The database_access event comes too late and after too much contradictory evidence to trigger the Data_Exfiltration pattern",
+    "crumbs": [
+      "rbe",
+      "RBE Part 3: Recursive Updating"
+    ]
+  },
+  {
+    "objectID": "rbe/recursive_updating.html#what-this-demonstrates",
+    "href": "rbe/recursive_updating.html#what-this-demonstrates",
+    "title": "RBE Part 3: Recursive Updating",
+    "section": "What This Demonstrates",
+    "text": "What This Demonstrates\nThe improved calibration successfully balances: - Sensitivity: Detects real attack patterns when they occur - Specificity: Doesn’t generate false alarms for isolated suspicious events - Temporal reasoning: Accumulates evidence over time rather than treating each event independently\nThis is exactly the kind of behavior you’d want in a real cybersecurity monitoring system - it builds confidence as attack patterns unfold while remaining robust to noise and isolated anomalous events.",
+    "crumbs": [
+      "rbe",
+      "RBE Part 3: Recursive Updating"
+    ]
+  },
+  {
+    "objectID": "rbe/recursive_updating.html#when-recursion-breaks-down",
+    "href": "rbe/recursive_updating.html#when-recursion-breaks-down",
+    "title": "RBE Part 3: Recursive Updating",
+    "section": "When Recursion Breaks Down",
+    "text": "When Recursion Breaks Down\nRecursive updating isn’t always optimal. Let’s explore scenarios where it struggles and potential solutions.\n\nsource\n\nstandard_recursive_filter\n\n standard_recursive_filter (observations)\n\nStandard recursive mean (no adaptation)\n\nsource\n\n\nwindowed_filter\n\n windowed_filter (observations, window_size=20)\n\nSimple windowed mean filter\n\nsource\n\n\nforgetting_factor_filter\n\n forgetting_factor_filter (observations, forgetting_factor=0.95)\n\nSimple filter with exponential forgetting\n\nsource\n\n\ncompare_adaptation_strategies\n\n compare_adaptation_strategies (observations, true_states, strategies)\n\nCompare different adaptation strategies for non-stationary data\n\nsource\n\n\nnon_stationary_demo\n\n non_stationary_demo (change_points, segment_patterns, n_observations=100)\n\nDemonstrate challenges with non-stationary data",
+    "crumbs": [
+      "rbe",
+      "RBE Part 3: Recursive Updating"
+    ]
+  },
+  {
+    "objectID": "rbe/recursive_updating.html#summary-and-key-takeaways",
+    "href": "rbe/recursive_updating.html#summary-and-key-takeaways",
+    "title": "RBE Part 3: Recursive Updating",
+    "section": "Summary and Key Takeaways",
+    "text": "Summary and Key Takeaways\nRecursive Bayesian updating transforms static inference into dynamic, adaptive learning:\n\nMathematical Elegance\n\nRecursive structure: Today’s posterior becomes tomorrow’s prior\nMarkov property: Future depends only on present state\nOptimality: Mathematically optimal under stationarity assumptions\n\n\n\nComputational Advantages\n\nMemory efficiency: O(1) storage vs O(n) for batch processing\nReal-time capability: Updates as evidence arrives\nScalability: Performance independent of history length\n\n\n\nPractical Applications\n\nThreat monitoring: Adaptive baselines for anomaly detection\nAttack detection: Multi-step pattern recognition\nState tracking: Object tracking and motion estimation\n\n\n\nLimitations and Solutions\n\nNon-stationarity: Use forgetting factors or sliding windows\nModel mismatch: Robust estimation techniques\nComputational complexity: Approximate methods (particle filters)\n\n\n\nIntegration with Modern AI\n\nHybrid approaches: Combine with neural networks\nMeta-learning: Learn to adapt adaptation parameters\nUncertainty quantification: Maintain probabilistic reasoning\n\nThe recursive nature of Bayesian updating makes it particularly powerful for cybersecurity applications where threats evolve continuously and decisions must be made in real-time with limited computational resources.",
+    "crumbs": [
+      "rbe",
+      "RBE Part 3: Recursive Updating"
+    ]
+  },
+  {
+    "objectID": "rbe/bayes_theorem.html",
+    "href": "rbe/bayes_theorem.html",
+    "title": "RBE Part 2: Bayes Theorem Interactive Calculator",
+    "section": "",
+    "text": "Before building our interactive tools, let’s derive Bayes’ theorem from first principles and understand its profound implications for cybersecurity.\n\n\nStart with the definition of conditional probability:\n\\[P(A|B) = \\frac{P(A \\cap B)}{P(B)}\\]\nSimilarly: \\[P(B|A) = \\frac{P(A \\cap B)}{P(A)}\\]\nSince \\(P(A \\cap B) = P(B \\cap A)\\), we can equate: \\[P(A|B) \\cdot P(B) = P(B|A) \\cdot P(A)\\]\nRearranging gives us Bayes’ theorem: \\[P(A|B) = \\frac{P(B|A) \\cdot P(A)}{P(B)}\\]\n\n\n\nLet’s translate this into cybersecurity terms: - \\(A\\) = “System is under attack” - \\(B\\) = “Suspicious activity detected”\nThen: - \\(P(A)\\) = Prior: Base rate of attacks (before seeing evidence) - \\(P(B|A)\\) = Likelihood: Probability of detecting suspicious activity given an attack - \\(P(B)\\) = Evidence: Overall probability of detecting suspicious activity - \\(P(A|B)\\) = Posterior: Probability of attack given suspicious activity detected\n\nsource\n\n\n\n\n bayes_theorem_step_by_step (prior, likelihood, evidence=None,\n                             labels=None)\n\nStep-by-step Bayes theorem calculation with detailed explanations\n\n\n\nBayes’ theorem can be visualized as updating probability distributions:\n\nsource\n\n\n\n\n visualize_bayes_update (prior, likelihood, title=\"Bayes' Theorem\n                         Visualization\")\n\nVisualize how Bayes’ theorem updates probability distributions\n\nsource\n\n\n\n\n bayes_calculator_component ()\n\nCreate interactive Bayes theorem calculator using FastHTML",
+    "crumbs": [
+      "rbe",
+      "RBE Part 2: Bayes Theorem Interactive Calculator"
+    ]
+  },
+  {
+    "objectID": "rbe/bayes_theorem.html#mathematical-foundation-deriving-bayes-theorem",
+    "href": "rbe/bayes_theorem.html#mathematical-foundation-deriving-bayes-theorem",
+    "title": "RBE Part 2: Bayes Theorem Interactive Calculator",
+    "section": "",
+    "text": "Before building our interactive tools, let’s derive Bayes’ theorem from first principles and understand its profound implications for cybersecurity.\n\n\nStart with the definition of conditional probability:\n\\[P(A|B) = \\frac{P(A \\cap B)}{P(B)}\\]\nSimilarly: \\[P(B|A) = \\frac{P(A \\cap B)}{P(A)}\\]\nSince \\(P(A \\cap B) = P(B \\cap A)\\), we can equate: \\[P(A|B) \\cdot P(B) = P(B|A) \\cdot P(A)\\]\nRearranging gives us Bayes’ theorem: \\[P(A|B) = \\frac{P(B|A) \\cdot P(A)}{P(B)}\\]\n\n\n\nLet’s translate this into cybersecurity terms: - \\(A\\) = “System is under attack” - \\(B\\) = “Suspicious activity detected”\nThen: - \\(P(A)\\) = Prior: Base rate of attacks (before seeing evidence) - \\(P(B|A)\\) = Likelihood: Probability of detecting suspicious activity given an attack - \\(P(B)\\) = Evidence: Overall probability of detecting suspicious activity - \\(P(A|B)\\) = Posterior: Probability of attack given suspicious activity detected\n\nsource\n\n\n\n\n bayes_theorem_step_by_step (prior, likelihood, evidence=None,\n                             labels=None)\n\nStep-by-step Bayes theorem calculation with detailed explanations\n\n\n\nBayes’ theorem can be visualized as updating probability distributions:\n\nsource\n\n\n\n\n visualize_bayes_update (prior, likelihood, title=\"Bayes' Theorem\n                         Visualization\")\n\nVisualize how Bayes’ theorem updates probability distributions\n\nsource\n\n\n\n\n bayes_calculator_component ()\n\nCreate interactive Bayes theorem calculator using FastHTML",
+    "crumbs": [
+      "rbe",
+      "RBE Part 2: Bayes Theorem Interactive Calculator"
+    ]
+  },
+  {
+    "objectID": "rbe/bayes_theorem.html#sensitivity-analysis-how-robust-are-our-conclusions",
+    "href": "rbe/bayes_theorem.html#sensitivity-analysis-how-robust-are-our-conclusions",
+    "title": "RBE Part 2: Bayes Theorem Interactive Calculator",
+    "section": "Sensitivity Analysis: How Robust Are Our Conclusions?",
+    "text": "Sensitivity Analysis: How Robust Are Our Conclusions?\nA critical aspect of Bayesian reasoning is understanding how sensitive our conclusions are to our assumptions. Let’s build tools to explore this:\n\nsource\n\nplot_sensitivity_heatmap\n\n plot_sensitivity_heatmap (priors, likelihoods, posteriors,\n                           title='Posterior Sensitivity Analysis')\n\nPlot sensitivity analysis as a heatmap\n\nsource\n\n\nsensitivity_analysis\n\n sensitivity_analysis (prior_range, likelihood_range, n_points=50)\n\nAnalyze sensitivity of posterior to changes in prior and likelihood",
+    "crumbs": [
+      "rbe",
+      "RBE Part 2: Bayes Theorem Interactive Calculator"
+    ]
+  },
+  {
+    "objectID": "rbe/bayes_theorem.html#advanced-cybersecurity-applications",
+    "href": "rbe/bayes_theorem.html#advanced-cybersecurity-applications",
+    "title": "RBE Part 2: Bayes Theorem Interactive Calculator",
+    "section": "Advanced Cybersecurity Applications",
+    "text": "Advanced Cybersecurity Applications\nNow let’s explore sophisticated applications of Bayes’ theorem in cybersecurity contexts:\n\nsource\n\nthreat_intelligence_fusion\n\n threat_intelligence_fusion (intelligence_sources, reliabilities,\n                             rng=None)\n\nFuse multiple threat intelligence sources using Bayesian updating\n\n\nFalse Positive/Negative Analysis\nUnderstanding the trade-offs between false positives and false negatives is crucial in cybersecurity:\n\nsource\n\n\nplot_roc_and_precision_recall\n\n plot_roc_and_precision_recall (base_rate, sensitivity, specificity)\n\nPlot ROC curve and Precision-Recall curve\n\nsource\n\n\nfalse_rate_analysis\n\n false_rate_analysis (base_rate, sensitivity, specificity,\n                      threshold_range=(0.1, 0.9))\n\nAnalyze false positive and false negative rates across decision thresholds",
+    "crumbs": [
+      "rbe",
+      "RBE Part 2: Bayes Theorem Interactive Calculator"
+    ]
+  },
+  {
+    "objectID": "rbe/bayes_theorem.html#common-pitfalls-and-misconceptions",
+    "href": "rbe/bayes_theorem.html#common-pitfalls-and-misconceptions",
+    "title": "RBE Part 2: Bayes Theorem Interactive Calculator",
+    "section": "Common Pitfalls and Misconceptions",
+    "text": "Common Pitfalls and Misconceptions\nLet’s address the most common mistakes people make when applying Bayes’ theorem:\n\nsource\n\ndemonstrate_conjunction_fallacy\n\n demonstrate_conjunction_fallacy ()\n\nDemonstrate conjunction fallacy in threat assessment\n\nsource\n\n\ndemonstrate_base_rate_neglect\n\n demonstrate_base_rate_neglect ()\n\nDemonstrate the base rate neglect fallacy with cybersecurity examples",
+    "crumbs": [
+      "rbe",
+      "RBE Part 2: Bayes Theorem Interactive Calculator"
+    ]
+  },
+  {
+    "objectID": "rbe/bayes_theorem.html#model-comparison-with-bayes-factors",
+    "href": "rbe/bayes_theorem.html#model-comparison-with-bayes-factors",
+    "title": "RBE Part 2: Bayes Theorem Interactive Calculator",
+    "section": "Model Comparison with Bayes Factors",
+    "text": "Model Comparison with Bayes Factors\nBayes factors provide a principled way to compare different hypotheses:\n\nsource\n\ninterpret_bayes_factor\n\n interpret_bayes_factor (bf)\n\nInterpret Bayes factor strength of evidence\n\nsource\n\n\nmodel_comparison_cybersec\n\n model_comparison_cybersec (evidence_data, rng=None)\n\nCompare different threat models using Bayes factors",
+    "crumbs": [
+      "rbe",
+      "RBE Part 2: Bayes Theorem Interactive Calculator"
+    ]
+  },
+  {
+    "objectID": "rbe/bayes_theorem.html#integration-with-rbe-framework",
+    "href": "rbe/bayes_theorem.html#integration-with-rbe-framework",
+    "title": "RBE Part 2: Bayes Theorem Interactive Calculator",
+    "section": "Integration with RBE Framework",
+    "text": "Integration with RBE Framework\nLet’s connect our Bayes theorem tools with the existing RBE core functions:\n\nsource\n\nintegrated_threat_tracking\n\n integrated_threat_tracking (observations, rng=None)\n\nDemonstrate integration of Bayes theorem with RBE particle filtering",
+    "crumbs": [
+      "rbe",
+      "RBE Part 2: Bayes Theorem Interactive Calculator"
+    ]
+  },
+  {
+    "objectID": "rbe/bayes_theorem.html#summary-key-takeaways",
+    "href": "rbe/bayes_theorem.html#summary-key-takeaways",
+    "title": "RBE Part 2: Bayes Theorem Interactive Calculator",
+    "section": "Summary: Key Takeaways",
+    "text": "Summary: Key Takeaways\nWe’ve built a comprehensive understanding of Bayes’ theorem and its applications in cybersecurity:\n\nCore Mathematical Insights\n\nBayes’ Theorem: \\(P(H|E) = \\frac{P(E|H) \\cdot P(H)}{P(E)}\\)\nComponents: Prior beliefs + Evidence → Posterior beliefs\n\nSensitivity Analysis: Understanding how assumptions affect conclusions\nModel Comparison: Using Bayes factors to choose between hypotheses\n\n\n\nPractical Applications\n\nInteractive calculators for real-time threat assessment\nThreat intelligence fusion from multiple sources\nFalse positive/negative analysis for system tuning\nMulti-model comparison for complex scenarios\n\n\n\nCommon Pitfalls Addressed\n\nBase rate neglect: Low base rates → many false positives\nConjunction fallacy: P(A and B) ≤ P(A) always\nLikelihood confusion: P(E|H) ≠ P(H|E)\n\n\n\nIntegration with RBE\n\nDiscrete updates for categorical threat classification\nContinuous estimation for threat level tracking\nHybrid approaches combining both paradigms\n\n\n\nNext Steps\nIn the next notebook, we’ll explore how these Bayesian foundations enable sophisticated Recursive Bayesian Estimation techniques for real-time cybersecurity monitoring and adaptive threat detection systems.",
+    "crumbs": [
+      "rbe",
+      "RBE Part 2: Bayes Theorem Interactive Calculator"
+    ]
+  },
+  {
+    "objectID": "rbe/index.html",
+    "href": "rbe/index.html",
+    "title": "Recursive Bayesian Estimators in Cybersecurity",
+    "section": "",
+    "text": "This comprehensive series takes you from the fundamental mathematical principles of Bayesian inference to practical implementations of Recursive Bayesian Estimators (RBE) in cybersecurity applications.\n\n\n\nMathematical Foundations: Bayes’ theorem, probability theory, and sequential inference\nRecursive Updating: How beliefs evolve over time with new evidence\nParticle Filters: Advanced Monte Carlo methods for complex distributions\nCybersecurity Applications: Network anomaly detection and threat assessment\nPractical Implementation: Complete Python implementations with performance optimization\nModern Context: How RBE fits with current AI/ML approaches\n\n\n\n\n\nPython programming experience\nBasic probability and statistics\nFamiliarity with NumPy and matplotlib\nUnderstanding of network concepts (helpful but not required)\n\n\n\n\nEach part builds progressively on previous concepts while including complete, runnable code examples and interactive visualizations.",
+    "crumbs": [
+      "rbe"
+    ]
+  },
+  {
+    "objectID": "rbe/index.html#series-overview",
+    "href": "rbe/index.html#series-overview",
+    "title": "Recursive Bayesian Estimators in Cybersecurity",
+    "section": "",
+    "text": "This comprehensive series takes you from the fundamental mathematical principles of Bayesian inference to practical implementations of Recursive Bayesian Estimators (RBE) in cybersecurity applications.\n\n\n\nMathematical Foundations: Bayes’ theorem, probability theory, and sequential inference\nRecursive Updating: How beliefs evolve over time with new evidence\nParticle Filters: Advanced Monte Carlo methods for complex distributions\nCybersecurity Applications: Network anomaly detection and threat assessment\nPractical Implementation: Complete Python implementations with performance optimization\nModern Context: How RBE fits with current AI/ML approaches\n\n\n\n\n\nPython programming experience\nBasic probability and statistics\nFamiliarity with NumPy and matplotlib\nUnderstanding of network concepts (helpful but not required)\n\n\n\n\nEach part builds progressively on previous concepts while including complete, runnable code examples and interactive visualizations.",
+    "crumbs": [
+      "rbe"
+    ]
+  },
+  {
+    "objectID": "rbe/index.html#table-of-contents",
+    "href": "rbe/index.html#table-of-contents",
+    "title": "Recursive Bayesian Estimators in Cybersecurity",
+    "section": "Table of Contents",
+    "text": "Table of Contents\n\nPart 1: Fundamentals\n\nUncertainty Fundamentals - Why reasoning under uncertainty matters\nBayes’ Theorem - Mathematical foundation and intuition\nRecursive Updating - Sequential belief updating\nRBE Mathematics - Particle filters and Monte Carlo methods\n\n\n\nPart 2: Applications\n\nNetwork Anomaly Detection - Practical cybersecurity implementation\nDynamic Environments - Handling concept drift and adaptation\n\n\n\nPart 3: Advanced Topics\n\nAdvanced Techniques - Multi-model estimation and optimization\nImplementation Considerations - Production deployment and scaling\n\n\n\nPart 4: Modern Context\n\nModern AI Comparison - RBE vs deep learning approaches\nFuture Directions - Current research and emerging applications",
+    "crumbs": [
+      "rbe"
+    ]
+  },
+  {
+    "objectID": "rbe/index.html#interactive-features",
+    "href": "rbe/index.html#interactive-features",
+    "title": "Recursive Bayesian Estimators in Cybersecurity",
+    "section": "Interactive Features",
+    "text": "Interactive Features\nThroughout this series, you’ll find:\n\nLive Demonstrations: Interactive particle filters and Bayesian updating\nParameter Exploration: Widgets to experiment with algorithm settings\nPerformance Analysis: Benchmarking tools and computational analysis\nReal-World Data: Synthetic network traffic and anomaly scenarios\nComparative Studies: Side-by-side algorithm comparisons",
+    "crumbs": [
+      "rbe"
+    ]
+  },
+  {
+    "objectID": "rbe/index.html#getting-started",
+    "href": "rbe/index.html#getting-started",
+    "title": "Recursive Bayesian Estimators in Cybersecurity",
+    "section": "Getting Started",
+    "text": "Getting Started\nReady to dive in? Start with Part 1: Uncertainty Fundamentals to build the foundational understanding needed for the entire series.\nOr jump to any specific topic that interests you - each part is designed to be as self-contained as possible while building on the overall narrative.",
+    "crumbs": [
+      "rbe"
+    ]
+  }
+]

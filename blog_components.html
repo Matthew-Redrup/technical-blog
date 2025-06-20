@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.32">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="description" content="Reusable components for the technical blog">
+
+<title>Blog Components – technical-blog</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script><script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-b1527d6dab3c1d2528611d399e709420.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
+
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+
+
+<link rel="stylesheet" href="styles.css">
+<meta property="og:title" content="Blog Components – technical-blog">
+<meta property="og:description" content="Reusable components for the technical blog">
+<meta property="og:site_name" content="technical-blog">
+<meta name="twitter:title" content="Blog Components – technical-blog">
+<meta name="twitter:description" content="Reusable components for the technical blog">
+<meta name="twitter:card" content="summary">
+</head>
+
+<body class="nav-sidebar floating nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="./index.html">
+    <span class="navbar-title">technical-blog</span>
+    </a>
+  </div>
+        <div class="quarto-navbar-tools tools-end">
+</div>
+          <div id="quarto-search" class="" title="Search"></div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./blog_components.html">Blog Components</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">technical-blog</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./core.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Core</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./blog_components.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Blog Components</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="./rbe/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">rbe</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./rbe/rbe_core.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">RBE Core</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./rbe/uncertainty_fundamentals.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">RBE Part 1: Uncertainty Fundamentals</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./rbe/bayes_theorem.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">RBE Part 2: Bayes Theorem Interactive Calculator</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./rbe/recursive_updating.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">RBE Part 3: Recursive Updating</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#navigation-components" id="toc-navigation-components" class="nav-link active" data-scroll-target="#navigation-components">Navigation Components</a>
+  <ul class="collapse">
+  <li><a href="#create_nav_links" id="toc-create_nav_links" class="nav-link" data-scroll-target="#create_nav_links">create_nav_links</a></li>
+  <li><a href="#create_brand" id="toc-create_brand" class="nav-link" data-scroll-target="#create_brand">create_brand</a></li>
+  <li><a href="#create_theme_toggle" id="toc-create_theme_toggle" class="nav-link" data-scroll-target="#create_theme_toggle">create_theme_toggle</a></li>
+  </ul></li>
+  <li><a href="#fasthtml-navigation-component-with-custom-theme-toggle" id="toc-fasthtml-navigation-component-with-custom-theme-toggle" class="nav-link" data-scroll-target="#fasthtml-navigation-component-with-custom-theme-toggle">FastHTML Navigation Component with Custom Theme Toggle</a>
+  <ul class="collapse">
+  <li><a href="#component-separation-benefits" id="toc-component-separation-benefits" class="nav-link" data-scroll-target="#component-separation-benefits">Component Separation Benefits</a></li>
+  <li><a href="#key-components" id="toc-key-components" class="nav-link" data-scroll-target="#key-components">Key Components</a></li>
+  <li><a href="#theme-toggle-implementation-details" id="toc-theme-toggle-implementation-details" class="nav-link" data-scroll-target="#theme-toggle-implementation-details">Theme Toggle Implementation Details</a></li>
+  <li><a href="#usage" id="toc-usage" class="nav-link" data-scroll-target="#usage">Usage</a></li>
+  <li><a href="#create_nav" id="toc-create_nav" class="nav-link" data-scroll-target="#create_nav">create_nav</a></li>
+  <li><a href="#topic_card" id="toc-topic_card" class="nav-link" data-scroll-target="#topic_card">topic_card</a></li>
+  <li><a href="#math_block" id="toc-math_block" class="nav-link" data-scroll-target="#math_block">math_block</a></li>
+  </ul></li>
+  <li><a href="#code-display-components" id="toc-code-display-components" class="nav-link" data-scroll-target="#code-display-components">Code Display Components</a>
+  <ul class="collapse">
+  <li><a href="#code_block" id="toc-code_block" class="nav-link" data-scroll-target="#code_block">code_block</a></li>
+  </ul></li>
+  </ul>
+<div class="toc-actions"><ul><li><a href="https://github.com/Matthew-Redrup/technical-blog/issues/new" class="toc-action"><i class="bi bi-github"></i>Report an issue</a></li></ul></div><div class="quarto-alternate-formats"><h2>Other Formats</h2><ul><li><a href="blog_components.html.md"><i class="bi bi-file-code"></i>CommonMark</a></li></ul></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Blog Components</h1>
+</div>
+
+<div>
+  <div class="description">
+    Reusable components for the technical blog
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<!-- WARNING: THIS FILE WAS AUTOGENERATED! DO NOT EDIT! -->
+<section id="navigation-components" class="level2">
+<h2 class="anchored" data-anchor-id="navigation-components">Navigation Components</h2>
+<hr>
+<p><a href="https://github.com/Matthew-Redrup/technical-blog/blob/main/technical_blog/blog_components.py#L16" target="_blank" style="float:right; font-size:smaller">source</a></p>
+<section id="create_nav_links" class="level3">
+<h3 class="anchored" data-anchor-id="create_nav_links">create_nav_links</h3>
+<blockquote class="blockquote">
+<pre><code> create_nav_links (nav_items, current_topic=None)</code></pre>
+</blockquote>
+<p><em>Create navigation links with active state handling</em></p>
+<div id="cell-4" class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> IPython.display <span class="im">import</span> HTML</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>nav_items <span class="op">=</span> [</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>        (<span class="st">'Home'</span>, <span class="st">'/'</span>),</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>        (<span class="st">'RBE Series'</span>, <span class="st">'/rbe/'</span>),</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>        (<span class="st">'Future Topics'</span>, <span class="st">'/topics/'</span>),</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>        (<span class="st">'About'</span>, <span class="st">'/about/'</span>)</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>n_links <span class="op">=</span> create_nav_links(nav_items, <span class="st">"home"</span>)</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>HTML(<span class="bu">str</span>(n_links))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+[button(('Home',),{'href': '/', 'variant': 'default', 'size': 'sm', 'type': 'submit', 'class': 'uk-btn transition-colors'}), button(('RBE Series',),{'href': '/rbe/', 'variant': 'ghost', 'size': 'sm', 'type': 'submit', 'class': 'uk-btn transition-colors'}), button(('Future Topics',),{'href': '/topics/', 'variant': 'ghost', 'size': 'sm', 'type': 'submit', 'class': 'uk-btn transition-colors'}), button(('About',),{'href': '/about/', 'variant': 'ghost', 'size': 'sm', 'type': 'submit', 'class': 'uk-btn transition-colors'})]
+</div>
+</div>
+<hr>
+<p><a href="https://github.com/Matthew-Redrup/technical-blog/blob/main/technical_blog/blog_components.py#L42" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="create_brand" class="level3">
+<h3 class="anchored" data-anchor-id="create_brand">create_brand</h3>
+<blockquote class="blockquote">
+<pre><code> create_brand (title="Matthew Redrup's Blog", subtitle='Ramblings on AI &amp;
+               Cybersecurity')</code></pre>
+</blockquote>
+<p><em>Create the brand/header section</em></p>
+<div id="cell-6" class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> IPython.display <span class="im">import</span> HTML</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>brand <span class="op">=</span> create_brand()</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>HTML(<span class="bu">str</span>(brand))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div class="flex flex-col"><h3 class="uk-h3 font-bold anchored">Matthew Redrup's Blog</h3><p class="text-muted-foreground hidden sm:block text-sm">Ramblings on AI &amp; Cybersecurity</p></div>
+</div>
+</div>
+<hr>
+<p><a href="https://github.com/Matthew-Redrup/technical-blog/blob/main/technical_blog/blog_components.py#L51" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="create_theme_toggle" class="level3">
+<h3 class="anchored" data-anchor-id="create_theme_toggle">create_theme_toggle</h3>
+<blockquote class="blockquote">
+<pre><code> create_theme_toggle ()</code></pre>
+</blockquote>
+<p><em>Create theme toggle that works with MonsterUI’s system</em></p>
+<div id="cell-8" class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> IPython.display <span class="im">import</span> HTML</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>toggle <span class="op">=</span> create_theme_toggle()</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>HTML(<span class="bu">str</span>(toggle))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div class="flex gap-1"><button onclick="
+               const franken = JSON.parse(localStorage.getItem('__FRANKEN__') || '{}');
+               franken.mode = 'light';
+               localStorage.setItem('__FRANKEN__', JSON.stringify(franken));
+               document.documentElement.classList.remove('dark');
+               " variant="ghost" size="sm" type="submit" class="uk-btn transition-colors">☀️</button><button onclick="
+               const franken = JSON.parse(localStorage.getItem('__FRANKEN__') || '{}');
+               franken.mode = 'dark';
+               localStorage.setItem('__FRANKEN__', JSON.stringify(franken));
+               document.documentElement.classList.add('dark');
+               " variant="ghost" size="sm" type="submit" class="uk-btn transition-colors">🌙</button></div>
+</div>
+</div>
+</section>
+</section>
+<section id="fasthtml-navigation-component-with-custom-theme-toggle" class="level2">
+<h2 class="anchored" data-anchor-id="fasthtml-navigation-component-with-custom-theme-toggle">FastHTML Navigation Component with Custom Theme Toggle</h2>
+<p>This code demonstrates how to create a modular, reusable navigation component for FastHTML applications using MonsterUI styling. The key improvements over monolithic route definitions include:</p>
+<section id="component-separation-benefits" class="level3">
+<h3 class="anchored" data-anchor-id="component-separation-benefits">Component Separation Benefits</h3>
+<ul>
+<li><strong>Maintainability</strong>: Each function has a single responsibility</li>
+<li><strong>Reusability</strong>: Components can be used across different routes</li>
+<li><strong>Testability</strong>: Individual components can be tested in isolation</li>
+<li><strong>Readability</strong>: Clear separation of concerns makes code easier to understand</li>
+</ul>
+</section>
+<section id="key-components" class="level3">
+<h3 class="anchored" data-anchor-id="key-components">Key Components</h3>
+<section id="navigation-links-create_nav_links" class="level4">
+<h4 class="anchored" data-anchor-id="navigation-links-create_nav_links">1. Navigation Links (<a href="https://Matthew-Redrup.github.io/technical-blog/blog_components.html#create_nav_links"><code>create_nav_links</code></a>)</h4>
+<ul>
+<li>Uses MonsterUI <code>Button</code> components instead of manual CSS classes</li>
+<li>Handles active state logic cleanly with helper functions</li>
+<li>Returns a list of styled navigation buttons</li>
+</ul>
+</section>
+<section id="brand-section-create_brand" class="level4">
+<h4 class="anchored" data-anchor-id="brand-section-create_brand">2. Brand Section (<a href="https://Matthew-Redrup.github.io/technical-blog/blog_components.html#create_brand"><code>create_brand</code></a>)</h4>
+<ul>
+<li>Separates the site title and subtitle into its own component</li>
+<li>Uses semantic HTML with consistent styling</li>
+<li>Easily customizable through parameters</li>
+</ul>
+</section>
+<section id="custom-theme-toggle-create_theme_toggle" class="level4">
+<h4 class="anchored" data-anchor-id="custom-theme-toggle-create_theme_toggle">3. Custom Theme Toggle (<a href="https://Matthew-Redrup.github.io/technical-blog/blog_components.html#create_theme_toggle"><code>create_theme_toggle</code></a>)</h4>
+<ul>
+<li><strong>Key Discovery</strong>: MonsterUI uses localStorage with the key <code>"__FRANKEN__"</code> to persist theme preferences</li>
+<li>Manually toggles the <code>dark</code> class on <code>document.documentElement</code></li>
+<li>Uses matching MonsterUI Button styling for visual consistency</li>
+<li>Bypasses the complex <code>Uk_theme_switcher</code> component that had alignment issues</li>
+</ul>
+</section>
+</section>
+<section id="theme-toggle-implementation-details" class="level3">
+<h3 class="anchored" data-anchor-id="theme-toggle-implementation-details">Theme Toggle Implementation Details</h3>
+<p>The theme toggle works by: 1. Reading the current theme state from <code>localStorage.getItem('__FRANKEN__')</code> 2. Updating the <code>mode</code> property in the stored object 3. Saving back to localStorage 4. Immediately applying the theme by adding/removing the <code>dark</code> class</p>
+<p>This approach integrates seamlessly with MonsterUI’s theme system while providing better visual alignment with navigation buttons.</p>
+</section>
+<section id="usage" class="level3">
+<h3 class="anchored" data-anchor-id="usage">Usage</h3>
+<p>Create navigation with active page indicator</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>nav <span class="op">=</span> create_nav(topic<span class="op">=</span><span class="st">"home"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Use in your FastHTML route</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="at">@rt</span>(<span class="st">'/'</span>) <span class="kw">def</span> get(): <span class="cf">return</span> Title(<span class="st">"My Site"</span>), nav, Main(...)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>This pattern can be extended to other UI components like sidebars, footers, and forms.</p>
+<hr>
+<p><a href="https://github.com/Matthew-Redrup/technical-blog/blob/main/technical_blog/blog_components.py#L75" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="create_nav" class="level3">
+<h3 class="anchored" data-anchor-id="create_nav">create_nav</h3>
+<blockquote class="blockquote">
+<pre><code> create_nav (topic:str=None)</code></pre>
+</blockquote>
+<p><em>Create main navigation with MonsterUI <code>NavBar</code> for current <code>topic</code></em></p>
+<div id="cell-11" class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>full_nav <span class="op">=</span> create_nav(<span class="st">'home'</span>)</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>HTML(<span class="bu">str</span>(full_nav))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div><div class="monster-navbar border-b navbar-underline"><div class="flex justify-between items-center w-full"><div class="flex flex-col"><h3 class="uk-h3 font-bold anchored">Matthew Redrup's Blog</h3><p class="text-muted-foreground hidden sm:block text-sm">Ramblings on AI &amp; Cybersecurity</p></div><a class="md:hidden" data-uk-toggle="target: #_9SWWDzGeSBeX0RmVzxTOaA; cls: hidden"><uk-icon icon="menu" height="30" width="30"></uk-icon></a><div class="items-center space-x-4 hidden md:flex"><button href="/" variant="default" size="sm" type="submit" class="uk-btn transition-colors">Home</button><button href="/rbe/" variant="ghost" size="sm" type="submit" class="uk-btn transition-colors">RBE Series</button><button href="/topics/" variant="ghost" size="sm" type="submit" class="uk-btn transition-colors">Future Topics</button><button href="/about/" variant="ghost" size="sm" type="submit" class="uk-btn transition-colors">About</button><div class="flex gap-1"><button onclick="
+               const franken = JSON.parse(localStorage.getItem('__FRANKEN__') || '{}');
+               franken.mode = 'light';
+               localStorage.setItem('__FRANKEN__', JSON.stringify(franken));
+               document.documentElement.classList.remove('dark');
+               " variant="ghost" size="sm" type="submit" class="uk-btn transition-colors">☀️</button><button onclick="
+               const franken = JSON.parse(localStorage.getItem('__FRANKEN__') || '{}');
+               franken.mode = 'dark';
+               localStorage.setItem('__FRANKEN__', JSON.stringify(franken));
+               document.documentElement.classList.add('dark');
+               " variant="ghost" size="sm" type="submit" class="uk-btn transition-colors">🌙</button></div></div></div></div><div class="flex flex-col items-center justify-center space-y-4 border-b navbar-underline hidden md:hidden monster-navbar" id="_9SWWDzGeSBeX0RmVzxTOaA"><button href="/" variant="default" size="sm" type="submit" class="uk-btn transition-colors">Home</button><button href="/rbe/" variant="ghost" size="sm" type="submit" class="uk-btn transition-colors">RBE Series</button><button href="/topics/" variant="ghost" size="sm" type="submit" class="uk-btn transition-colors">Future Topics</button><button href="/about/" variant="ghost" size="sm" type="submit" class="uk-btn transition-colors">About</button><div class="flex gap-1"><button onclick="
+               const franken = JSON.parse(localStorage.getItem('__FRANKEN__') || '{}');
+               franken.mode = 'light';
+               localStorage.setItem('__FRANKEN__', JSON.stringify(franken));
+               document.documentElement.classList.remove('dark');
+               " variant="ghost" size="sm" type="submit" class="uk-btn transition-colors">☀️</button><button onclick="
+               const franken = JSON.parse(localStorage.getItem('__FRANKEN__') || '{}');
+               franken.mode = 'dark';
+               localStorage.setItem('__FRANKEN__', JSON.stringify(franken));
+               document.documentElement.classList.add('dark');
+               " variant="ghost" size="sm" type="submit" class="uk-btn transition-colors">🌙</button></div></div></div>
+</div>
+</div>
+<div id="cell-12" class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Test create_nav - simplified for debugging</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>nav <span class="op">=</span> create_nav(<span class="st">"home"</span>)</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"NavBar type: </span><span class="sc">{</span><span class="bu">type</span>(nav)<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"NavBar children count: </span><span class="sc">{</span><span class="bu">len</span>(nav.children)<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i, child <span class="kw">in</span> <span class="bu">enumerate</span>(nav.children):</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"Child </span><span class="sc">{</span>i<span class="sc">}</span><span class="ss">: </span><span class="sc">{</span><span class="bu">type</span>(child)<span class="sc">.</span><span class="va">__name__</span><span class="sc">}</span><span class="ss"> - </span><span class="sc">{</span><span class="bu">getattr</span>(child, <span class="st">'cls'</span>, <span class="st">'no cls'</span>)<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Basic test that it's a NavBar</span></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="bu">hasattr</span>(nav, <span class="st">'brand'</span>), <span class="st">"Should have brand attribute"</span></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="bu">hasattr</span>(nav, <span class="st">'children'</span>), <span class="st">"Should have children attribute"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>NavBar type: &lt;class 'fastcore.xml.FT'&gt;
+NavBar children count: 2
+Child 0: FT - None
+Child 1: FT - None</code></pre>
+</div>
+</div>
+<hr>
+<p><a href="https://github.com/Matthew-Redrup/technical-blog/blob/main/technical_blog/blog_components.py#L97" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="topic_card" class="level3">
+<h3 class="anchored" data-anchor-id="topic_card">topic_card</h3>
+<blockquote class="blockquote">
+<pre><code> topic_card (title:str, desc:str, url:str, status:str='available')</code></pre>
+</blockquote>
+<p><em>Create a card for blog <code>title</code> with <code>desc</code>ription and <code>url</code></em></p>
+<div id="cell-14" class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Test topic_card</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>card <span class="op">=</span> topic_card(<span class="st">"Test Topic"</span>, <span class="st">"A test description"</span>, <span class="st">"/test/"</span>, <span class="st">"available"</span>)</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>test_eq(card.children[<span class="dv">0</span>].children[<span class="dv">0</span>], <span class="st">"Test Topic"</span>)</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>test_eq(card.children[<span class="dv">1</span>].children[<span class="dv">0</span>], <span class="st">"A test description"</span>)</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>test_eq(card.children[<span class="dv">2</span>].href, <span class="st">"/test/"</span>)</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Test coming soon status</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>card_soon <span class="op">=</span> topic_card(<span class="st">"Future"</span>, <span class="st">"Coming later"</span>, <span class="st">"/future/"</span>, <span class="st">"coming soon"</span>)</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>test_eq(card_soon.children[<span class="dv">2</span>].children[<span class="dv">0</span>], <span class="st">"Coming Soon"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<hr>
+<p><a href="https://github.com/Matthew-Redrup/technical-blog/blob/main/technical_blog/blog_components.py#L109" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="math_block" class="level3">
+<h3 class="anchored" data-anchor-id="math_block">math_block</h3>
+<blockquote class="blockquote">
+<pre><code> math_block (tex:str, block:bool=True)</code></pre>
+</blockquote>
+<p><em>Render LaTeX <code>tex</code> using KatexMarkdownJS</em></p>
+<div id="cell-16" class="cell">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Test math_block</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>math <span class="op">=</span> math_block(<span class="st">"x^2 + y^2 = z^2"</span>)</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>test_eq(math.children[<span class="dv">0</span>], <span class="st">"$$x^2 + y^2 = z^2$$"</span>)</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="co"># FastHTML components store class in attrs dict, not directly as cls</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>test_eq(math.attrs.get(<span class="st">'class'</span>), <span class="st">"marked math-content"</span>)</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Test inline math</span></span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>inline <span class="op">=</span> math_block(<span class="st">"E = mc^2"</span>, block<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>test_eq(inline.children[<span class="dv">0</span>], <span class="st">"$E = mc^2$"</span>)</span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>test_eq(inline.attrs.get(<span class="st">'class'</span>), <span class="st">"marked math-inline"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+</section>
+<section id="code-display-components" class="level2">
+<h2 class="anchored" data-anchor-id="code-display-components">Code Display Components</h2>
+<hr>
+<p><a href="https://github.com/Matthew-Redrup/technical-blog/blob/main/technical_blog/blog_components.py#L120" target="_blank" style="float:right; font-size:smaller">source</a></p>
+<section id="code_block" class="level3">
+<h3 class="anchored" data-anchor-id="code_block">code_block</h3>
+<blockquote class="blockquote">
+<pre><code> code_block (code:str, language:str='python', title:str=None)</code></pre>
+</blockquote>
+<p><em>Create a syntax-highlighted code block using FastHTML’s HighlightJS</em></p>
+
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/Matthew-Redrup\.github\.io\/technical-blog");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/Matthew-Redrup/technical-blog/issues/new" class="toc-action"><i class="bi bi-github"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>

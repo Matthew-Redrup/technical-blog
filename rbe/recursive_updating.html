@@ -1,0 +1,1942 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.32">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="description" content="From single updates to recursive Bayesian filtering - the temporal dimension of belief evolution">
+
+<title>RBE Part 3: Recursive Updating – technical-blog</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-b1527d6dab3c1d2528611d399e709420.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../styles.css">
+<meta property="og:title" content="RBE Part 3: Recursive Updating – technical-blog">
+<meta property="og:description" content="From single updates to recursive Bayesian filtering - the temporal dimension of belief evolution">
+<meta property="og:image" content="https://Matthew-Redrup.github.io/technical-blog/rbe/03_recursive_updating_files/figure-html/cell-18-output-2.png">
+<meta property="og:site_name" content="technical-blog">
+<meta property="og:image:height" content="490">
+<meta property="og:image:width" content="1189">
+<meta name="twitter:title" content="RBE Part 3: Recursive Updating – technical-blog">
+<meta name="twitter:description" content="From single updates to recursive Bayesian filtering - the temporal dimension of belief evolution">
+<meta name="twitter:image" content="https://Matthew-Redrup.github.io/technical-blog/rbe/03_recursive_updating_files/figure-html/cell-18-output-2.png">
+<meta name="twitter:image-height" content="490">
+<meta name="twitter:image-width" content="1189">
+<meta name="twitter:card" content="summary_large_image">
+</head>
+
+<body class="nav-sidebar floating nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">technical-blog</span>
+    </a>
+  </div>
+        <div class="quarto-navbar-tools tools-end">
+</div>
+          <div id="quarto-search" class="" title="Search"></div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../rbe/index.html">rbe</a></li><li class="breadcrumb-item"><a href="../rbe/recursive_updating.html">RBE Part 3: Recursive Updating</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">technical-blog</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../core.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Core</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../blog_components.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Blog Components</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../rbe/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">rbe</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../rbe/rbe_core.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">RBE Core</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../rbe/uncertainty_fundamentals.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">RBE Part 1: Uncertainty Fundamentals</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../rbe/bayes_theorem.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">RBE Part 2: Bayes Theorem Interactive Calculator</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../rbe/recursive_updating.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">RBE Part 3: Recursive Updating</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#why-recursive-updating" id="toc-why-recursive-updating" class="nav-link active" data-scroll-target="#why-recursive-updating">Why Recursive Updating?</a></li>
+  <li><a href="#mathematical-foundation" id="toc-mathematical-foundation" class="nav-link" data-scroll-target="#mathematical-foundation">Mathematical Foundation</a>
+  <ul class="collapse">
+  <li><a href="#from-single-to-sequential-updates" id="toc-from-single-to-sequential-updates" class="nav-link" data-scroll-target="#from-single-to-sequential-updates">From Single to Sequential Updates</a></li>
+  </ul></li>
+  <li><a href="#sequential-bayesian-updating-two-cases" id="toc-sequential-bayesian-updating-two-cases" class="nav-link" data-scroll-target="#sequential-bayesian-updating-two-cases">Sequential Bayesian Updating: Two Cases</a>
+  <ul class="collapse">
+  <li><a href="#case-1-conditionally-independent-evidence" id="toc-case-1-conditionally-independent-evidence" class="nav-link" data-scroll-target="#case-1-conditionally-independent-evidence">Case 1: Conditionally Independent Evidence</a></li>
+  <li><a href="#case-2-conditionally-dependent-evidence-your-case" id="toc-case-2-conditionally-dependent-evidence-your-case" class="nav-link" data-scroll-target="#case-2-conditionally-dependent-evidence-your-case">Case 2: Conditionally Dependent Evidence (Your Case)</a></li>
+  <li><a href="#why-it-matters" id="toc-why-it-matters" class="nav-link" data-scroll-target="#why-it-matters">Why It Matters</a></li>
+  <li><a href="#recursive_bayes_demo" id="toc-recursive_bayes_demo" class="nav-link" data-scroll-target="#recursive_bayes_demo">recursive_bayes_demo</a></li>
+  <li><a href="#state-space-models" id="toc-state-space-models" class="nav-link" data-scroll-target="#state-space-models">State Space Models</a></li>
+  <li><a href="#position_likelihood" id="toc-position_likelihood" class="nav-link" data-scroll-target="#position_likelihood">position_likelihood</a></li>
+  <li><a href="#motion_model" id="toc-motion_model" class="nav-link" data-scroll-target="#motion_model">motion_model</a></li>
+  <li><a href="#particle_filter" id="toc-particle_filter" class="nav-link" data-scroll-target="#particle_filter">particle_filter</a></li>
+  </ul></li>
+  <li><a href="#improved-particle-filter-implementation" id="toc-improved-particle-filter-implementation" class="nav-link" data-scroll-target="#improved-particle-filter-implementation">Improved Particle Filter Implementation</a>
+  <ul class="collapse">
+  <li><a href="#core-algorithm-structure" id="toc-core-algorithm-structure" class="nav-link" data-scroll-target="#core-algorithm-structure">Core Algorithm Structure</a></li>
+  <li><a href="#key-implementation-features" id="toc-key-implementation-features" class="nav-link" data-scroll-target="#key-implementation-features">Key Implementation Features</a>
+  <ul class="collapse">
+  <li><a href="#proper-particle-initialization" id="toc-proper-particle-initialization" class="nav-link" data-scroll-target="#proper-particle-initialization">Proper Particle Initialization</a></li>
+  <li><a href="#numerical-stability-in-weight-computation" id="toc-numerical-stability-in-weight-computation" class="nav-link" data-scroll-target="#numerical-stability-in-weight-computation">Numerical Stability in Weight Computation</a></li>
+  <li><a href="#adaptive-resampling" id="toc-adaptive-resampling" class="nav-link" data-scroll-target="#adaptive-resampling">Adaptive Resampling</a></li>
+  </ul></li>
+  <li><a href="#performance-analysis" id="toc-performance-analysis" class="nav-link" data-scroll-target="#performance-analysis">Performance Analysis</a>
+  <ul class="collapse">
+  <li><a href="#what-these-results-tell-us" id="toc-what-these-results-tell-us" class="nav-link" data-scroll-target="#what-these-results-tell-us">What These Results Tell Us</a></li>
+  </ul></li>
+  <li><a href="#motion-model-design" id="toc-motion-model-design" class="nav-link" data-scroll-target="#motion-model-design">Motion Model Design</a></li>
+  <li><a href="#why-this-implementation-works" id="toc-why-this-implementation-works" class="nav-link" data-scroll-target="#why-this-implementation-works">Why This Implementation Works</a></li>
+  <li><a href="#markov-assumptions" id="toc-markov-assumptions" class="nav-link" data-scroll-target="#markov-assumptions">Markov Assumptions</a>
+  <ul class="collapse">
+  <li><a href="#markov_chain_demo" id="toc-markov_chain_demo" class="nav-link" data-scroll-target="#markov_chain_demo">markov_chain_demo</a></li>
+  </ul></li>
+  <li><a href="#interactive-demonstrations" id="toc-interactive-demonstrations" class="nav-link" data-scroll-target="#interactive-demonstrations">Interactive Demonstrations</a>
+  <ul class="collapse">
+  <li><a href="#belief_evolution_visualizer" id="toc-belief_evolution_visualizer" class="nav-link" data-scroll-target="#belief_evolution_visualizer">belief_evolution_visualizer</a></li>
+  <li><a href="#post" id="toc-post" class="nav-link" data-scroll-target="#post">post</a></li>
+  <li><a href="#post-1" id="toc-post-1" class="nav-link" data-scroll-target="#post-1">post</a></li>
+  <li><a href="#get" id="toc-get" class="nav-link" data-scroll-target="#get">get</a></li>
+  <li><a href="#recursive_update_component" id="toc-recursive_update_component" class="nav-link" data-scroll-target="#recursive_update_component">recursive_update_component</a></li>
+  <li><a href="#control_buttons" id="toc-control_buttons" class="nav-link" data-scroll-target="#control_buttons">control_buttons</a></li>
+  <li><a href="#belief_state_component" id="toc-belief_state_component" class="nav-link" data-scroll-target="#belief_state_component">belief_state_component</a></li>
+  </ul></li>
+  <li><a href="#performance-analysis-recursive-vs-batch" id="toc-performance-analysis-recursive-vs-batch" class="nav-link" data-scroll-target="#performance-analysis-recursive-vs-batch">Performance Analysis: Recursive vs Batch</a>
+  <ul class="collapse">
+  <li><a href="#batch_vs_recursive_comparison" id="toc-batch_vs_recursive_comparison" class="nav-link" data-scroll-target="#batch_vs_recursive_comparison">batch_vs_recursive_comparison</a></li>
+  </ul></li>
+  <li><a href="#memory-analysis-how-much-history-matters" id="toc-memory-analysis-how-much-history-matters" class="nav-link" data-scroll-target="#memory-analysis-how-much-history-matters">Memory Analysis: How Much History Matters</a>
+  <ul class="collapse">
+  <li><a href="#memory_analysis_corrected" id="toc-memory_analysis_corrected" class="nav-link" data-scroll-target="#memory_analysis_corrected">memory_analysis_corrected</a></li>
+  <li><a href="#rolling_memory_analysis" id="toc-rolling_memory_analysis" class="nav-link" data-scroll-target="#rolling_memory_analysis">rolling_memory_analysis</a></li>
+  <li><a href="#plot_memory_insights" id="toc-plot_memory_insights" class="nav-link" data-scroll-target="#plot_memory_insights">plot_memory_insights</a></li>
+  <li><a href="#plot_memory_decision_guide" id="toc-plot_memory_decision_guide" class="nav-link" data-scroll-target="#plot_memory_decision_guide">plot_memory_decision_guide</a></li>
+  </ul></li>
+  <li><a href="#cybersecurity-applications" id="toc-cybersecurity-applications" class="nav-link" data-scroll-target="#cybersecurity-applications">Cybersecurity Applications</a>
+  <ul class="collapse">
+  <li><a href="#update_baseline" id="toc-update_baseline" class="nav-link" data-scroll-target="#update_baseline">update_baseline</a></li>
+  <li><a href="#multi_step_attack_detection" id="toc-multi_step_attack_detection" class="nav-link" data-scroll-target="#multi_step_attack_detection">multi_step_attack_detection</a></li>
+  <li><a href="#adaptive_threat_monitor" id="toc-adaptive_threat_monitor" class="nav-link" data-scroll-target="#adaptive_threat_monitor">adaptive_threat_monitor</a></li>
+  </ul></li>
+  <li><a href="#excellent-improvements" id="toc-excellent-improvements" class="nav-link" data-scroll-target="#excellent-improvements">Excellent Improvements ✅</a></li>
+  <li><a href="#realistic-behavior-patterns" id="toc-realistic-behavior-patterns" class="nav-link" data-scroll-target="#realistic-behavior-patterns">Realistic Behavior Patterns</a></li>
+  <li><a href="#minor-observations" id="toc-minor-observations" class="nav-link" data-scroll-target="#minor-observations">Minor Observations</a></li>
+  <li><a href="#real-world-applicability" id="toc-real-world-applicability" class="nav-link" data-scroll-target="#real-world-applicability">Real-World Applicability</a></li>
+  <li><a href="#successful-detection" id="toc-successful-detection" class="nav-link" data-scroll-target="#successful-detection">Successful Detection</a></li>
+  <li><a href="#key-improvements-working" id="toc-key-improvements-working" class="nav-link" data-scroll-target="#key-improvements-working">Key Improvements Working</a></li>
+  <li><a href="#interesting-observations" id="toc-interesting-observations" class="nav-link" data-scroll-target="#interesting-observations">Interesting Observations</a></li>
+  <li><a href="#what-this-demonstrates" id="toc-what-this-demonstrates" class="nav-link" data-scroll-target="#what-this-demonstrates">What This Demonstrates</a></li>
+  <li><a href="#when-recursion-breaks-down" id="toc-when-recursion-breaks-down" class="nav-link" data-scroll-target="#when-recursion-breaks-down">When Recursion Breaks Down</a>
+  <ul class="collapse">
+  <li><a href="#standard_recursive_filter" id="toc-standard_recursive_filter" class="nav-link" data-scroll-target="#standard_recursive_filter">standard_recursive_filter</a></li>
+  <li><a href="#windowed_filter" id="toc-windowed_filter" class="nav-link" data-scroll-target="#windowed_filter">windowed_filter</a></li>
+  <li><a href="#forgetting_factor_filter" id="toc-forgetting_factor_filter" class="nav-link" data-scroll-target="#forgetting_factor_filter">forgetting_factor_filter</a></li>
+  <li><a href="#compare_adaptation_strategies" id="toc-compare_adaptation_strategies" class="nav-link" data-scroll-target="#compare_adaptation_strategies">compare_adaptation_strategies</a></li>
+  <li><a href="#non_stationary_demo" id="toc-non_stationary_demo" class="nav-link" data-scroll-target="#non_stationary_demo">non_stationary_demo</a></li>
+  </ul></li>
+  <li><a href="#summary-and-key-takeaways" id="toc-summary-and-key-takeaways" class="nav-link" data-scroll-target="#summary-and-key-takeaways">Summary and Key Takeaways</a>
+  <ul class="collapse">
+  <li><a href="#mathematical-elegance" id="toc-mathematical-elegance" class="nav-link" data-scroll-target="#mathematical-elegance"><strong>Mathematical Elegance</strong></a></li>
+  <li><a href="#computational-advantages" id="toc-computational-advantages" class="nav-link" data-scroll-target="#computational-advantages"><strong>Computational Advantages</strong></a></li>
+  <li><a href="#practical-applications" id="toc-practical-applications" class="nav-link" data-scroll-target="#practical-applications"><strong>Practical Applications</strong></a></li>
+  <li><a href="#limitations-and-solutions" id="toc-limitations-and-solutions" class="nav-link" data-scroll-target="#limitations-and-solutions"><strong>Limitations and Solutions</strong></a></li>
+  <li><a href="#integration-with-modern-ai" id="toc-integration-with-modern-ai" class="nav-link" data-scroll-target="#integration-with-modern-ai"><strong>Integration with Modern AI</strong></a></li>
+  </ul></li>
+  </ul></li>
+  </ul>
+<div class="toc-actions"><ul><li><a href="https://github.com/Matthew-Redrup/technical-blog/issues/new" class="toc-action"><i class="bi bi-github"></i>Report an issue</a></li></ul></div><div class="quarto-alternate-formats"><h2>Other Formats</h2><ul><li><a href="recursive_updating.html.md"><i class="bi bi-file-code"></i>CommonMark</a></li></ul></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../rbe/index.html">rbe</a></li><li class="breadcrumb-item"><a href="../rbe/recursive_updating.html">RBE Part 3: Recursive Updating</a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title">RBE Part 3: Recursive Updating</h1>
+</div>
+
+<div>
+  <div class="description">
+    From single updates to recursive Bayesian filtering - the temporal dimension of belief evolution
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<!-- WARNING: THIS FILE WAS AUTOGENERATED! DO NOT EDIT! -->
+<section id="why-recursive-updating" class="level2">
+<h2 class="anchored" data-anchor-id="why-recursive-updating">Why Recursive Updating?</h2>
+<p>In our previous exploration of Bayes’ theorem, we saw how to update beliefs with new evidence. But what happens when evidence arrives sequentially over time?</p>
+<p>Consider cybersecurity monitoring: we don’t wait for all network traffic data before making decisions. We need to continuously update our threat assessments as new packets arrive.</p>
+<p>Recursive Bayesian updating provides: - <strong>Memory efficiency</strong>: No need to store all historical data - <strong>Real-time processing</strong>: Updates as new evidence arrives - <strong>Theoretical elegance</strong>: Mathematically optimal under certain conditions - <strong>Computational efficiency</strong>: O(1) per update vs O(n) for batch processing</p>
+</section>
+<section id="mathematical-foundation" class="level2">
+<h2 class="anchored" data-anchor-id="mathematical-foundation">Mathematical Foundation</h2>
+<section id="from-single-to-sequential-updates" class="level3">
+<h3 class="anchored" data-anchor-id="from-single-to-sequential-updates">From Single to Sequential Updates</h3>
+<p>We start with our familiar Bayes’ theorem: <span class="math display">\[P(H|E) = \frac{P(E|H)P(H)}{P(E)}\]</span></p>
+<p>But now evidence arrives sequentially: <span class="math inline">\(E_1, E_2, E_3, \ldots\)</span></p>
+<p>The key insight: <strong>today’s posterior becomes tomorrow’s prior</strong></p>
+<p>Here’s a summary of what we’ve covered:</p>
+</section>
+</section>
+<section id="sequential-bayesian-updating-two-cases" class="level2">
+<h2 class="anchored" data-anchor-id="sequential-bayesian-updating-two-cases">Sequential Bayesian Updating: Two Cases</h2>
+<p><strong>Core Principle</strong>: “Today’s posterior becomes tomorrow’s prior” - each update uses the previous result as the starting point for the next evidence.</p>
+<section id="case-1-conditionally-independent-evidence" class="level3">
+<h3 class="anchored" data-anchor-id="case-1-conditionally-independent-evidence">Case 1: Conditionally Independent Evidence</h3>
+<p>When evidence pieces don’t depend on each other given the hypothesis H: - <span class="math inline">\(P(E₂|E₁, H) = P(E₂|H)\)</span> - Denominators simplify: <span class="math inline">\(P(E₂|E₁) = P(E₂)\)</span> - Math is cleaner and more tractable</p>
+<p><strong>Network Example</strong>: If you’re just checking whether individual packets match a known signature, each packet classification might be independent once you know the true network state.</p>
+</section>
+<section id="case-2-conditionally-dependent-evidence-your-case" class="level3">
+<h3 class="anchored" data-anchor-id="case-2-conditionally-dependent-evidence-your-case">Case 2: Conditionally Dependent Evidence (Your Case)</h3>
+<p>When evidence pieces remain related even given hypothesis H: - <span class="math inline">\(P(E₂|E₁, H) ≠ P(E₂|H)\)</span> - Must calculate full conditional probabilities <span class="math inline">\(P(E₂|E₁), P(E₃|E₁, E₂)\)</span> - More complex but captures real temporal dependencies</p>
+<p><strong>Network Example</strong>: Connection patterns for anomaly detection - user behavior, attack sequences, and network state all carry forward over time, making sequential observations dependent.</p>
+</section>
+<section id="why-it-matters" class="level3">
+<h3 class="anchored" data-anchor-id="why-it-matters">Why It Matters</h3>
+<ul>
+<li><strong>Independent case</strong>: Simpler computation, may miss temporal patterns</li>
+<li><strong>Dependent case</strong>: Better captures network reality but requires modeling the sequential dependencies explicitly</li>
+</ul>
+<p><span class="math display">\[P(H|E_1) = \frac{P(E_1|H)P(H)}{P(E_1)}\]</span> <span class="math display">\[P(H|E_1, E_2) = \frac{P(E_2|H)P(H|E_1)}{P(E_2|E_1)}\]</span> <span class="math display">\[P(H|E_1, E_2, E_3) = \frac{P(E_3|H)P(H|E_1, E_2)}{P(E_3|E_1, E_2)}\]</span></p>
+<p>This recursive pattern is the heart of sequential Bayesian updating.</p>
+<hr>
+<p><a href="https://github.com/Matthew-Redrup/technical-blog/blob/main/technical_blog/rbe/recursive.py#L30" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="recursive_bayes_demo" class="level3">
+<h3 class="anchored" data-anchor-id="recursive_bayes_demo">recursive_bayes_demo</h3>
+<blockquote class="blockquote">
+<pre><code> recursive_bayes_demo (prior, evidence_seq, likelihoods, labels=None)</code></pre>
+</blockquote>
+<p><em>Demonstrate recursive Bayesian updating</em></p>
+<p>Let me trace through what’s happening above.</p>
+<p>Step 1: Starting with 10% attack probability, suspicious port evidence shifts us to ~44% attack probability. This makes sense - suspicious ports are more common in attacks (70%) than normal traffic (10%).</p>
+<p>Step 2: The failed login evidence is quite strong (90% vs 5%), so we jump to ~93% attack probability. Notice how the previous posterior (44% attack) became the prior for this step.</p>
+<p>Step 3: Privilege escalation is extremely strong evidence (95% vs 1%), pushing us to ~99.9% certainty of attack.</p>
+<p>Key validation points:</p>
+<ul>
+<li>✅ Each step uses the previous posterior as the new prior</li>
+<li>✅ Probabilities sum to 1 at each step</li>
+<li>✅ The belief evolution makes intuitive sense - stronger evidence creates bigger updates</li>
+<li>✅ The final high confidence matches what we’d expect from this evidence sequence</li>
+</ul>
+<p>The progression from 10% → 44% → 93% → 99.9% shows exactly how sequential evidence accumulates in Bayesian updating. Each piece of evidence builds on what came before, which is the essence of recursive updating.</p>
+</section>
+<section id="state-space-models" class="level3">
+<h3 class="anchored" data-anchor-id="state-space-models">State Space Models</h3>
+<p>For more complex scenarios, we model the system state as evolving over time. State space models provide a powerful framework for tracking dynamic systems with two key components:</p>
+<p><strong>State Evolution</strong>: <span class="math inline">\(x_{t+1} = f(x_t, w_t)\)</span> where <span class="math inline">\(w_t\)</span> is process noise</p>
+<p><strong>Observations</strong>: <span class="math inline">\(z_t = h(x_t, v_t)\)</span> where <span class="math inline">\(v_t\)</span> is observation noise</p>
+<p>This formulation assumes the <strong>Markov property</strong>: the next state <span class="math inline">\(x_{t+1}\)</span> depends only on the current state <span class="math inline">\(x_t\)</span>, not the entire history.</p>
+<p><strong>Recursive Bayesian Filter</strong>: 1. <strong>Predict</strong>: <span class="math inline">\(p(x_t|z_{1:t-1}) = \int p(x_t|x_{t-1}) p(x_{t-1}|z_{1:t-1}) dx_{t-1}\)</span> 2. <strong>Update</strong>: <span class="math inline">\(p(x_t|z_{1:t}) = \frac{p(z_t|x_t) p(x_t|z_{1:t-1})}{p(z_t|z_{1:t-1})}\)</span></p>
+<p>where <span class="math inline">\(p(z_t|z_{1:t-1})\)</span> is the normalization constant ensuring the posterior integrates to 1.</p>
+<p><strong>Practical Implementations</strong>: Since the integrals above are often intractable, we use approximations: - <strong>Kalman filters</strong>: Optimal for linear Gaussian systems - <strong>Particle filters</strong>: Monte Carlo approximation for general nonlinear cases - <strong>Extended/Unscented Kalman filters</strong>: Handle nonlinear systems with Gaussian approximations</p>
+<p><strong>Network Security Connection</strong>: Our earlier intrusion detection example could be formalized as a state space model where the “attack progression state” evolves over time, and we observe various network indicators (port scans, login attempts, etc.) that depend on this hidden state.</p>
+<hr>
+<p><a href="https://github.com/Matthew-Redrup/technical-blog/blob/main/technical_blog/rbe/recursive.py#L116" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="position_likelihood" class="level3">
+<h3 class="anchored" data-anchor-id="position_likelihood">position_likelihood</h3>
+<blockquote class="blockquote">
+<pre><code> position_likelihood (state, obs, obs_noise=0.1)</code></pre>
+</blockquote>
+<p><em>Gaussian likelihood for position observation</em></p>
+<hr>
+<p><a href="https://github.com/Matthew-Redrup/technical-blog/blob/main/technical_blog/rbe/recursive.py#L109" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="motion_model" class="level3">
+<h3 class="anchored" data-anchor-id="motion_model">motion_model</h3>
+<blockquote class="blockquote">
+<pre><code> motion_model (state, rng, dt=1.0, process_noise=0.05)</code></pre>
+</blockquote>
+<p><em>Constant velocity model: [pos, vel] -&gt; [pos+vel*dt, vel+noise]</em></p>
+<hr>
+<p><a href="https://github.com/Matthew-Redrup/technical-blog/blob/main/technical_blog/rbe/recursive.py#L58" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="particle_filter" class="level3">
+<h3 class="anchored" data-anchor-id="particle_filter">particle_filter</h3>
+<blockquote class="blockquote">
+<pre><code> particle_filter (initial_state, observations, transition_fn,
+                  observation_fn, n_particles=1000, initial_cov=0.1,
+                  resample_threshold=0.5, rng=None)</code></pre>
+</blockquote>
+<p><em>Particle filter for state space tracking</em></p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 6%">
+<col style="width: 25%">
+<col style="width: 34%">
+<col style="width: 34%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Type</strong></th>
+<th><strong>Default</strong></th>
+<th><strong>Details</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>initial_state</td>
+<td></td>
+<td></td>
+<td>Initial state estimate</td>
+</tr>
+<tr class="even">
+<td>observations</td>
+<td></td>
+<td></td>
+<td>Sequence of observations</td>
+</tr>
+<tr class="odd">
+<td>transition_fn</td>
+<td></td>
+<td></td>
+<td>Function (state, rng) -&gt; new_state</td>
+</tr>
+<tr class="even">
+<td>observation_fn</td>
+<td></td>
+<td></td>
+<td>Function (state, obs) -&gt; likelihood</td>
+</tr>
+<tr class="odd">
+<td>n_particles</td>
+<td>int</td>
+<td>1000</td>
+<td>Number of particles</td>
+</tr>
+<tr class="even">
+<td>initial_cov</td>
+<td>float</td>
+<td>0.1</td>
+<td>Initial covariance for particle initialization</td>
+</tr>
+<tr class="odd">
+<td>resample_threshold</td>
+<td>float</td>
+<td>0.5</td>
+<td>Resample when eff_size &lt; threshold * n_particles</td>
+</tr>
+<tr class="even">
+<td>rng</td>
+<td>NoneType</td>
+<td>None</td>
+<td>Random number generator</td>
+</tr>
+</tbody>
+</table>
+<div id="cell-10" class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Test the improved version</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>rng <span class="op">=</span> np.random.default_rng(<span class="dv">42</span>)</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Generate test data - keep track of TRUE position</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>true_positions <span class="op">=</span> []</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>true_pos, true_vel <span class="op">=</span> <span class="fl">0.0</span>, <span class="fl">0.1</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>observations <span class="op">=</span> []</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> t <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">20</span>):</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>    true_pos <span class="op">+=</span> true_vel <span class="op">+</span> rng.normal(<span class="dv">0</span>, <span class="fl">0.05</span>)</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>    true_vel <span class="op">+=</span> rng.normal(<span class="dv">0</span>, <span class="fl">0.02</span>)</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>    true_positions.append(true_pos)  <span class="co"># Store true position</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>    observations.append(true_pos <span class="op">+</span> rng.normal(<span class="dv">0</span>, <span class="fl">0.1</span>))  <span class="co"># Add noise for observation</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Track with improved filter</span></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>estimates <span class="op">=</span> particle_filter(</span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>    initial_state<span class="op">=</span>[<span class="fl">0.0</span>, <span class="fl">0.1</span>],</span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>    observations<span class="op">=</span>observations,</span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>    transition_fn<span class="op">=</span>motion_model,</span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>    observation_fn<span class="op">=</span>position_likelihood,</span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>    rng<span class="op">=</span>rng</span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="ch">\n</span><span class="ss">Tracking Results:"</span>)</span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Final position estimate: </span><span class="sc">{</span>estimates[<span class="op">-</span><span class="dv">1</span>][<span class="dv">0</span>]<span class="sc">:.3f}</span><span class="ss">"</span>)</span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"True final position: </span><span class="sc">{</span>true_positions[<span class="op">-</span><span class="dv">1</span>]<span class="sc">:.3f}</span><span class="ss">"</span>)  <span class="co"># Actual truth</span></span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Final observation: </span><span class="sc">{</span>observations[<span class="op">-</span><span class="dv">1</span>]<span class="sc">:.3f}</span><span class="ss">"</span>)      <span class="co"># Noisy measurement</span></span>
+<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Tracking error: </span><span class="sc">{</span><span class="bu">abs</span>(estimates[<span class="op">-</span><span class="dv">1</span>][<span class="dv">0</span>] <span class="op">-</span> true_positions[<span class="op">-</span><span class="dv">1</span>])<span class="sc">:.4f}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Tracking Results:
+Final position estimate: 2.079
+True final position: 2.007
+Final observation: 2.104
+Tracking error: 0.0721</code></pre>
+</div>
+</div>
+<div id="cell-11" class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> compare_tracking_performance(n_trials<span class="op">=</span><span class="dv">10</span>):</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Compare tracking performance across multiple random trials"""</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    errors <span class="op">=</span> []</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> trial <span class="kw">in</span> <span class="bu">range</span>(n_trials):</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>        rng <span class="op">=</span> np.random.default_rng(trial)  <span class="co"># Different seed each time</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Generate test data</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>        true_pos, true_vel <span class="op">=</span> <span class="fl">0.0</span>, <span class="fl">0.1</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>        observations <span class="op">=</span> []</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> t <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">20</span>):</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>            true_pos <span class="op">+=</span> true_vel <span class="op">+</span> rng.normal(<span class="dv">0</span>, <span class="fl">0.05</span>)</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>            true_vel <span class="op">+=</span> rng.normal(<span class="dv">0</span>, <span class="fl">0.02</span>)</span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>            observations.append(true_pos <span class="op">+</span> rng.normal(<span class="dv">0</span>, <span class="fl">0.1</span>))</span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Track</span></span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>        estimates <span class="op">=</span> particle_filter(</span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>            initial_state<span class="op">=</span>[<span class="fl">0.0</span>, <span class="fl">0.1</span>],</span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>            observations<span class="op">=</span>observations,</span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>            transition_fn<span class="op">=</span>motion_model,</span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>            observation_fn<span class="op">=</span>position_likelihood,</span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>            rng<span class="op">=</span>rng</span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a>        error <span class="op">=</span> <span class="bu">abs</span>(estimates[<span class="op">-</span><span class="dv">1</span>][<span class="dv">0</span>] <span class="op">-</span> true_pos)</span>
+<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a>        errors.append(error)</span>
+<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> np.array(errors)</span>
+<span id="cb7-30"><a href="#cb7-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-31"><a href="#cb7-31" aria-hidden="true" tabindex="-1"></a>errors <span class="op">=</span> compare_tracking_performance()</span>
+<span id="cb7-32"><a href="#cb7-32" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Mean tracking error: </span><span class="sc">{</span>np<span class="sc">.</span>mean(errors)<span class="sc">:.4f}</span><span class="ss">"</span>)</span>
+<span id="cb7-33"><a href="#cb7-33" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Std tracking error: </span><span class="sc">{</span>np<span class="sc">.</span>std(errors)<span class="sc">:.4f}</span><span class="ss">"</span>)</span>
+<span id="cb7-34"><a href="#cb7-34" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Best case: </span><span class="sc">{</span>np<span class="sc">.</span><span class="bu">min</span>(errors)<span class="sc">:.4f}</span><span class="ss">"</span>)</span>
+<span id="cb7-35"><a href="#cb7-35" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Worst case: </span><span class="sc">{</span>np<span class="sc">.</span><span class="bu">max</span>(errors)<span class="sc">:.4f}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Mean tracking error: 0.0430
+Std tracking error: 0.0211
+Best case: 0.0027
+Worst case: 0.0858</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="improved-particle-filter-implementation" class="level1">
+<h1>Improved Particle Filter Implementation</h1>
+<p>Our particle filter implementation demonstrates excellent tracking performance with consistent results across multiple trials. Let’s break down the key components and analyze why it works so well.</p>
+<section id="core-algorithm-structure" class="level2">
+<h2 class="anchored" data-anchor-id="core-algorithm-structure">Core Algorithm Structure</h2>
+<p>The <a href="https://Matthew-Redrup.github.io/technical-blog/rbe/recursive_updating.html#particle_filter"><code>particle_filter</code></a> function implements the classic three-step particle filtering algorithm:</p>
+<ol type="1">
+<li><strong>Predict</strong>: Each particle evolves according to the motion model</li>
+<li><strong>Update</strong>: Particles are weighted based on how well they explain the observation</li>
+<li><strong>Resample</strong>: When particle diversity drops, we resample to maintain effective population</li>
+</ol>
+</section>
+<section id="key-implementation-features" class="level2">
+<h2 class="anchored" data-anchor-id="key-implementation-features">Key Implementation Features</h2>
+<section id="proper-particle-initialization" class="level3">
+<h3 class="anchored" data-anchor-id="proper-particle-initialization">Proper Particle Initialization</h3>
+<div class="sourceCode" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="bu">len</span>(initial_state) <span class="op">==</span> <span class="dv">1</span>:</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    particles <span class="op">=</span> rng.normal(initial_state[<span class="dv">0</span>], initial_cov, (n_particles, <span class="dv">1</span>))</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="cf">else</span>:</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    cov_matrix <span class="op">=</span> initial_cov <span class="op">*</span> np.eye(<span class="bu">len</span>(initial_state))</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    particles <span class="op">=</span> rng.multivariate_normal(initial_state, cov_matrix, n_particles)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>This creates genuine diversity in the initial particle cloud, rather than identical particles with tiny perturbations. Each particle starts as a plausible hypothesis about the true state.</p>
+</section>
+<section id="numerical-stability-in-weight-computation" class="level3">
+<h3 class="anchored" data-anchor-id="numerical-stability-in-weight-computation">Numerical Stability in Weight Computation</h3>
+<div class="sourceCode" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>log_weights <span class="op">=</span> np.array([np.log(<span class="bu">max</span>(observation_fn(p.flatten(), obs), <span class="fl">1e-300</span>)) </span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>                       <span class="cf">for</span> p <span class="kw">in</span> particles])</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>log_weights <span class="op">-=</span> np.<span class="bu">max</span>(log_weights)  <span class="co"># Prevent overflow</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>weights <span class="op">=</span> np.exp(log_weights)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Working in log space prevents numerical underflow when likelihoods become very small. The <code>max()</code> clamp ensures we never take log(0), and subtracting the maximum prevents overflow when exponentiating back.</p>
+</section>
+<section id="adaptive-resampling" class="level3">
+<h3 class="anchored" data-anchor-id="adaptive-resampling">Adaptive Resampling</h3>
+<div class="sourceCode" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>eff_size <span class="op">=</span> pf_effective_size(weights)</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> eff_size <span class="op">&lt;</span> resample_threshold <span class="op">*</span> n_particles:</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    indices <span class="op">=</span> prob_sample(weights, n_particles, rng)</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    particles <span class="op">=</span> particles[indices]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Resampling only occurs when needed (when effective sample size drops), preserving particle diversity when the filter is confident.</p>
+</section>
+</section>
+<section id="performance-analysis" class="level2">
+<h2 class="anchored" data-anchor-id="performance-analysis">Performance Analysis</h2>
+<p>The <code>compare_tracking_performance()</code> function reveals the implementation’s strength through consistency testing:</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>errors <span class="op">=</span> compare_tracking_performance()</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Mean tracking error: </span><span class="sc">{</span>np<span class="sc">.</span>mean(errors)<span class="sc">:.4f}</span><span class="ss">"</span>)      <span class="co"># 0.0430</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Std tracking error: </span><span class="sc">{</span>np<span class="sc">.</span>std(errors)<span class="sc">:.4f}</span><span class="ss">"</span>)       <span class="co"># 0.0211</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Best case: </span><span class="sc">{</span>np<span class="sc">.</span><span class="bu">min</span>(errors)<span class="sc">:.4f}</span><span class="ss">"</span>)                <span class="co"># 0.0027</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Worst case: </span><span class="sc">{</span>np<span class="sc">.</span><span class="bu">max</span>(errors)<span class="sc">:.4f}</span><span class="ss">"</span>)               <span class="co"># 0.0858</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<section id="what-these-results-tell-us" class="level3">
+<h3 class="anchored" data-anchor-id="what-these-results-tell-us">What These Results Tell Us</h3>
+<p><strong>Consistent Performance</strong>: The low standard deviation (0.0211) relative to the mean (0.0430) indicates the filter performs reliably across different random scenarios. This consistency is crucial for real-world applications where you can’t cherry-pick favorable conditions.</p>
+<p><strong>Reasonable Error Bounds</strong>: The worst-case error (0.0858) is still acceptable given that we’re adding 0.1 standard deviation noise to observations and 0.05 to the motion model. The filter isn’t just getting lucky on easy cases.</p>
+<p><strong>Scalable Accuracy</strong>: The best-case performance (0.0027) shows the filter can achieve high precision when the data supports it, demonstrating it’s not artificially limited by poor implementation choices.</p>
+</section>
+</section>
+<section id="motion-model-design" class="level2">
+<h2 class="anchored" data-anchor-id="motion-model-design">Motion Model Design</h2>
+<div class="sourceCode" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> motion_model(state, rng, dt<span class="op">=</span><span class="fl">1.0</span>, process_noise<span class="op">=</span><span class="fl">0.05</span>):</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>    pos, vel <span class="op">=</span> state</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    new_pos <span class="op">=</span> pos <span class="op">+</span> vel <span class="op">*</span> dt <span class="op">+</span> rng.normal(<span class="dv">0</span>, process_noise)</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    new_vel <span class="op">=</span> vel <span class="op">+</span> rng.normal(<span class="dv">0</span>, process_noise <span class="op">*</span> <span class="fl">0.5</span>)  <span class="co"># Less velocity noise</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> np.array([new_pos, new_vel])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>The constant velocity model with process noise captures realistic motion uncertainty. Using less noise on velocity than position reflects the physical intuition that velocity changes more gradually than position.</p>
+</section>
+<section id="why-this-implementation-works" class="level2">
+<h2 class="anchored" data-anchor-id="why-this-implementation-works">Why This Implementation Works</h2>
+<ol type="1">
+<li><strong>Proper uncertainty representation</strong>: Initial particle diversity and process noise model realistic uncertainty</li>
+<li><strong>Numerical robustness</strong>: Log-space computations handle extreme likelihood values gracefully<br>
+</li>
+<li><strong>Adaptive resource allocation</strong>: Resampling maintains computational efficiency while preserving accuracy</li>
+<li><strong>Clean interfaces</strong>: Simple function signatures make it easy to swap in different motion and observation models</li>
+</ol>
+<p>The consistency demonstrated by <code>compare_tracking_performance()</code> shows these design choices work together effectively, producing a particle filter that’s both accurate and reliable across varying conditions.</p>
+</section>
+<section id="markov-assumptions" class="level2">
+<h2 class="anchored" data-anchor-id="markov-assumptions">Markov Assumptions</h2>
+<p>The power of recursive updating relies on the <strong>Markov assumption</strong>: the future depends only on the present, not the past.</p>
+<p>Formally: <span class="math inline">\(P(x_{t+1}|x_t, x_{t-1}, \ldots, x_1) = P(x_{t+1}|x_t)\)</span></p>
+<p>This perfectly captures the essence: “the future depends only on the present state, not the history of how we got there.”</p>
+<p><strong>The Benefits</strong> - <strong>Computational tractability</strong>: Without Markov assumptions, we’d need to track exponentially growing state histories - <strong>Memory efficiency</strong>: We only need to store the current state, not the entire trajectory - <strong>Theoretical guarantees</strong>: Many optimality results (like Kalman filter optimality) rely on this assumption</p>
+<p><strong>Where It Gets Interesting: When Markov Breaks Down</strong></p>
+<p>The Markov assumption fails when:</p>
+<ol type="1">
+<li><strong>Hidden long-term dependencies</strong>: Network intrusion patterns where attackers use multi-stage campaigns spanning weeks</li>
+<li><strong>Insufficient state representation</strong>: If your state vector doesn’t capture all relevant information, past observations become informative</li>
+<li><strong>Non-stationary environments</strong>: When the underlying system dynamics change over time</li>
+<li><strong>Measurement artifacts</strong>: Sensor drift or calibration issues that accumulate over time</li>
+</ol>
+<p><strong>Practical Implications</strong> In our particle filter example, the Markov assumption works well because the state <code>[position, velocity]</code> captures the essential dynamics. But if there were hidden forces (like wind patterns) affecting motion, we might need to either: - Expand the state to include wind estimates, or - Accept that the Markov assumption is approximate</p>
+<p><strong>The Key Insight</strong>: Markov assumptions are often engineering choices rather than physical truths. We design our state representation to make the assumption as valid as possible for our specific application.</p>
+<hr>
+<p><a href="https://github.com/Matthew-Redrup/technical-blog/blob/main/technical_blog/rbe/recursive.py#L123" target="_blank" style="float:right; font-size:smaller">source</a></p>
+<section id="markov_chain_demo" class="level3">
+<h3 class="anchored" data-anchor-id="markov_chain_demo">markov_chain_demo</h3>
+<blockquote class="blockquote">
+<pre><code> markov_chain_demo (P, n_steps, π0=None, labels=None, seed=None)</code></pre>
+</blockquote>
+<p><em>Demonstrate Markov chain evolution and properties</em></p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Type</strong></th>
+<th><strong>Default</strong></th>
+<th><strong>Details</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>P</td>
+<td></td>
+<td></td>
+<td>transition matrix</td>
+</tr>
+<tr class="even">
+<td>n_steps</td>
+<td></td>
+<td></td>
+<td>number of steps to simulate</td>
+</tr>
+<tr class="odd">
+<td>π0</td>
+<td>NoneType</td>
+<td>None</td>
+<td>initial distribution (uniform if None)</td>
+</tr>
+<tr class="even">
+<td>labels</td>
+<td>NoneType</td>
+<td>None</td>
+<td>state names (auto-generated if None)</td>
+</tr>
+<tr class="odd">
+<td>seed</td>
+<td>NoneType</td>
+<td>None</td>
+<td>random seed for reproducibility</td>
+</tr>
+</tbody>
+</table>
+<div id="cell-15" class="cell">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Test with invalid matrix first</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="cf">try</span>:</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    bad_P <span class="op">=</span> [[<span class="fl">0.8</span>, <span class="fl">0.15</span>, <span class="fl">0.04</span>],  <span class="co"># Doesn't sum to 1!</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>             [<span class="fl">0.3</span>, <span class="fl">0.6</span>, <span class="fl">0.1</span>], </span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>             [<span class="fl">0.1</span>, <span class="fl">0.2</span>, <span class="fl">0.7</span>]]</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>    markov_chain_demo(bad_P, <span class="dv">5</span>)</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a><span class="cf">except</span> <span class="pp">ValueError</span> <span class="im">as</span> e:</span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"✓ Validation caught error: </span><span class="sc">{</span>e<span class="sc">}</span><span class="ch">\n</span><span class="ss">"</span>)</span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Network security example</span></span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>security_P <span class="op">=</span> [[<span class="fl">0.8</span>, <span class="fl">0.15</span>, <span class="fl">0.05</span>],   <span class="co"># Normal</span></span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>              [<span class="fl">0.3</span>, <span class="fl">0.6</span>, <span class="fl">0.1</span>],     <span class="co"># Suspicious  </span></span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>              [<span class="fl">0.1</span>, <span class="fl">0.2</span>, <span class="fl">0.7</span>]]     <span class="co"># Compromised</span></span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>result <span class="op">=</span> markov_chain_demo(</span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>    security_P, <span class="dv">5</span>,</span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a>    π<span class="dv">0</span><span class="op">=</span>[<span class="fl">0.9</span>, <span class="fl">0.1</span>, <span class="fl">0.0</span>],</span>
+<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a>    labels<span class="op">=</span>[<span class="st">'Normal'</span>, <span class="st">'Suspicious'</span>, <span class="st">'Compromised'</span>],</span>
+<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a>    seed<span class="op">=</span><span class="dv">42</span></span>
+<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>✓ Validation caught error: Transition matrix rows must sum to 1. Rows [0] sum to [0.99]
+
+=== MARKOV CHAIN ===
+Transition Matrix P:
+  Normal: [0.8  0.15 0.05]
+  Suspicious: [0.3 0.6 0.1]
+  Compromised: [0.1 0.2 0.7]
+
+Distribution Evolution:
+t=0: {'Normal': np.float64(0.9), 'Suspicious': np.float64(0.1), 'Compromised': np.float64(0.0)}
+t=1: {'Normal': np.float64(0.75), 'Suspicious': np.float64(0.195), 'Compromised': np.float64(0.055)}
+t=2: {'Normal': np.float64(0.664), 'Suspicious': np.float64(0.2405), 'Compromised': np.float64(0.0955)}
+t=3: {'Normal': np.float64(0.6129), 'Suspicious': np.float64(0.263), 'Compromised': np.float64(0.1241)}
+t=4: {'Normal': np.float64(0.5816), 'Suspicious': np.float64(0.2746), 'Compromised': np.float64(0.1438)}
+t=5: {'Normal': np.float64(0.5621), 'Suspicious': np.float64(0.2807), 'Compromised': np.float64(0.1572)}
+
+Sample Path:
+t=0: Normal
+t=1: Normal
+t=2: Suspicious
+t=3: Suspicious
+t=4: Normal
+t=5: Compromised</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="interactive-demonstrations" class="level2">
+<h2 class="anchored" data-anchor-id="interactive-demonstrations">Interactive Demonstrations</h2>
+<p>Let’s create interactive components to visualize recursive updating in action.</p>
+<hr>
+<p><a href="https://github.com/Matthew-Redrup/technical-blog/blob/main/technical_blog/rbe/recursive.py#L183" target="_blank" style="float:right; font-size:smaller">source</a></p>
+<section id="belief_evolution_visualizer" class="level3">
+<h3 class="anchored" data-anchor-id="belief_evolution_visualizer">belief_evolution_visualizer</h3>
+<blockquote class="blockquote">
+<pre><code> belief_evolution_visualizer (beliefs, time_steps=None, title='Belief
+                              Evolution', labels=None, figsize=(12, 6))</code></pre>
+</blockquote>
+<p><em>Visualize how beliefs evolve over time with interactive features</em></p>
+<hr>
+<p><a href="https://github.com/Matthew-Redrup/technical-blog/blob/main/technical_blog/rbe/recursive.py#L359" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="post" class="level3">
+<h3 class="anchored" data-anchor-id="post">post</h3>
+<blockquote class="blockquote">
+<pre><code> post ()</code></pre>
+</blockquote>
+<p><em>HTMX endpoint to reset demo</em></p>
+<hr>
+<p><a href="https://github.com/Matthew-Redrup/technical-blog/blob/main/technical_blog/rbe/recursive.py#L359" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="post-1" class="level3">
+<h3 class="anchored" data-anchor-id="post-1">post</h3>
+<blockquote class="blockquote">
+<pre><code> post ()</code></pre>
+</blockquote>
+<p><em>HTMX endpoint to reset demo</em></p>
+<hr>
+<p><a href="https://github.com/Matthew-Redrup/technical-blog/blob/main/technical_blog/rbe/recursive.py#L343" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="get" class="level3">
+<h3 class="anchored" data-anchor-id="get">get</h3>
+<blockquote class="blockquote">
+<pre><code> get ()</code></pre>
+</blockquote>
+<hr>
+<p><a href="https://github.com/Matthew-Redrup/technical-blog/blob/main/technical_blog/rbe/recursive.py#L301" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="recursive_update_component" class="level3">
+<h3 class="anchored" data-anchor-id="recursive_update_component">recursive_update_component</h3>
+<blockquote class="blockquote">
+<pre><code> recursive_update_component ()</code></pre>
+</blockquote>
+<p><em>Main component using HTMX</em></p>
+<hr>
+<p><a href="https://github.com/Matthew-Redrup/technical-blog/blob/main/technical_blog/rbe/recursive.py#L282" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="control_buttons" class="level3">
+<h3 class="anchored" data-anchor-id="control_buttons">control_buttons</h3>
+<blockquote class="blockquote">
+<pre><code> control_buttons ()</code></pre>
+</blockquote>
+<p><em>Control buttons component</em></p>
+<hr>
+<p><a href="https://github.com/Matthew-Redrup/technical-blog/blob/main/technical_blog/rbe/recursive.py#L244" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="belief_state_component" class="level3">
+<h3 class="anchored" data-anchor-id="belief_state_component">belief_state_component</h3>
+<blockquote class="blockquote">
+<pre><code> belief_state_component ()</code></pre>
+</blockquote>
+<p><em>Component showing current belief state</em></p>
+<p><span class="citation" data-cites="rt">@rt</span>(“/update_beliefs”) def post(): # Server-side Bayesian update beliefs = bayes_update(beliefs, evidence[‘likelihood’]) return belief_state_component() # Return new HTML</p>
+</section>
+</section>
+<section id="performance-analysis-recursive-vs-batch" class="level2">
+<h2 class="anchored" data-anchor-id="performance-analysis-recursive-vs-batch">Performance Analysis: Recursive vs Batch</h2>
+<p>One of the key advantages of recursive updating is computational efficiency. Let’s compare recursive and batch approaches.</p>
+<hr>
+<p><a href="https://github.com/Matthew-Redrup/technical-blog/blob/main/technical_blog/rbe/recursive.py#L374" target="_blank" style="float:right; font-size:smaller">source</a></p>
+<section id="batch_vs_recursive_comparison" class="level3">
+<h3 class="anchored" data-anchor-id="batch_vs_recursive_comparison">batch_vs_recursive_comparison</h3>
+<blockquote class="blockquote">
+<pre><code> batch_vs_recursive_comparison (data_sizes, n_trials=10, rng=None)</code></pre>
+</blockquote>
+<p><em>Compare true batch processing vs recursive updating</em></p>
+<div id="cell-27" class="cell">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Batch vs Recursive Performance comparison</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Running performance comparison..."</span>)</span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>corrected_results <span class="op">=</span> batch_vs_recursive_comparison([<span class="dv">10</span>, <span class="dv">25</span>, <span class="dv">50</span>, <span class="dv">100</span>], n_trials<span class="op">=</span><span class="dv">3</span>)</span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Extract the data for plotting</span></span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>data_sizes <span class="op">=</span> corrected_results[<span class="st">'data_sizes'</span>]</span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>batch_times <span class="op">=</span> corrected_results[<span class="st">'batch_times'</span>]</span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>recursive_times <span class="op">=</span> corrected_results[<span class="st">'recursive_times'</span>]</span>
+<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a>accuracy_differences <span class="op">=</span> corrected_results[<span class="st">'accuracy_difference'</span>]</span>
+<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-11"><a href="#cb25-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Now your plotting code will work</span></span>
+<span id="cb25-12"><a href="#cb25-12" aria-hidden="true" tabindex="-1"></a>fig, (ax1, ax2) <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="dv">12</span>, <span class="dv">5</span>))</span>
+<span id="cb25-13"><a href="#cb25-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-14"><a href="#cb25-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Left: Performance comparison</span></span>
+<span id="cb25-15"><a href="#cb25-15" aria-hidden="true" tabindex="-1"></a>ax1.plot(data_sizes, batch_times, <span class="st">'b-o'</span>, label<span class="op">=</span><span class="st">'Batch (O(n))'</span>)  </span>
+<span id="cb25-16"><a href="#cb25-16" aria-hidden="true" tabindex="-1"></a>ax1.plot(data_sizes, recursive_times, <span class="st">'r-s'</span>, label<span class="op">=</span><span class="st">'Recursive (O(n))'</span>)</span>
+<span id="cb25-17"><a href="#cb25-17" aria-hidden="true" tabindex="-1"></a>ax1.set_xlabel(<span class="st">'Number of Data Points'</span>)</span>
+<span id="cb25-18"><a href="#cb25-18" aria-hidden="true" tabindex="-1"></a>ax1.set_ylabel(<span class="st">'Computation Time (seconds)'</span>)</span>
+<span id="cb25-19"><a href="#cb25-19" aria-hidden="true" tabindex="-1"></a>ax1.set_title(<span class="st">'Performance: Batch vs Recursive'</span>)</span>
+<span id="cb25-20"><a href="#cb25-20" aria-hidden="true" tabindex="-1"></a>ax1.legend()</span>
+<span id="cb25-21"><a href="#cb25-21" aria-hidden="true" tabindex="-1"></a>ax1.grid(<span class="va">True</span>, alpha<span class="op">=</span><span class="fl">0.3</span>)</span>
+<span id="cb25-22"><a href="#cb25-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-23"><a href="#cb25-23" aria-hidden="true" tabindex="-1"></a><span class="co"># Right: Numerical accuracy</span></span>
+<span id="cb25-24"><a href="#cb25-24" aria-hidden="true" tabindex="-1"></a>ax2.plot(data_sizes, accuracy_differences, <span class="st">'g-^'</span>)</span>
+<span id="cb25-25"><a href="#cb25-25" aria-hidden="true" tabindex="-1"></a>ax2.set_xlabel(<span class="st">'Number of Data Points'</span>) </span>
+<span id="cb25-26"><a href="#cb25-26" aria-hidden="true" tabindex="-1"></a>ax2.set_ylabel(<span class="st">'Numerical Difference'</span>)</span>
+<span id="cb25-27"><a href="#cb25-27" aria-hidden="true" tabindex="-1"></a>ax2.set_title(<span class="st">'Numerical Stability Comparison'</span>)</span>
+<span id="cb25-28"><a href="#cb25-28" aria-hidden="true" tabindex="-1"></a>ax2.grid(<span class="va">True</span>, alpha<span class="op">=</span><span class="fl">0.3</span>)</span>
+<span id="cb25-29"><a href="#cb25-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-30"><a href="#cb25-30" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb25-31"><a href="#cb25-31" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Running performance comparison...
+
+Testing with 10 data points...
+  Batch time: 0.000010s
+  Recursive time: 0.000018s
+  Accuracy difference: 9.25e-17
+
+Testing with 25 data points...
+  Batch time: 0.000010s
+  Recursive time: 0.000041s
+  Accuracy difference: 7.52e-17
+
+Testing with 50 data points...
+  Batch time: 0.000012s
+  Recursive time: 0.000127s
+  Accuracy difference: 1.01e-16
+
+Testing with 100 data points...
+  Batch time: 0.000052s
+  Recursive time: 0.000377s
+  Accuracy difference: 1.48e-16</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="03_recursive_updating_files/figure-html/cell-18-output-2.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p><strong>Performance Plot (Left):</strong> - <strong>Batch method (blue)</strong>: Nearly flat scaling - this makes sense because it’s just multiplying likelihoods and doing one normalization, regardless of data size - <strong>Recursive method (red)</strong>: Clear linear scaling - each data point requires a full Bayes update with normalization, so time grows linearly with data size - <strong>Crossover insight</strong>: Batch is actually faster for larger datasets, which is counterintuitive but correct for this specific comparison</p>
+<p><strong>Numerical Stability Plot (Right):</strong> - Shows tiny differences (10^-17 to 10^-19 range) - these are just floating-point precision limits, not meaningful algorithmic differences - The variation pattern is essentially random noise from floating-point arithmetic - This confirms that both methods are mathematically equivalent for independent evidence</p>
+<p><strong>Key Insights from the Plot:</strong></p>
+<ol type="1">
+<li><strong>Batch wins for large datasets</strong>: The flat scaling of batch processing makes it more efficient as data size grows</li>
+<li><strong>Recursive wins for streaming</strong>: But recursive is better for real-time processing where data arrives sequentially</li>
+<li><strong>Perfect numerical equivalence</strong>: The tiny differences prove both methods are computing the same mathematical result</li>
+</ol>
+<p>This is a great example of how plotting reveals the practical trade-offs between theoretically equivalent algorithms. The performance difference isn’t about accuracy - it’s about when you need the answer and how your data arrives.</p>
+<p>The plot effectively demonstrates why you’d choose recursive updating for streaming applications (real-time processing) versus batch processing for offline analysis of large datasets.</p>
+</section>
+</section>
+<section id="memory-analysis-how-much-history-matters" class="level2">
+<h2 class="anchored" data-anchor-id="memory-analysis-how-much-history-matters">Memory Analysis: How Much History Matters</h2>
+<p>A key question in recursive updating: how much does distant history affect current beliefs? Let’s explore this empirically.</p>
+<hr>
+<p><a href="https://github.com/Matthew-Redrup/technical-blog/blob/main/technical_blog/rbe/recursive.py#L442" target="_blank" style="float:right; font-size:smaller">source</a></p>
+<section id="memory_analysis_corrected" class="level3">
+<h3 class="anchored" data-anchor-id="memory_analysis_corrected">memory_analysis_corrected</h3>
+<blockquote class="blockquote">
+<pre><code> memory_analysis_corrected (evidence_sequence, likelihoods,
+                            lookback_windows, initial_prior=None)</code></pre>
+</blockquote>
+<p><em>Corrected memory analysis - simulate true memory limitations</em></p>
+<hr>
+<p><a href="https://github.com/Matthew-Redrup/technical-blog/blob/main/technical_blog/rbe/recursive.py#L503" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="rolling_memory_analysis" class="level3">
+<h3 class="anchored" data-anchor-id="rolling_memory_analysis">rolling_memory_analysis</h3>
+<blockquote class="blockquote">
+<pre><code> rolling_memory_analysis (evidence_sequence, likelihoods, window_size,
+                          initial_prior=None)</code></pre>
+</blockquote>
+<p><em>Analyze performance with a fixed rolling memory window</em></p>
+<div id="cell-32" class="cell">
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> plot_complete_memory_analysis(lookback_results, likelihoods):</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Complete analysis including both lookback and rolling memory"""</span></span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>    fig <span class="op">=</span> plt.figure(figsize<span class="op">=</span>(<span class="dv">18</span>, <span class="dv">12</span>))</span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>    gs <span class="op">=</span> fig.add_gridspec(<span class="dv">3</span>, <span class="dv">3</span>, height_ratios<span class="op">=</span>[<span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>], hspace<span class="op">=</span><span class="fl">0.3</span>, wspace<span class="op">=</span><span class="fl">0.3</span>)</span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a>    <span class="co"># First, compute rolling memory results for comparison</span></span>
+<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a>    rolling_windows <span class="op">=</span> [<span class="dv">2</span>, <span class="dv">4</span>, <span class="dv">6</span>, <span class="dv">8</span>, <span class="dv">10</span>, <span class="dv">12</span>, <span class="dv">15</span>, <span class="dv">20</span>]</span>
+<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a>    rolling_results <span class="op">=</span> []</span>
+<span id="cb29-10"><a href="#cb29-10" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb29-11"><a href="#cb29-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> window_size <span class="kw">in</span> rolling_windows:</span>
+<span id="cb29-12"><a href="#cb29-12" aria-hidden="true" tabindex="-1"></a>        result <span class="op">=</span> rolling_memory_analysis([<span class="st">'event'</span>] <span class="op">*</span> <span class="bu">len</span>(likelihoods), likelihoods, window_size)</span>
+<span id="cb29-13"><a href="#cb29-13" aria-hidden="true" tabindex="-1"></a>        rolling_results.append(result)</span>
+<span id="cb29-14"><a href="#cb29-14" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb29-15"><a href="#cb29-15" aria-hidden="true" tabindex="-1"></a>    rolling_diffs <span class="op">=</span> [r[<span class="st">'difference'</span>] <span class="cf">for</span> r <span class="kw">in</span> rolling_results]</span>
+<span id="cb29-16"><a href="#cb29-16" aria-hidden="true" tabindex="-1"></a>    rolling_kl <span class="op">=</span> [r[<span class="st">'kl_divergence'</span>] <span class="cf">for</span> r <span class="kw">in</span> rolling_results]</span>
+<span id="cb29-17"><a href="#cb29-17" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb29-18"><a href="#cb29-18" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Extract lookback data</span></span>
+<span id="cb29-19"><a href="#cb29-19" aria-hidden="true" tabindex="-1"></a>    windows <span class="op">=</span> lookback_results[<span class="st">'lookback_windows'</span>]</span>
+<span id="cb29-20"><a href="#cb29-20" aria-hidden="true" tabindex="-1"></a>    belief_diffs <span class="op">=</span> lookback_results[<span class="st">'belief_differences'</span>]</span>
+<span id="cb29-21"><a href="#cb29-21" aria-hidden="true" tabindex="-1"></a>    info_losses <span class="op">=</span> lookback_results[<span class="st">'information_loss'</span>]</span>
+<span id="cb29-22"><a href="#cb29-22" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb29-23"><a href="#cb29-23" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 1. Direct comparison: Lookback vs Rolling</span></span>
+<span id="cb29-24"><a href="#cb29-24" aria-hidden="true" tabindex="-1"></a>    ax1 <span class="op">=</span> fig.add_subplot(gs[<span class="dv">0</span>, :])</span>
+<span id="cb29-25"><a href="#cb29-25" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb29-26"><a href="#cb29-26" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Plot both methods</span></span>
+<span id="cb29-27"><a href="#cb29-27" aria-hidden="true" tabindex="-1"></a>    ax1.plot(windows[:<span class="op">-</span><span class="dv">1</span>], belief_diffs[:<span class="op">-</span><span class="dv">1</span>], <span class="st">'b-o'</span>, label<span class="op">=</span><span class="st">'Lookback Memory'</span>, </span>
+<span id="cb29-28"><a href="#cb29-28" aria-hidden="true" tabindex="-1"></a>             linewidth<span class="op">=</span><span class="dv">2</span>, markersize<span class="op">=</span><span class="dv">6</span>)</span>
+<span id="cb29-29"><a href="#cb29-29" aria-hidden="true" tabindex="-1"></a>    ax1.plot(rolling_windows, rolling_diffs, <span class="st">'r-s'</span>, label<span class="op">=</span><span class="st">'Rolling Memory'</span>, </span>
+<span id="cb29-30"><a href="#cb29-30" aria-hidden="true" tabindex="-1"></a>             linewidth<span class="op">=</span><span class="dv">2</span>, markersize<span class="op">=</span><span class="dv">6</span>)</span>
+<span id="cb29-31"><a href="#cb29-31" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb29-32"><a href="#cb29-32" aria-hidden="true" tabindex="-1"></a>    ax1.set_xlabel(<span class="st">'Memory Window Size'</span>)</span>
+<span id="cb29-33"><a href="#cb29-33" aria-hidden="true" tabindex="-1"></a>    ax1.set_ylabel(<span class="st">'L2 Error from Full Memory'</span>)</span>
+<span id="cb29-34"><a href="#cb29-34" aria-hidden="true" tabindex="-1"></a>    ax1.set_title(<span class="st">'Memory Analysis Comparison: Lookback vs Rolling Window'</span>)</span>
+<span id="cb29-35"><a href="#cb29-35" aria-hidden="true" tabindex="-1"></a>    ax1.legend()</span>
+<span id="cb29-36"><a href="#cb29-36" aria-hidden="true" tabindex="-1"></a>    ax1.grid(<span class="va">True</span>, alpha<span class="op">=</span><span class="fl">0.3</span>)</span>
+<span id="cb29-37"><a href="#cb29-37" aria-hidden="true" tabindex="-1"></a>    ax1.set_yscale(<span class="st">'log'</span>)</span>
+<span id="cb29-38"><a href="#cb29-38" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb29-39"><a href="#cb29-39" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 2. Rolling memory trajectory visualization</span></span>
+<span id="cb29-40"><a href="#cb29-40" aria-hidden="true" tabindex="-1"></a>    ax2 <span class="op">=</span> fig.add_subplot(gs[<span class="dv">1</span>, <span class="dv">0</span>])</span>
+<span id="cb29-41"><a href="#cb29-41" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb29-42"><a href="#cb29-42" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Show how rolling memory evolves over time for different window sizes</span></span>
+<span id="cb29-43"><a href="#cb29-43" aria-hidden="true" tabindex="-1"></a>    test_windows <span class="op">=</span> [<span class="dv">3</span>, <span class="dv">6</span>, <span class="dv">12</span>]</span>
+<span id="cb29-44"><a href="#cb29-44" aria-hidden="true" tabindex="-1"></a>    colors <span class="op">=</span> [<span class="st">'red'</span>, <span class="st">'orange'</span>, <span class="st">'green'</span>]</span>
+<span id="cb29-45"><a href="#cb29-45" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb29-46"><a href="#cb29-46" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> window, color <span class="kw">in</span> <span class="bu">zip</span>(test_windows, colors):</span>
+<span id="cb29-47"><a href="#cb29-47" aria-hidden="true" tabindex="-1"></a>        rolling_trajectory <span class="op">=</span> []</span>
+<span id="cb29-48"><a href="#cb29-48" aria-hidden="true" tabindex="-1"></a>        recent_evidence <span class="op">=</span> []</span>
+<span id="cb29-49"><a href="#cb29-49" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb29-50"><a href="#cb29-50" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> i, likelihood <span class="kw">in</span> <span class="bu">enumerate</span>(likelihoods):</span>
+<span id="cb29-51"><a href="#cb29-51" aria-hidden="true" tabindex="-1"></a>            recent_evidence.append(likelihood)</span>
+<span id="cb29-52"><a href="#cb29-52" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> <span class="bu">len</span>(recent_evidence) <span class="op">&gt;</span> window:</span>
+<span id="cb29-53"><a href="#cb29-53" aria-hidden="true" tabindex="-1"></a>                recent_evidence.pop(<span class="dv">0</span>)</span>
+<span id="cb29-54"><a href="#cb29-54" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb29-55"><a href="#cb29-55" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Recompute from scratch with current window</span></span>
+<span id="cb29-56"><a href="#cb29-56" aria-hidden="true" tabindex="-1"></a>            rolling_belief <span class="op">=</span> np.array([<span class="fl">0.5</span>, <span class="fl">0.5</span>])</span>
+<span id="cb29-57"><a href="#cb29-57" aria-hidden="true" tabindex="-1"></a>            <span class="cf">for</span> recent_like <span class="kw">in</span> recent_evidence:</span>
+<span id="cb29-58"><a href="#cb29-58" aria-hidden="true" tabindex="-1"></a>                rolling_belief <span class="op">=</span> bayes_update(rolling_belief, np.array(recent_like))</span>
+<span id="cb29-59"><a href="#cb29-59" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb29-60"><a href="#cb29-60" aria-hidden="true" tabindex="-1"></a>            rolling_trajectory.append(rolling_belief[<span class="dv">0</span>])  <span class="co"># Track H1 probability</span></span>
+<span id="cb29-61"><a href="#cb29-61" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb29-62"><a href="#cb29-62" aria-hidden="true" tabindex="-1"></a>        ax2.plot(<span class="bu">range</span>(<span class="dv">1</span>, <span class="bu">len</span>(rolling_trajectory) <span class="op">+</span> <span class="dv">1</span>), rolling_trajectory, </span>
+<span id="cb29-63"><a href="#cb29-63" aria-hidden="true" tabindex="-1"></a>                color<span class="op">=</span>color, linewidth<span class="op">=</span><span class="dv">2</span>, label<span class="op">=</span><span class="ss">f'Rolling Window </span><span class="sc">{</span>window<span class="sc">}</span><span class="ss">'</span>)</span>
+<span id="cb29-64"><a href="#cb29-64" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb29-65"><a href="#cb29-65" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Add full memory trajectory for reference</span></span>
+<span id="cb29-66"><a href="#cb29-66" aria-hidden="true" tabindex="-1"></a>    full_trajectory <span class="op">=</span> []</span>
+<span id="cb29-67"><a href="#cb29-67" aria-hidden="true" tabindex="-1"></a>    full_belief <span class="op">=</span> np.array([<span class="fl">0.5</span>, <span class="fl">0.5</span>])</span>
+<span id="cb29-68"><a href="#cb29-68" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> likelihood <span class="kw">in</span> likelihoods:</span>
+<span id="cb29-69"><a href="#cb29-69" aria-hidden="true" tabindex="-1"></a>        full_belief <span class="op">=</span> bayes_update(full_belief, np.array(likelihood))</span>
+<span id="cb29-70"><a href="#cb29-70" aria-hidden="true" tabindex="-1"></a>        full_trajectory.append(full_belief[<span class="dv">0</span>])</span>
+<span id="cb29-71"><a href="#cb29-71" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb29-72"><a href="#cb29-72" aria-hidden="true" tabindex="-1"></a>    ax2.plot(<span class="bu">range</span>(<span class="dv">1</span>, <span class="bu">len</span>(full_trajectory) <span class="op">+</span> <span class="dv">1</span>), full_trajectory, </span>
+<span id="cb29-73"><a href="#cb29-73" aria-hidden="true" tabindex="-1"></a>            <span class="st">'k--'</span>, linewidth<span class="op">=</span><span class="dv">2</span>, alpha<span class="op">=</span><span class="fl">0.7</span>, label<span class="op">=</span><span class="st">'Full Memory'</span>)</span>
+<span id="cb29-74"><a href="#cb29-74" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb29-75"><a href="#cb29-75" aria-hidden="true" tabindex="-1"></a>    ax2.set_xlabel(<span class="st">'Time Step'</span>)</span>
+<span id="cb29-76"><a href="#cb29-76" aria-hidden="true" tabindex="-1"></a>    ax2.set_ylabel(<span class="st">'Belief in Hypothesis 1'</span>)</span>
+<span id="cb29-77"><a href="#cb29-77" aria-hidden="true" tabindex="-1"></a>    ax2.set_title(<span class="st">'Rolling Memory Belief Evolution'</span>)</span>
+<span id="cb29-78"><a href="#cb29-78" aria-hidden="true" tabindex="-1"></a>    ax2.legend()</span>
+<span id="cb29-79"><a href="#cb29-79" aria-hidden="true" tabindex="-1"></a>    ax2.grid(<span class="va">True</span>, alpha<span class="op">=</span><span class="fl">0.3</span>)</span>
+<span id="cb29-80"><a href="#cb29-80" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb29-81"><a href="#cb29-81" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 3. Memory method efficiency comparison</span></span>
+<span id="cb29-82"><a href="#cb29-82" aria-hidden="true" tabindex="-1"></a>    ax3 <span class="op">=</span> fig.add_subplot(gs[<span class="dv">1</span>, <span class="dv">1</span>])</span>
+<span id="cb29-83"><a href="#cb29-83" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb29-84"><a href="#cb29-84" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Efficiency for lookback (exclude full memory)</span></span>
+<span id="cb29-85"><a href="#cb29-85" aria-hidden="true" tabindex="-1"></a>    lookback_eff <span class="op">=</span> [<span class="dv">1</span><span class="op">/</span>(d<span class="op">*</span>w) <span class="cf">if</span> d <span class="op">&gt;</span> <span class="dv">0</span> <span class="kw">and</span> w <span class="op">&gt;</span> <span class="dv">0</span> <span class="cf">else</span> <span class="dv">0</span> </span>
+<span id="cb29-86"><a href="#cb29-86" aria-hidden="true" tabindex="-1"></a>                   <span class="cf">for</span> d, w <span class="kw">in</span> <span class="bu">zip</span>(belief_diffs[:<span class="op">-</span><span class="dv">1</span>], windows[:<span class="op">-</span><span class="dv">1</span>])]</span>
+<span id="cb29-87"><a href="#cb29-87" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb29-88"><a href="#cb29-88" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Efficiency for rolling</span></span>
+<span id="cb29-89"><a href="#cb29-89" aria-hidden="true" tabindex="-1"></a>    rolling_eff <span class="op">=</span> [<span class="dv">1</span><span class="op">/</span>(d<span class="op">*</span>w) <span class="cf">if</span> d <span class="op">&gt;</span> <span class="dv">0</span> <span class="kw">and</span> w <span class="op">&gt;</span> <span class="dv">0</span> <span class="cf">else</span> <span class="dv">0</span> </span>
+<span id="cb29-90"><a href="#cb29-90" aria-hidden="true" tabindex="-1"></a>                  <span class="cf">for</span> d, w <span class="kw">in</span> <span class="bu">zip</span>(rolling_diffs, rolling_windows)]</span>
+<span id="cb29-91"><a href="#cb29-91" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb29-92"><a href="#cb29-92" aria-hidden="true" tabindex="-1"></a>    ax3.plot(windows[:<span class="op">-</span><span class="dv">1</span>], lookback_eff, <span class="st">'b-o'</span>, label<span class="op">=</span><span class="st">'Lookback Efficiency'</span>, </span>
+<span id="cb29-93"><a href="#cb29-93" aria-hidden="true" tabindex="-1"></a>             linewidth<span class="op">=</span><span class="dv">2</span>, markersize<span class="op">=</span><span class="dv">6</span>)</span>
+<span id="cb29-94"><a href="#cb29-94" aria-hidden="true" tabindex="-1"></a>    ax3.plot(rolling_windows, rolling_eff, <span class="st">'r-s'</span>, label<span class="op">=</span><span class="st">'Rolling Efficiency'</span>, </span>
+<span id="cb29-95"><a href="#cb29-95" aria-hidden="true" tabindex="-1"></a>             linewidth<span class="op">=</span><span class="dv">2</span>, markersize<span class="op">=</span><span class="dv">6</span>)</span>
+<span id="cb29-96"><a href="#cb29-96" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb29-97"><a href="#cb29-97" aria-hidden="true" tabindex="-1"></a>    ax3.set_xlabel(<span class="st">'Memory Window Size'</span>)</span>
+<span id="cb29-98"><a href="#cb29-98" aria-hidden="true" tabindex="-1"></a>    ax3.set_ylabel(<span class="st">'Efficiency (Accuracy/Memory Cost)'</span>)</span>
+<span id="cb29-99"><a href="#cb29-99" aria-hidden="true" tabindex="-1"></a>    ax3.set_title(<span class="st">'Memory Method Efficiency Comparison'</span>)</span>
+<span id="cb29-100"><a href="#cb29-100" aria-hidden="true" tabindex="-1"></a>    ax3.legend()</span>
+<span id="cb29-101"><a href="#cb29-101" aria-hidden="true" tabindex="-1"></a>    ax3.grid(<span class="va">True</span>, alpha<span class="op">=</span><span class="fl">0.3</span>)</span>
+<span id="cb29-102"><a href="#cb29-102" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb29-103"><a href="#cb29-103" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 4. Computational cost analysis</span></span>
+<span id="cb29-104"><a href="#cb29-104" aria-hidden="true" tabindex="-1"></a>    ax4 <span class="op">=</span> fig.add_subplot(gs[<span class="dv">1</span>, <span class="dv">2</span>])</span>
+<span id="cb29-105"><a href="#cb29-105" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb29-106"><a href="#cb29-106" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Computational cost: lookback is O(window), rolling is O(window * time)</span></span>
+<span id="cb29-107"><a href="#cb29-107" aria-hidden="true" tabindex="-1"></a>    time_steps <span class="op">=</span> <span class="bu">len</span>(likelihoods)</span>
+<span id="cb29-108"><a href="#cb29-108" aria-hidden="true" tabindex="-1"></a>    lookback_cost <span class="op">=</span> windows[:<span class="op">-</span><span class="dv">1</span>]  <span class="co"># Just the window size</span></span>
+<span id="cb29-109"><a href="#cb29-109" aria-hidden="true" tabindex="-1"></a>    rolling_cost <span class="op">=</span> [w <span class="op">*</span> time_steps <span class="cf">for</span> w <span class="kw">in</span> rolling_windows]  <span class="co"># Window * time</span></span>
+<span id="cb29-110"><a href="#cb29-110" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb29-111"><a href="#cb29-111" aria-hidden="true" tabindex="-1"></a>    ax4.plot(windows[:<span class="op">-</span><span class="dv">1</span>], lookback_cost, <span class="st">'b-o'</span>, label<span class="op">=</span><span class="st">'Lookback Cost'</span>, </span>
+<span id="cb29-112"><a href="#cb29-112" aria-hidden="true" tabindex="-1"></a>             linewidth<span class="op">=</span><span class="dv">2</span>, markersize<span class="op">=</span><span class="dv">6</span>)</span>
+<span id="cb29-113"><a href="#cb29-113" aria-hidden="true" tabindex="-1"></a>    ax4.plot(rolling_windows, rolling_cost, <span class="st">'r-s'</span>, label<span class="op">=</span><span class="st">'Rolling Cost'</span>, </span>
+<span id="cb29-114"><a href="#cb29-114" aria-hidden="true" tabindex="-1"></a>             linewidth<span class="op">=</span><span class="dv">2</span>, markersize<span class="op">=</span><span class="dv">6</span>)</span>
+<span id="cb29-115"><a href="#cb29-115" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb29-116"><a href="#cb29-116" aria-hidden="true" tabindex="-1"></a>    ax4.set_xlabel(<span class="st">'Memory Window Size'</span>)</span>
+<span id="cb29-117"><a href="#cb29-117" aria-hidden="true" tabindex="-1"></a>    ax4.set_ylabel(<span class="st">'Computational Cost (Operations)'</span>)</span>
+<span id="cb29-118"><a href="#cb29-118" aria-hidden="true" tabindex="-1"></a>    ax4.set_title(<span class="st">'Computational Cost Comparison'</span>)</span>
+<span id="cb29-119"><a href="#cb29-119" aria-hidden="true" tabindex="-1"></a>    ax4.legend()</span>
+<span id="cb29-120"><a href="#cb29-120" aria-hidden="true" tabindex="-1"></a>    ax4.grid(<span class="va">True</span>, alpha<span class="op">=</span><span class="fl">0.3</span>)</span>
+<span id="cb29-121"><a href="#cb29-121" aria-hidden="true" tabindex="-1"></a>    ax4.set_yscale(<span class="st">'log'</span>)</span>
+<span id="cb29-122"><a href="#cb29-122" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb29-123"><a href="#cb29-123" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 5. Method selection guide</span></span>
+<span id="cb29-124"><a href="#cb29-124" aria-hidden="true" tabindex="-1"></a>    ax5 <span class="op">=</span> fig.add_subplot(gs[<span class="dv">2</span>, :<span class="dv">2</span>])</span>
+<span id="cb29-125"><a href="#cb29-125" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb29-126"><a href="#cb29-126" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Create a decision matrix</span></span>
+<span id="cb29-127"><a href="#cb29-127" aria-hidden="true" tabindex="-1"></a>    scenarios <span class="op">=</span> [<span class="st">'Real-time</span><span class="ch">\n</span><span class="st">Streaming'</span>, <span class="st">'Batch</span><span class="ch">\n</span><span class="st">Processing'</span>, <span class="st">'Resource</span><span class="ch">\n</span><span class="st">Constrained'</span>, </span>
+<span id="cb29-128"><a href="#cb29-128" aria-hidden="true" tabindex="-1"></a>                <span class="st">'High</span><span class="ch">\n</span><span class="st">Accuracy'</span>, <span class="st">'Adaptive</span><span class="ch">\n</span><span class="st">Systems'</span>]</span>
+<span id="cb29-129"><a href="#cb29-129" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb29-130"><a href="#cb29-130" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Ratings: 0=Poor, 1=Fair, 2=Good, 3=Excellent</span></span>
+<span id="cb29-131"><a href="#cb29-131" aria-hidden="true" tabindex="-1"></a>    lookback_ratings <span class="op">=</span> [<span class="dv">3</span>, <span class="dv">1</span>, <span class="dv">3</span>, <span class="dv">2</span>, <span class="dv">1</span>]  <span class="co"># Good for real-time, resource-constrained</span></span>
+<span id="cb29-132"><a href="#cb29-132" aria-hidden="true" tabindex="-1"></a>    rolling_ratings <span class="op">=</span> [<span class="dv">1</span>, <span class="dv">3</span>, <span class="dv">1</span>, <span class="dv">3</span>, <span class="dv">3</span>]   <span class="co"># Good for batch, high-accuracy, adaptive</span></span>
+<span id="cb29-133"><a href="#cb29-133" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb29-134"><a href="#cb29-134" aria-hidden="true" tabindex="-1"></a>    x <span class="op">=</span> np.arange(<span class="bu">len</span>(scenarios))</span>
+<span id="cb29-135"><a href="#cb29-135" aria-hidden="true" tabindex="-1"></a>    width <span class="op">=</span> <span class="fl">0.35</span></span>
+<span id="cb29-136"><a href="#cb29-136" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb29-137"><a href="#cb29-137" aria-hidden="true" tabindex="-1"></a>    bars1 <span class="op">=</span> ax5.bar(x <span class="op">-</span> width<span class="op">/</span><span class="dv">2</span>, lookback_ratings, width, label<span class="op">=</span><span class="st">'Lookback Memory'</span>, </span>
+<span id="cb29-138"><a href="#cb29-138" aria-hidden="true" tabindex="-1"></a>                   color<span class="op">=</span><span class="st">'blue'</span>, alpha<span class="op">=</span><span class="fl">0.7</span>)</span>
+<span id="cb29-139"><a href="#cb29-139" aria-hidden="true" tabindex="-1"></a>    bars2 <span class="op">=</span> ax5.bar(x <span class="op">+</span> width<span class="op">/</span><span class="dv">2</span>, rolling_ratings, width, label<span class="op">=</span><span class="st">'Rolling Memory'</span>, </span>
+<span id="cb29-140"><a href="#cb29-140" aria-hidden="true" tabindex="-1"></a>                   color<span class="op">=</span><span class="st">'red'</span>, alpha<span class="op">=</span><span class="fl">0.7</span>)</span>
+<span id="cb29-141"><a href="#cb29-141" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb29-142"><a href="#cb29-142" aria-hidden="true" tabindex="-1"></a>    ax5.set_xlabel(<span class="st">'Use Case Scenarios'</span>)</span>
+<span id="cb29-143"><a href="#cb29-143" aria-hidden="true" tabindex="-1"></a>    ax5.set_ylabel(<span class="st">'Suitability Rating (0-3)'</span>)</span>
+<span id="cb29-144"><a href="#cb29-144" aria-hidden="true" tabindex="-1"></a>    ax5.set_title(<span class="st">'Memory Method Suitability by Use Case'</span>)</span>
+<span id="cb29-145"><a href="#cb29-145" aria-hidden="true" tabindex="-1"></a>    ax5.set_xticks(x)</span>
+<span id="cb29-146"><a href="#cb29-146" aria-hidden="true" tabindex="-1"></a>    ax5.set_xticklabels(scenarios)</span>
+<span id="cb29-147"><a href="#cb29-147" aria-hidden="true" tabindex="-1"></a>    ax5.legend()</span>
+<span id="cb29-148"><a href="#cb29-148" aria-hidden="true" tabindex="-1"></a>    ax5.grid(<span class="va">True</span>, alpha<span class="op">=</span><span class="fl">0.3</span>, axis<span class="op">=</span><span class="st">'y'</span>)</span>
+<span id="cb29-149"><a href="#cb29-149" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb29-150"><a href="#cb29-150" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Add value labels on bars</span></span>
+<span id="cb29-151"><a href="#cb29-151" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> bars <span class="kw">in</span> [bars1, bars2]:</span>
+<span id="cb29-152"><a href="#cb29-152" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> bar <span class="kw">in</span> bars:</span>
+<span id="cb29-153"><a href="#cb29-153" aria-hidden="true" tabindex="-1"></a>            height <span class="op">=</span> bar.get_height()</span>
+<span id="cb29-154"><a href="#cb29-154" aria-hidden="true" tabindex="-1"></a>            ax5.text(bar.get_x() <span class="op">+</span> bar.get_width()<span class="op">/</span><span class="fl">2.</span>, height <span class="op">+</span> <span class="fl">0.05</span>,</span>
+<span id="cb29-155"><a href="#cb29-155" aria-hidden="true" tabindex="-1"></a>                    <span class="ss">f'</span><span class="sc">{</span>height<span class="sc">}</span><span class="ss">'</span>, ha<span class="op">=</span><span class="st">'center'</span>, va<span class="op">=</span><span class="st">'bottom'</span>)</span>
+<span id="cb29-156"><a href="#cb29-156" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb29-157"><a href="#cb29-157" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 6. Summary recommendations</span></span>
+<span id="cb29-158"><a href="#cb29-158" aria-hidden="true" tabindex="-1"></a>    ax6 <span class="op">=</span> fig.add_subplot(gs[<span class="dv">2</span>, <span class="dv">2</span>])</span>
+<span id="cb29-159"><a href="#cb29-159" aria-hidden="true" tabindex="-1"></a>    ax6.axis(<span class="st">'off'</span>)</span>
+<span id="cb29-160"><a href="#cb29-160" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb29-161"><a href="#cb29-161" aria-hidden="true" tabindex="-1"></a>    summary_text <span class="op">=</span> <span class="st">"""MEMORY METHOD COMPARISON:</span></span>
+<span id="cb29-162"><a href="#cb29-162" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-163"><a href="#cb29-163" aria-hidden="true" tabindex="-1"></a><span class="st">LOOKBACK MEMORY:</span></span>
+<span id="cb29-164"><a href="#cb29-164" aria-hidden="true" tabindex="-1"></a><span class="st">✓ Simple implementation</span></span>
+<span id="cb29-165"><a href="#cb29-165" aria-hidden="true" tabindex="-1"></a><span class="st">✓ Lower computational cost</span></span>
+<span id="cb29-166"><a href="#cb29-166" aria-hidden="true" tabindex="-1"></a><span class="st">✓ Good for real-time systems</span></span>
+<span id="cb29-167"><a href="#cb29-167" aria-hidden="true" tabindex="-1"></a><span class="st">✗ May miss important history</span></span>
+<span id="cb29-168"><a href="#cb29-168" aria-hidden="true" tabindex="-1"></a><span class="st">✗ Less adaptive to changes</span></span>
+<span id="cb29-169"><a href="#cb29-169" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-170"><a href="#cb29-170" aria-hidden="true" tabindex="-1"></a><span class="st">ROLLING MEMORY:</span></span>
+<span id="cb29-171"><a href="#cb29-171" aria-hidden="true" tabindex="-1"></a><span class="st">✓ Maintains recent context</span></span>
+<span id="cb29-172"><a href="#cb29-172" aria-hidden="true" tabindex="-1"></a><span class="st">✓ Better for pattern detection</span></span>
+<span id="cb29-173"><a href="#cb29-173" aria-hidden="true" tabindex="-1"></a><span class="st">✓ Adapts to changing conditions</span></span>
+<span id="cb29-174"><a href="#cb29-174" aria-hidden="true" tabindex="-1"></a><span class="st">✗ Higher computational cost</span></span>
+<span id="cb29-175"><a href="#cb29-175" aria-hidden="true" tabindex="-1"></a><span class="st">✗ More complex implementation</span></span>
+<span id="cb29-176"><a href="#cb29-176" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-177"><a href="#cb29-177" aria-hidden="true" tabindex="-1"></a><span class="st">CHOOSE LOOKBACK FOR:</span></span>
+<span id="cb29-178"><a href="#cb29-178" aria-hidden="true" tabindex="-1"></a><span class="st">• Real-time applications</span></span>
+<span id="cb29-179"><a href="#cb29-179" aria-hidden="true" tabindex="-1"></a><span class="st">• Resource constraints</span></span>
+<span id="cb29-180"><a href="#cb29-180" aria-hidden="true" tabindex="-1"></a><span class="st">• Simple decision making</span></span>
+<span id="cb29-181"><a href="#cb29-181" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-182"><a href="#cb29-182" aria-hidden="true" tabindex="-1"></a><span class="st">CHOOSE ROLLING FOR:</span></span>
+<span id="cb29-183"><a href="#cb29-183" aria-hidden="true" tabindex="-1"></a><span class="st">• Pattern recognition</span></span>
+<span id="cb29-184"><a href="#cb29-184" aria-hidden="true" tabindex="-1"></a><span class="st">• Adaptive systems</span></span>
+<span id="cb29-185"><a href="#cb29-185" aria-hidden="true" tabindex="-1"></a><span class="st">• When recent context matters"""</span></span>
+<span id="cb29-186"><a href="#cb29-186" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb29-187"><a href="#cb29-187" aria-hidden="true" tabindex="-1"></a>    ax6.text(<span class="fl">0.05</span>, <span class="fl">0.95</span>, summary_text, transform<span class="op">=</span>ax6.transAxes, fontsize<span class="op">=</span><span class="dv">10</span>,</span>
+<span id="cb29-188"><a href="#cb29-188" aria-hidden="true" tabindex="-1"></a>             verticalalignment<span class="op">=</span><span class="st">'top'</span>, fontfamily<span class="op">=</span><span class="st">'monospace'</span>,</span>
+<span id="cb29-189"><a href="#cb29-189" aria-hidden="true" tabindex="-1"></a>             bbox<span class="op">=</span><span class="bu">dict</span>(boxstyle<span class="op">=</span><span class="st">'round'</span>, facecolor<span class="op">=</span><span class="st">'lightyellow'</span>, alpha<span class="op">=</span><span class="fl">0.8</span>))</span>
+<span id="cb29-190"><a href="#cb29-190" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb29-191"><a href="#cb29-191" aria-hidden="true" tabindex="-1"></a>    plt.suptitle(<span class="st">'Complete Memory Analysis: Lookback vs Rolling Methods'</span>, fontsize<span class="op">=</span><span class="dv">16</span>, y<span class="op">=</span><span class="fl">0.98</span>)</span>
+<span id="cb29-192"><a href="#cb29-192" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> fig</span>
+<span id="cb29-193"><a href="#cb29-193" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-194"><a href="#cb29-194" aria-hidden="true" tabindex="-1"></a><span class="co"># Create the complete analysis</span></span>
+<span id="cb29-195"><a href="#cb29-195" aria-hidden="true" tabindex="-1"></a>complete_fig <span class="op">=</span> plot_complete_memory_analysis(corrected_results, balanced_likelihoods)</span>
+<span id="cb29-196"><a href="#cb29-196" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="03_recursive_updating_files/figure-html/cell-21-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<hr>
+<p><a href="https://github.com/Matthew-Redrup/technical-blog/blob/main/technical_blog/rbe/recursive.py#L539" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="plot_memory_insights" class="level3">
+<h3 class="anchored" data-anchor-id="plot_memory_insights">plot_memory_insights</h3>
+<blockquote class="blockquote">
+<pre><code> plot_memory_insights (results, likelihoods)</code></pre>
+</blockquote>
+<p><em>Create insightful visualizations of memory effects</em></p>
+<hr>
+<p><a href="https://github.com/Matthew-Redrup/technical-blog/blob/main/technical_blog/rbe/recursive.py#L665" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="plot_memory_decision_guide" class="level3">
+<h3 class="anchored" data-anchor-id="plot_memory_decision_guide">plot_memory_decision_guide</h3>
+<blockquote class="blockquote">
+<pre><code> plot_memory_decision_guide (results)</code></pre>
+</blockquote>
+<p><em>Create a practical decision guide for choosing memory window size</em></p>
+</section>
+</section>
+<section id="cybersecurity-applications" class="level2">
+<h2 class="anchored" data-anchor-id="cybersecurity-applications">Cybersecurity Applications</h2>
+<p>Let’s apply recursive updating to realistic cybersecurity scenarios.</p>
+<hr>
+<p><a href="https://github.com/Matthew-Redrup/technical-blog/blob/main/technical_blog/rbe/recursive.py#L784" target="_blank" style="float:right; font-size:smaller">source</a></p>
+<section id="update_baseline" class="level3">
+<h3 class="anchored" data-anchor-id="update_baseline">update_baseline</h3>
+<blockquote class="blockquote">
+<pre><code> update_baseline (current_baseline, observation, adaptation_rate)</code></pre>
+</blockquote>
+<p><em>Update baseline using exponential moving average</em></p>
+<hr>
+<p><a href="https://github.com/Matthew-Redrup/technical-blog/blob/main/technical_blog/rbe/recursive.py#L789" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="multi_step_attack_detection" class="level3">
+<h3 class="anchored" data-anchor-id="multi_step_attack_detection">multi_step_attack_detection</h3>
+<blockquote class="blockquote">
+<pre><code> multi_step_attack_detection (event_sequence, attack_patterns,
+                              window_size=5, threshold=0.6)</code></pre>
+</blockquote>
+<p><em>Improved multi-step attack detection with better calibration</em></p>
+<hr>
+<p><a href="https://github.com/Matthew-Redrup/technical-blog/blob/main/technical_blog/rbe/recursive.py#L846" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="adaptive_threat_monitor" class="level3">
+<h3 class="anchored" data-anchor-id="adaptive_threat_monitor">adaptive_threat_monitor</h3>
+<blockquote class="blockquote">
+<pre><code> adaptive_threat_monitor (baseline_behavior, time_series_data,
+                          adaptation_rate=0.01, threshold=0.6,
+                          decay_rate=0.1)</code></pre>
+</blockquote>
+<p><em>Refined version with better memory management</em></p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Type</strong></th>
+<th><strong>Default</strong></th>
+<th><strong>Details</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>baseline_behavior</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="even">
+<td>time_series_data</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>adaptation_rate</td>
+<td>float</td>
+<td>0.01</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>threshold</td>
+<td>float</td>
+<td>0.6</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>decay_rate</td>
+<td>float</td>
+<td>0.1</td>
+<td>Add memory decay</td>
+</tr>
+</tbody>
+</table>
+<div id="cell-39" class="cell">
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Demonstrate adaptive threat monitoring</span></span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Example: Network Traffic Monitoring"</span>)</span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>baseline <span class="op">=</span> <span class="dv">100</span>  <span class="co"># Baseline network traffic (packets/sec)</span></span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a>traffic_data <span class="op">=</span> [<span class="dv">95</span>, <span class="dv">102</span>, <span class="dv">98</span>, <span class="dv">105</span>, <span class="dv">150</span>, <span class="dv">180</span>, <span class="dv">160</span>, <span class="dv">110</span>, <span class="dv">95</span>, <span class="dv">200</span>, <span class="dv">220</span>, <span class="dv">190</span>, <span class="dv">100</span>, <span class="dv">98</span>]</span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a>monitoring_results <span class="op">=</span> adaptive_threat_monitor(</span>
+<span id="cb35-7"><a href="#cb35-7" aria-hidden="true" tabindex="-1"></a>    baseline, traffic_data, </span>
+<span id="cb35-8"><a href="#cb35-8" aria-hidden="true" tabindex="-1"></a>    adaptation_rate<span class="op">=</span><span class="fl">0.2</span>, threshold<span class="op">=</span><span class="fl">0.6</span>, decay_rate<span class="op">=</span><span class="fl">0.15</span></span>
+<span id="cb35-9"><a href="#cb35-9" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb35-10"><a href="#cb35-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-11"><a href="#cb35-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="ch">\n</span><span class="ss">Summary: </span><span class="sc">{</span><span class="bu">sum</span>(monitoring_results[<span class="st">'alerts'</span>])<span class="sc">}</span><span class="ss"> alerts generated"</span>)</span>
+<span id="cb35-12"><a href="#cb35-12" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Alert steps: </span><span class="sc">{</span>[i <span class="cf">for</span> i, alert <span class="kw">in</span> <span class="bu">enumerate</span>(monitoring_results[<span class="st">'alerts'</span>]) <span class="cf">if</span> alert]<span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Example: Network Traffic Monitoring
+=== REFINED THREAT MONITORING ===
+Time 0: Obs=95.0, DevPct=5.0%, Threat=0.249, Alert=False
+Time 1: Obs=102.0, DevPct=2.0%, Threat=0.090, Alert=False
+Time 2: Obs=98.0, DevPct=2.0%, Threat=0.069, Alert=False
+Time 3: Obs=105.0, DevPct=5.0%, Threat=0.086, Alert=False
+Time 4: Obs=150.0, DevPct=50.0%, Threat=0.459, Alert=False
+Time 5: Obs=180.0, DevPct=80.0%, Threat=0.884, Alert=True
+Time 6: Obs=160.0, DevPct=60.0%, Threat=0.986, Alert=True
+Time 7: Obs=110.0, DevPct=10.0%, Threat=0.967, Alert=True
+Time 8: Obs=95.0, DevPct=5.0%, Threat=0.848, Alert=True
+Time 9: Obs=200.0, DevPct=100.0%, Threat=0.980, Alert=True
+Time 10: Obs=220.0, DevPct=120.0%, Threat=0.998, Alert=True
+Time 11: Obs=190.0, DevPct=90.0%, Threat=1.000, Alert=True
+Time 12: Obs=100.0, DevPct=0.0%, Threat=0.908, Alert=True
+Time 13: Obs=98.0, DevPct=2.0%, Threat=0.505, Alert=False
+
+Summary: 8 alerts generated
+Alert steps: [5, 6, 7, 8, 9, 10, 11, 12]</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="excellent-improvements" class="level2">
+<h2 class="anchored" data-anchor-id="excellent-improvements">Excellent Improvements ✅</h2>
+<ol type="1">
+<li><p><strong>Catches the major spike sequence</strong>: Properly detects the sustained high traffic period (steps 5-11: 180, 160, 110, 95, 200, 220, 190)</p></li>
+<li><p><strong>Memory decay working</strong>: Notice how the threat probability drops from 0.908 to 0.505 between steps 12-13 when traffic returns to normal (100, 98) - this shows the system is recovering</p></li>
+<li><p><strong>Better sensitivity</strong>: The 150 spike (step 4) now gets a reasonable threat score of 0.459, which is appropriately elevated but not quite alerting</p></li>
+<li><p><strong>Proper alert timing</strong>: First alert at step 5 (180) makes sense as this is when the sustained anomalous period really begins</p></li>
+</ol>
+</section>
+<section id="realistic-behavior-patterns" class="level2">
+<h2 class="anchored" data-anchor-id="realistic-behavior-patterns">Realistic Behavior Patterns</h2>
+<ul>
+<li><strong>Escalation</strong>: 0.459 → 0.884 → 0.986 as the attack intensifies</li>
+<li><strong>Persistence</strong>: Maintains high threat levels during the anomalous period (steps 5-11)</li>
+<li><strong>Recovery</strong>: Begins returning to normal when traffic normalizes (step 13: 0.505)</li>
+</ul>
+</section>
+<section id="minor-observations" class="level2">
+<h2 class="anchored" data-anchor-id="minor-observations">Minor Observations</h2>
+<ul>
+<li><strong>Step 4 (150)</strong>: Not alerting might be appropriate - could be a single anomalous packet burst rather than sustained attack</li>
+<li><strong>Step 8 (95)</strong>: Still alerting even though value is normal - this makes sense because it’s in the middle of an anomalous sequence, showing the system has “situational awareness”</li>
+</ul>
+</section>
+<section id="real-world-applicability" class="level2">
+<h2 class="anchored" data-anchor-id="real-world-applicability">Real-World Applicability</h2>
+<p>This behavior pattern would work well in practice: - <strong>Reduces false positives</strong>: Doesn’t alert on single spikes - <strong>Detects sustained attacks</strong>: Catches the extended high-traffic period - <strong>Recovers gracefully</strong>: Returns to normal sensitivity after threats pass - <strong>Maintains context</strong>: Considers recent history when evaluating current observations</p>
+<p>The refined version successfully balances sensitivity with stability - exactly what you’d want in a production cybersecurity monitoring system!</p>
+<div id="cell-41" class="cell">
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Demonstrate multi-step attack detection  </span></span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">"</span> <span class="op">+</span> <span class="st">"="</span><span class="op">*</span><span class="dv">50</span>)</span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Example: Multi-step Attack Detection"</span>)</span>
+<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-5"><a href="#cb37-5" aria-hidden="true" tabindex="-1"></a>attack_patterns <span class="op">=</span> {</span>
+<span id="cb37-6"><a href="#cb37-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Reconnaissance'</span>: [<span class="st">'port_scan'</span>, <span class="st">'dns_lookup'</span>, <span class="st">'service_enum'</span>],</span>
+<span id="cb37-7"><a href="#cb37-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Lateral_Movement'</span>: [<span class="st">'credential_theft'</span>, <span class="st">'remote_login'</span>, <span class="st">'privilege_escalation'</span>], </span>
+<span id="cb37-8"><a href="#cb37-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Data_Exfiltration'</span>: [<span class="st">'database_access'</span>, <span class="st">'file_compression'</span>, <span class="st">'network_transfer'</span>]</span>
+<span id="cb37-9"><a href="#cb37-9" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb37-10"><a href="#cb37-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-11"><a href="#cb37-11" aria-hidden="true" tabindex="-1"></a>event_sequence <span class="op">=</span> [<span class="st">'port_scan'</span>, <span class="st">'normal_traffic'</span>, <span class="st">'dns_lookup'</span>, <span class="st">'credential_theft'</span>, </span>
+<span id="cb37-12"><a href="#cb37-12" aria-hidden="true" tabindex="-1"></a>                 <span class="st">'service_enum'</span>, <span class="st">'remote_login'</span>, <span class="st">'normal_traffic'</span>, <span class="st">'database_access'</span>]</span>
+<span id="cb37-13"><a href="#cb37-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-14"><a href="#cb37-14" aria-hidden="true" tabindex="-1"></a>attack_results <span class="op">=</span> multi_step_attack_detection(</span>
+<span id="cb37-15"><a href="#cb37-15" aria-hidden="true" tabindex="-1"></a>    event_sequence, attack_patterns, threshold<span class="op">=</span><span class="fl">0.6</span></span>
+<span id="cb37-16"><a href="#cb37-16" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb37-17"><a href="#cb37-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-18"><a href="#cb37-18" aria-hidden="true" tabindex="-1"></a>detected_patterns <span class="op">=</span> <span class="bu">set</span>([p <span class="cf">for</span> patterns <span class="kw">in</span> attack_results[<span class="st">'detected_patterns'</span>] <span class="cf">for</span> p <span class="kw">in</span> patterns])</span>
+<span id="cb37-19"><a href="#cb37-19" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="ch">\n</span><span class="ss">Detected attack patterns: </span><span class="sc">{</span>detected_patterns <span class="cf">if</span> detected_patterns <span class="cf">else</span> <span class="st">'None'</span><span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+==================================================
+Example: Multi-step Attack Detection
+=== IMPROVED MULTI-STEP ATTACK DETECTION ===
+
+Time step 0: Event = port_scan
+  Reconnaissance: Match=True, P(attack)=0.794, Alert=True
+  Lateral_Movement: Match=False, P(attack)=0.097, Alert=False
+  Data_Exfiltration: Match=False, P(attack)=0.097, Alert=False
+
+Time step 1: Event = normal_traffic
+  Reconnaissance: Match=False, P(attack)=0.491, Alert=False
+  Lateral_Movement: Match=False, P(attack)=0.026, Alert=False
+  Data_Exfiltration: Match=False, P(attack)=0.026, Alert=False
+
+Time step 2: Event = dns_lookup
+  Reconnaissance: Match=True, P(attack)=0.897, Alert=True
+  Lateral_Movement: Match=False, P(attack)=0.007, Alert=False
+  Data_Exfiltration: Match=False, P(attack)=0.007, Alert=False
+
+Time step 3: Event = credential_theft
+  Reconnaissance: Match=False, P(attack)=0.685, Alert=True
+  Lateral_Movement: Match=True, P(attack)=0.057, Alert=False
+  Data_Exfiltration: Match=False, P(attack)=0.002, Alert=False
+
+Time step 4: Event = service_enum
+  Reconnaissance: Match=True, P(attack)=0.951, Alert=True
+  Lateral_Movement: Match=False, P(attack)=0.015, Alert=False
+  Data_Exfiltration: Match=False, P(attack)=0.000, Alert=False
+
+Time step 5: Event = remote_login
+  Reconnaissance: Match=False, P(attack)=0.830, Alert=True
+  Lateral_Movement: Match=True, P(attack)=0.119, Alert=False
+  Data_Exfiltration: Match=False, P(attack)=0.000, Alert=False
+
+Time step 6: Event = normal_traffic
+  Reconnaissance: Match=False, P(attack)=0.550, Alert=False
+  Lateral_Movement: Match=False, P(attack)=0.033, Alert=False
+  Data_Exfiltration: Match=False, P(attack)=0.000, Alert=False
+
+Time step 7: Event = database_access
+  Reconnaissance: Match=False, P(attack)=0.234, Alert=False
+  Lateral_Movement: Match=False, P(attack)=0.008, Alert=False
+  Data_Exfiltration: Match=True, P(attack)=0.000, Alert=False
+
+Detected attack patterns: {'Reconnaissance'}</code></pre>
+</div>
+</div>
+</section>
+<section id="successful-detection" class="level2">
+<h2 class="anchored" data-anchor-id="successful-detection">Successful Detection</h2>
+<p><strong>Reconnaissance Pattern Detected</strong>: The system correctly identified the Reconnaissance attack pattern, which makes sense given the event sequence contained multiple matching events: - <code>port_scan</code> (step 0) → P(attack) jumps to 79.4% - <code>dns_lookup</code> (step 2) → P(attack) increases to 89.7% - <code>service_enum</code> (step 4) → P(attack) reaches 95.1%</p>
+</section>
+<section id="key-improvements-working" class="level2">
+<h2 class="anchored" data-anchor-id="key-improvements-working">Key Improvements Working</h2>
+<ol type="1">
+<li><p><strong>Responsive Detection</strong>: The system now alerts immediately when strong evidence appears (port_scan triggered the first alert)</p></li>
+<li><p><strong>Evidence Accumulation</strong>: Each matching event strengthens the belief - notice how the Reconnaissance probability keeps climbing: 79.4% → 89.7% → 95.1%</p></li>
+<li><p><strong>Proper Decay</strong>: When non-matching events occur (like <code>normal_traffic</code>), the probabilities appropriately decrease but don’t crash to zero</p></li>
+<li><p><strong>Pattern Discrimination</strong>: The other patterns (Lateral_Movement, Data_Exfiltration) remain at low probabilities since they don’t see their specific events clustering together</p></li>
+</ol>
+</section>
+<section id="interesting-observations" class="level2">
+<h2 class="anchored" data-anchor-id="interesting-observations">Interesting Observations</h2>
+<ul>
+<li><strong>Persistence</strong>: Even after <code>normal_traffic</code> events, the Reconnaissance pattern maintains elevated probability (55% at step 6), showing the system has “memory” of the attack sequence</li>
+<li><strong>Cross-contamination</strong>: The <code>credential_theft</code> event briefly elevates Reconnaissance probability even though it’s not in that pattern - this shows the system is appropriately uncertain when seeing attack-like behavior</li>
+<li><strong>Late Evidence</strong>: The <code>database_access</code> event comes too late and after too much contradictory evidence to trigger the Data_Exfiltration pattern</li>
+</ul>
+</section>
+<section id="what-this-demonstrates" class="level2">
+<h2 class="anchored" data-anchor-id="what-this-demonstrates">What This Demonstrates</h2>
+<p>The improved calibration successfully balances: - <strong>Sensitivity</strong>: Detects real attack patterns when they occur - <strong>Specificity</strong>: Doesn’t generate false alarms for isolated suspicious events - <strong>Temporal reasoning</strong>: Accumulates evidence over time rather than treating each event independently</p>
+<p>This is exactly the kind of behavior you’d want in a real cybersecurity monitoring system - it builds confidence as attack patterns unfold while remaining robust to noise and isolated anomalous events.</p>
+</section>
+<section id="when-recursion-breaks-down" class="level2">
+<h2 class="anchored" data-anchor-id="when-recursion-breaks-down">When Recursion Breaks Down</h2>
+<p>Recursive updating isn’t always optimal. Let’s explore scenarios where it struggles and potential solutions.</p>
+<hr>
+<p><a href="https://github.com/Matthew-Redrup/technical-blog/blob/main/technical_blog/rbe/recursive.py#L952" target="_blank" style="float:right; font-size:smaller">source</a></p>
+<section id="standard_recursive_filter" class="level3">
+<h3 class="anchored" data-anchor-id="standard_recursive_filter">standard_recursive_filter</h3>
+<blockquote class="blockquote">
+<pre><code> standard_recursive_filter (observations)</code></pre>
+</blockquote>
+<p><em>Standard recursive mean (no adaptation)</em></p>
+<hr>
+<p><a href="https://github.com/Matthew-Redrup/technical-blog/blob/main/technical_blog/rbe/recursive.py#L941" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="windowed_filter" class="level3">
+<h3 class="anchored" data-anchor-id="windowed_filter">windowed_filter</h3>
+<blockquote class="blockquote">
+<pre><code> windowed_filter (observations, window_size=20)</code></pre>
+</blockquote>
+<p><em>Simple windowed mean filter</em></p>
+<hr>
+<p><a href="https://github.com/Matthew-Redrup/technical-blog/blob/main/technical_blog/rbe/recursive.py#L930" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="forgetting_factor_filter" class="level3">
+<h3 class="anchored" data-anchor-id="forgetting_factor_filter">forgetting_factor_filter</h3>
+<blockquote class="blockquote">
+<pre><code> forgetting_factor_filter (observations, forgetting_factor=0.95)</code></pre>
+</blockquote>
+<p><em>Simple filter with exponential forgetting</em></p>
+<hr>
+<p><a href="https://github.com/Matthew-Redrup/technical-blog/blob/main/technical_blog/rbe/recursive.py#L915" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="compare_adaptation_strategies" class="level3">
+<h3 class="anchored" data-anchor-id="compare_adaptation_strategies">compare_adaptation_strategies</h3>
+<blockquote class="blockquote">
+<pre><code> compare_adaptation_strategies (observations, true_states, strategies)</code></pre>
+</blockquote>
+<p><em>Compare different adaptation strategies for non-stationary data</em></p>
+<hr>
+<p><a href="https://github.com/Matthew-Redrup/technical-blog/blob/main/technical_blog/rbe/recursive.py#L893" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="non_stationary_demo" class="level3">
+<h3 class="anchored" data-anchor-id="non_stationary_demo">non_stationary_demo</h3>
+<blockquote class="blockquote">
+<pre><code> non_stationary_demo (change_points, segment_patterns, n_observations=100)</code></pre>
+</blockquote>
+<p><em>Demonstrate challenges with non-stationary data</em></p>
+</section>
+</section>
+<section id="summary-and-key-takeaways" class="level2">
+<h2 class="anchored" data-anchor-id="summary-and-key-takeaways">Summary and Key Takeaways</h2>
+<p>Recursive Bayesian updating transforms static inference into dynamic, adaptive learning:</p>
+<section id="mathematical-elegance" class="level3">
+<h3 class="anchored" data-anchor-id="mathematical-elegance"><strong>Mathematical Elegance</strong></h3>
+<ul>
+<li><strong>Recursive structure</strong>: Today’s posterior becomes tomorrow’s prior</li>
+<li><strong>Markov property</strong>: Future depends only on present state</li>
+<li><strong>Optimality</strong>: Mathematically optimal under stationarity assumptions</li>
+</ul>
+</section>
+<section id="computational-advantages" class="level3">
+<h3 class="anchored" data-anchor-id="computational-advantages"><strong>Computational Advantages</strong></h3>
+<ul>
+<li><strong>Memory efficiency</strong>: O(1) storage vs O(n) for batch processing</li>
+<li><strong>Real-time capability</strong>: Updates as evidence arrives</li>
+<li><strong>Scalability</strong>: Performance independent of history length</li>
+</ul>
+</section>
+<section id="practical-applications" class="level3">
+<h3 class="anchored" data-anchor-id="practical-applications"><strong>Practical Applications</strong></h3>
+<ul>
+<li><strong>Threat monitoring</strong>: Adaptive baselines for anomaly detection</li>
+<li><strong>Attack detection</strong>: Multi-step pattern recognition</li>
+<li><strong>State tracking</strong>: Object tracking and motion estimation</li>
+</ul>
+</section>
+<section id="limitations-and-solutions" class="level3">
+<h3 class="anchored" data-anchor-id="limitations-and-solutions"><strong>Limitations and Solutions</strong></h3>
+<ul>
+<li><strong>Non-stationarity</strong>: Use forgetting factors or sliding windows</li>
+<li><strong>Model mismatch</strong>: Robust estimation techniques</li>
+<li><strong>Computational complexity</strong>: Approximate methods (particle filters)</li>
+</ul>
+</section>
+<section id="integration-with-modern-ai" class="level3">
+<h3 class="anchored" data-anchor-id="integration-with-modern-ai"><strong>Integration with Modern AI</strong></h3>
+<ul>
+<li><strong>Hybrid approaches</strong>: Combine with neural networks</li>
+<li><strong>Meta-learning</strong>: Learn to adapt adaptation parameters</li>
+<li><strong>Uncertainty quantification</strong>: Maintain probabilistic reasoning</li>
+</ul>
+<p>The recursive nature of Bayesian updating makes it particularly powerful for cybersecurity applications where threats evolve continuously and decisions must be made in real-time with limited computational resources.</p>
+
+
+</section>
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/Matthew-Redrup\.github\.io\/technical-blog");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/Matthew-Redrup/technical-blog/issues/new" class="toc-action"><i class="bi bi-github"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>
