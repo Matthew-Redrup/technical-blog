@@ -16,8 +16,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from fastcore.test import test_eq, test_close
 from fastcore.all import *
-from .core import *
-from .uncertainty import *
+from . import *  # Import all RBE functionality
 from fasthtml.common import *
 from typing import List, Dict, Tuple, Optional
 import seaborn as sns

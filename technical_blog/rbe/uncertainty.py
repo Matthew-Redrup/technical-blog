@@ -12,7 +12,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 from fastcore.test import test_eq, test_close
 from fastcore.all import *
-from .core import *
+# Import specific functions we need
+from .probability import normalize as prob_normalize, entropy as prob_entropy
+from .bayes_core import update as bayes_update, sequential as bayes_sequential
+from .viz import beliefs as viz_beliefs
 from fasthtml.common import *
 from typing import List, Dict, Tuple
 
