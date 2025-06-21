@@ -47,7 +47,7 @@ def predictive(posterior, likelihood_fn, n_samples=1000, rng=None):
     for param_idx in param_samples:
         # likelihood_fn should return a distribution over observations
         obs_dist = likelihood_fn(param_idx)
-        obs_sample = sample(obs_dist, 1, rng)[0]
+        obs_sample = sample(obs_dist, 1, rng)
         predictions.append(obs_sample)
     
     return np.array(predictions)

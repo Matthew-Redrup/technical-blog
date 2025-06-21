@@ -5,29 +5,35 @@
 # %% auto 0
 __all__ = ['normalize', 'sample', 'entropy', 'kl_div', 'js_div', 'eff_size', 'categorical', 'uniform', 'from_counts']
 
-# %% ../../nbs/rbe/00_probability.ipynb 3
+# %% ../../nbs/rbe/00_probability.ipynb 4
 import numpy as np
 from typing import Optional, Union, List
-from fastcore.test import test_eq, test_close
 from fastcore.all import *
 
-# %% ../../nbs/rbe/00_probability.ipynb 5
+# %% ../../nbs/rbe/00_probability.ipynb 8
 def normalize(probs):
-    "Normalize `probs` to sum to 1"
-    probs = np.asarray(probs)
+    """Normalize probabilities to sum to 1."""
+    probs = np.asarray(probs, dtype=np.float64)  # Ensure float64 for precision
+    if probs.size == 0: raise ValueError("Cannot normalize empty array")
+    if np.any(probs < 0): raise ValueError("Probabilities must be non-negative") 
     s = np.sum(probs)
     if s == 0: raise ValueError("Cannot normalize zero probabilities")
     return probs / s
 
-def sample(probs, n=1, rng=None):
-    "Sample `n` indices from `probs` distribution"
+# %% ../../nbs/rbe/00_probability.ipynb 13
+def sample(probs, # probability distribution
+           n=1, # number of samples
+           rng=None # random number generator
+           ):
+    """Sample indices from probability distribution."""
     if rng is None: rng = np.random.default_rng()
-    probs = np.asarray(probs)
-    if np.any(probs < 0): raise ValueError("Probabilities must be non-negative")
-    probs = normalize(probs)
-    return rng.choice(len(probs), size=n, p=probs)
+    probs = normalize(probs)  # This handles all validation
+    if n == 1:
+        return rng.choice(len(probs), p=probs)  # Return scalar
+    else:
+        return rng.choice(len(probs), size=n, p=probs)  # Return array
 
-# %% ../../nbs/rbe/00_probability.ipynb 8
+# %% ../../nbs/rbe/00_probability.ipynb 20
 def entropy(probs, base=2):
     "Calculate entropy of `probs` distribution in given `base`"
     probs = normalize(probs)
@@ -51,13 +57,13 @@ def js_div(p, q):
     m = 0.5 * (p + q)
     return 0.5 * kl_div(p, m) + 0.5 * kl_div(q, m)
 
-# %% ../../nbs/rbe/00_probability.ipynb 11
+# %% ../../nbs/rbe/00_probability.ipynb 23
 def eff_size(weights):
     "Calculate effective sample size of normalized `weights`"
     weights = normalize(weights)
     return 1.0 / np.sum(weights**2)
 
-# %% ../../nbs/rbe/00_probability.ipynb 14
+# %% ../../nbs/rbe/00_probability.ipynb 26
 def categorical(probs, labels=None):
     "Create categorical distribution from `probs` with optional `labels`"
     probs = normalize(probs)
@@ -76,7 +82,7 @@ def from_counts(counts):
         raise ValueError("Counts must be non-negative")
     return normalize(counts)
 
-# %% ../../nbs/rbe/00_probability.ipynb 17
+# %% ../../nbs/rbe/00_probability.ipynb 29
 __all__ = [
     # Basic operations
     'normalize', 'sample',
