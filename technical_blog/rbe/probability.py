@@ -50,28 +50,36 @@ def entropy(probs, # probability distribution
         return h / np.log(base)
 
 
-# %% ../../nbs/rbe/00_probability.ipynb 24
-def kl_div(p, q, eps=1e-10):
-    "KL divergence from `q` to `p`"
+# %% ../../nbs/rbe/00_probability.ipynb 25
+def kl_div(p, # probability distribution
+           q, # probability distribution
+           eps=1e-15 # epsilon,small number to avoid log(0)
+           ):
+    """KL divergence D(P||Q) from distribution P to distribution Q."""
     p, q = normalize(p), normalize(q)
-    # Add epsilon to avoid log(0)
-    return np.sum(p * np.log((p + eps) / (q + eps)))
+    # Check for undefined case: P has probability where Q doesn't
+    if np.any((p > 0) & (q == 0)): return np.inf
+    # Only use epsilon where both are zero (to handle 0*log(0) = 0)
+    mask = (p > 0)  # Only compute where p > 0
+    result = np.sum(p[mask] * np.log(p[mask] / np.maximum(q[mask], eps)))
+    return result
 
 
-# %% ../../nbs/rbe/00_probability.ipynb 26
+
+# %% ../../nbs/rbe/00_probability.ipynb 29
 def js_div(p, q):
     "Jensen-Shannon divergence between `p` and `q`"
     p, q = normalize(p), normalize(q)
     m = 0.5 * (p + q)
     return 0.5 * kl_div(p, m) + 0.5 * kl_div(q, m)
 
-# %% ../../nbs/rbe/00_probability.ipynb 29
+# %% ../../nbs/rbe/00_probability.ipynb 32
 def eff_size(weights):
     "Calculate effective sample size of normalized `weights`"
     weights = normalize(weights)
     return 1.0 / np.sum(weights**2)
 
-# %% ../../nbs/rbe/00_probability.ipynb 32
+# %% ../../nbs/rbe/00_probability.ipynb 35
 def categorical(probs, labels=None):
     "Create categorical distribution from `probs` with optional `labels`"
     probs = normalize(probs)
@@ -90,7 +98,7 @@ def from_counts(counts):
         raise ValueError("Counts must be non-negative")
     return normalize(counts)
 
-# %% ../../nbs/rbe/00_probability.ipynb 35
+# %% ../../nbs/rbe/00_probability.ipynb 38
 __all__ = [
     # Basic operations
     'normalize', 'sample',
