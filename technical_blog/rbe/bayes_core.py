@@ -12,14 +12,33 @@ from fastcore.test import test_eq, test_close
 from fastcore.all import *
 from .probability import normalize, sample
 
-# %% ../../nbs/rbe/01_bayes_core.ipynb 5
-def update(prior, likelihood, evidence=None):
-    "Update `prior` with `likelihood` and optional `evidence`"
-    prior, likelihood = np.array(prior), np.array(likelihood)
-    if evidence is None: evidence = (prior * likelihood).sum()
-    if evidence == 0: raise ValueError("Impossible observation")
+# %% ../../nbs/rbe/01_bayes_core.ipynb 6
+def update(prior, # Prior probabilities
+           likelihood, # Likelihood of evidence given hypothesis
+           evidence=None # Optional evidence, defaults to sum(prior * likelihood)
+           ):
+    """Update prior beliefs with likelihood using Bayes' theorem."""
+    prior = np.asarray(prior, dtype=np.float64)
+    likelihood = np.asarray(likelihood, dtype=np.float64)
+    
+    # Validate inputs
+    if prior.shape != likelihood.shape: raise ValueError(f"Prior and likelihood shapes don't match: {prior.shape} vs {likelihood.shape}")
+    if np.any(prior < 0) or np.any(likelihood < 0): raise ValueError("Prior and likelihood must be non-negative")
+    # Normalize prior if needed (common in practice)
+    if not np.isclose(np.sum(prior), 1.0): prior = normalize(prior)
+    # Compute evidence if not provided
+    if evidence is None: evidence = np.sum(prior * likelihood)
+    # Check for impossible observation
+    if evidence == 0: raise ValueError("Impossible observation: zero evidence")
+    # Numerical stability check
+    if evidence < 1e-15:
+        import warnings
+        warnings.warn("Very small evidence value - numerical instability possible")
+    
     return (prior * likelihood) / evidence
 
+
+# %% ../../nbs/rbe/01_bayes_core.ipynb 11
 def sequential(priors, likelihoods, evidences=None):
     "Sequential updating of `priors` with `likelihoods`"
     if evidences is None:
@@ -34,7 +53,7 @@ def sequential(priors, likelihoods, evidences=None):
     
     return np.array(posteriors)
 
-# %% ../../nbs/rbe/01_bayes_core.ipynb 8
+# %% ../../nbs/rbe/01_bayes_core.ipynb 14
 def predictive(posterior, likelihood_fn, n_samples=1000, rng=None):
     "Sample from posterior predictive distribution"
     if rng is None: rng = np.random.default_rng()
@@ -52,7 +71,7 @@ def predictive(posterior, likelihood_fn, n_samples=1000, rng=None):
     
     return np.array(predictions)
 
-# %% ../../nbs/rbe/01_bayes_core.ipynb 11
+# %% ../../nbs/rbe/01_bayes_core.ipynb 17
 def bayes_factor(likelihood1, likelihood2, data):
     "Calculate Bayes factor for hypothesis 1 vs 2 given `data`"
     # For single observation
@@ -84,7 +103,7 @@ def interpret_bf(bf):
     else:
         return "Decisive evidence for H1"
 
-# %% ../../nbs/rbe/01_bayes_core.ipynb 14
+# %% ../../nbs/rbe/01_bayes_core.ipynb 20
 def beta_binomial_update(alpha, beta, successes, failures):
     "Update Beta prior with binomial data"
     return alpha + successes, beta + failures
@@ -101,7 +120,7 @@ def normal_normal_update(prior_mean, prior_var, data_mean, data_var, n_obs):
     
     return post_mean, post_var
 
-# %% ../../nbs/rbe/01_bayes_core.ipynb 17
+# %% ../../nbs/rbe/01_bayes_core.ipynb 23
 __all__ = [
     # Core updates
     'update', 'sequential',
