@@ -92,7 +92,7 @@ def eff_size(weights):
     weights = normalize(weights)
     return 1.0 / np.sum(weights**2)
 
-# %% ../../nbs/rbe/00_probability.ipynb 36
+# %% ../../nbs/rbe/00_probability.ipynb 37
 def categorical(probs, # probability distribution
                 labels=None # optional labels for the distribution
                 ):
@@ -102,10 +102,12 @@ def categorical(probs, # probability distribution
         labels = list(range(len(probs)))
     return dict(zip(labels, probs))
 
+# %% ../../nbs/rbe/00_probability.ipynb 47
 def uniform(n):
     "Create uniform distribution over `n` outcomes"
     return np.ones(n) / n
 
+# %% ../../nbs/rbe/00_probability.ipynb 56
 def from_counts(counts):
     "Create probability distribution from `counts`"
     counts = np.asarray(counts)
@@ -113,7 +115,7 @@ def from_counts(counts):
         raise ValueError("Counts must be non-negative")
     return normalize(counts)
 
-# %% ../../nbs/rbe/00_probability.ipynb 39
+# %% ../../nbs/rbe/00_probability.ipynb 59
 __all__ = [
     # Basic operations
     'normalize', 'sample',
