@@ -93,7 +93,9 @@ def eff_size(weights):
     return 1.0 / np.sum(weights**2)
 
 # %% ../../nbs/rbe/00_probability.ipynb 36
-def categorical(probs, labels=None):
+def categorical(probs, # probability distribution
+                labels=None # optional labels for the distribution
+                ):
     "Create categorical distribution from `probs` with optional `labels`"
     probs = normalize(probs)
     if labels is None:
