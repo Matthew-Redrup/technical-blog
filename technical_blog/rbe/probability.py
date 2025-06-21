@@ -66,20 +66,33 @@ def kl_div(p, # probability distribution
 
 
 
-# %% ../../nbs/rbe/00_probability.ipynb 29
-def js_div(p, q):
-    "Jensen-Shannon divergence between `p` and `q`"
+# %% ../../nbs/rbe/00_probability.ipynb 30
+def js_div(p, # probability distribution
+           q # probability distribution
+           ):
+    """Jensen-Shannon divergence between distributions p and q."""
     p, q = normalize(p), normalize(q)
+    # Check dimensions match
+    if len(p) != len(q): raise ValueError("Distributions must have same length")
+    
     m = 0.5 * (p + q)
-    return 0.5 * kl_div(p, m) + 0.5 * kl_div(q, m)
+    # JS divergence is always finite (unlike KL), but check for safety
+    kl_pm = kl_div(p, m)
+    kl_qm = kl_div(q, m)
+    
+    if not (np.isfinite(kl_pm) and np.isfinite(kl_qm)):
+        # This should never happen with proper implementation
+        raise RuntimeError("Unexpected infinite KL divergence in JS calculation")
+    
+    return 0.5 * (kl_pm + kl_qm)
 
-# %% ../../nbs/rbe/00_probability.ipynb 32
+# %% ../../nbs/rbe/00_probability.ipynb 33
 def eff_size(weights):
     "Calculate effective sample size of normalized `weights`"
     weights = normalize(weights)
     return 1.0 / np.sum(weights**2)
 
-# %% ../../nbs/rbe/00_probability.ipynb 35
+# %% ../../nbs/rbe/00_probability.ipynb 36
 def categorical(probs, labels=None):
     "Create categorical distribution from `probs` with optional `labels`"
     probs = normalize(probs)
@@ -98,7 +111,7 @@ def from_counts(counts):
         raise ValueError("Counts must be non-negative")
     return normalize(counts)
 
-# %% ../../nbs/rbe/00_probability.ipynb 38
+# %% ../../nbs/rbe/00_probability.ipynb 39
 __all__ = [
     # Basic operations
     'normalize', 'sample',
