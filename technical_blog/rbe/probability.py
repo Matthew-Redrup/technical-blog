@@ -107,7 +107,7 @@ def uniform(n):
     "Create uniform distribution over `n` outcomes"
     return np.ones(n) / n
 
-# %% ../../nbs/rbe/00_probability.ipynb 56
+# %% ../../nbs/rbe/00_probability.ipynb 57
 def from_counts(counts):
     "Create probability distribution from `counts`"
     counts = np.asarray(counts)
@@ -115,7 +115,7 @@ def from_counts(counts):
         raise ValueError("Counts must be non-negative")
     return normalize(counts)
 
-# %% ../../nbs/rbe/00_probability.ipynb 59
+# %% ../../nbs/rbe/00_probability.ipynb 68
 __all__ = [
     # Basic operations
     'normalize', 'sample',
