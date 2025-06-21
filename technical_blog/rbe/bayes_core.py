@@ -73,25 +73,29 @@ def sequential(priors,  # prior probabilities of hypotheses
     return np.array(posteriors)
 
 
-# %% ../../nbs/rbe/01_bayes_core.ipynb 28
+# %% ../../nbs/rbe/01_bayes_core.ipynb 29
 def predictive(posterior, likelihood_fn, n_samples=1000, rng=None):
-    "Sample from posterior predictive distribution"
+    """Vectorized posterior predictive sampling."""
     if rng is None: rng = np.random.default_rng()
     
-    # Sample parameter values from posterior
+    posterior = normalize(posterior)
     param_samples = sample(posterior, n_samples, rng)
     
-    # Generate predictions for each parameter sample
-    predictions = []
-    for param_idx in param_samples:
-        # likelihood_fn should return a distribution over observations
-        obs_dist = likelihood_fn(param_idx)
-        obs_sample = sample(obs_dist, 1, rng)
-        predictions.append(obs_sample)
+    # Group samples by parameter for efficient batch processing
+    unique_params, counts = np.unique(param_samples, return_counts=True)
     
-    return np.array(predictions)
+    predictions = []
+    for param_idx, count in zip(unique_params, counts):
+        obs_dist = normalize(likelihood_fn(param_idx))
+        obs_samples = sample(obs_dist, count, rng)
+        predictions.extend(obs_samples)
+    
+    # Shuffle to remove parameter ordering bias
+    rng.shuffle(predictions)
+    return np.array(predictions, dtype=int)
 
-# %% ../../nbs/rbe/01_bayes_core.ipynb 31
+
+# %% ../../nbs/rbe/01_bayes_core.ipynb 36
 def bayes_factor(likelihood1, likelihood2, data):
     "Calculate Bayes factor for hypothesis 1 vs 2 given `data`"
     # For single observation
@@ -123,7 +127,7 @@ def interpret_bf(bf):
     else:
         return "Decisive evidence for H1"
 
-# %% ../../nbs/rbe/01_bayes_core.ipynb 34
+# %% ../../nbs/rbe/01_bayes_core.ipynb 39
 def beta_binomial_update(alpha, beta, successes, failures):
     "Update Beta prior with binomial data"
     return alpha + successes, beta + failures
@@ -140,7 +144,7 @@ def normal_normal_update(prior_mean, prior_var, data_mean, data_var, n_obs):
     
     return post_mean, post_var
 
-# %% ../../nbs/rbe/01_bayes_core.ipynb 37
+# %% ../../nbs/rbe/01_bayes_core.ipynb 42
 __all__ = [
     # Core updates
     'update', 'sequential',
