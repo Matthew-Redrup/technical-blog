@@ -38,13 +38,32 @@ def update(prior, # Prior probabilities
     return (prior * likelihood) / evidence
 
 
-# %% ../../nbs/rbe/01_bayes_core.ipynb 11
-def sequential(priors, likelihoods, evidences=None):
-    "Sequential updating of `priors` with `likelihoods`"
+# %% ../../nbs/rbe/01_bayes_core.ipynb 12
+def sequential(priors,  # prior probabilities of hypotheses 
+               likelihoods, # likelihoods of observations given hypotheses
+               evidences=None # evidence for each observation
+               ):
+    """Sequential Bayesian updates with multiple observations."""
+    priors = np.asarray(priors, dtype=np.float64)
+    likelihoods = np.asarray(likelihoods, dtype=np.float64)
+    
+    # Validate inputs
+    if len(likelihoods) == 0:
+        return np.array([priors])
+    
+    if likelihoods.ndim != 2:
+        raise ValueError("Likelihoods must be 2D array (n_observations, n_hypotheses)")
+    
+    if likelihoods.shape[1] != len(priors):
+        raise ValueError(f"Likelihood shape {likelihoods.shape} incompatible with prior length {len(priors)}")
+    
     if evidences is None:
         evidences = [None] * len(likelihoods)
+    elif len(evidences) != len(likelihoods):
+        raise ValueError("Number of evidences must match number of likelihoods")
     
-    posterior = np.array(priors)
+    # Perform sequential updates
+    posterior = priors.copy()
     posteriors = [posterior.copy()]
     
     for likelihood, evidence in zip(likelihoods, evidences):
@@ -53,7 +72,8 @@ def sequential(priors, likelihoods, evidences=None):
     
     return np.array(posteriors)
 
-# %% ../../nbs/rbe/01_bayes_core.ipynb 14
+
+# %% ../../nbs/rbe/01_bayes_core.ipynb 28
 def predictive(posterior, likelihood_fn, n_samples=1000, rng=None):
     "Sample from posterior predictive distribution"
     if rng is None: rng = np.random.default_rng()
@@ -71,7 +91,7 @@ def predictive(posterior, likelihood_fn, n_samples=1000, rng=None):
     
     return np.array(predictions)
 
-# %% ../../nbs/rbe/01_bayes_core.ipynb 17
+# %% ../../nbs/rbe/01_bayes_core.ipynb 31
 def bayes_factor(likelihood1, likelihood2, data):
     "Calculate Bayes factor for hypothesis 1 vs 2 given `data`"
     # For single observation
@@ -103,7 +123,7 @@ def interpret_bf(bf):
     else:
         return "Decisive evidence for H1"
 
-# %% ../../nbs/rbe/01_bayes_core.ipynb 20
+# %% ../../nbs/rbe/01_bayes_core.ipynb 34
 def beta_binomial_update(alpha, beta, successes, failures):
     "Update Beta prior with binomial data"
     return alpha + successes, beta + failures
@@ -120,7 +140,7 @@ def normal_normal_update(prior_mean, prior_var, data_mean, data_var, n_obs):
     
     return post_mean, post_var
 
-# %% ../../nbs/rbe/01_bayes_core.ipynb 23
+# %% ../../nbs/rbe/01_bayes_core.ipynb 37
 __all__ = [
     # Core updates
     'update', 'sequential',
