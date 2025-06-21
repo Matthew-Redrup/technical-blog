@@ -9,6 +9,7 @@ __all__ = ['normalize', 'sample', 'entropy', 'kl_div', 'js_div', 'eff_size', 'ca
 import numpy as np
 from typing import Optional, Union, List
 from fastcore.all import *
+from scipy.special import entr
 
 # %% ../../nbs/rbe/00_probability.ipynb 8
 def normalize(probs):
@@ -33,37 +34,44 @@ def sample(probs, # probability distribution
     else:
         return rng.choice(len(probs), size=n, p=probs)  # Return array
 
-# %% ../../nbs/rbe/00_probability.ipynb 20
-def entropy(probs, base=2):
-    "Calculate entropy of `probs` distribution in given `base`"
+# %% ../../nbs/rbe/00_probability.ipynb 21
+def entropy(probs, # probability distribution
+            base=2 # base of the logarithm
+            ):
+    """Calculate entropy using scipy's numerically stable implementation."""
     probs = normalize(probs)
-    probs = probs[probs > 0]  # Remove zeros to avoid log(0)
+    h = np.sum(entr(probs))  # Uses x*log(x) with proper handling of x=0
+    
     if base == 2:
-        return -np.sum(probs * np.log2(probs))
+        return h / np.log(2)
     elif base == 'e':
-        return -np.sum(probs * np.log(probs))
+        return h
     else:
-        return -np.sum(probs * np.log(probs)) / np.log(base)
+        return h / np.log(base)
 
+
+# %% ../../nbs/rbe/00_probability.ipynb 24
 def kl_div(p, q, eps=1e-10):
     "KL divergence from `q` to `p`"
     p, q = normalize(p), normalize(q)
     # Add epsilon to avoid log(0)
     return np.sum(p * np.log((p + eps) / (q + eps)))
 
+
+# %% ../../nbs/rbe/00_probability.ipynb 26
 def js_div(p, q):
     "Jensen-Shannon divergence between `p` and `q`"
     p, q = normalize(p), normalize(q)
     m = 0.5 * (p + q)
     return 0.5 * kl_div(p, m) + 0.5 * kl_div(q, m)
 
-# %% ../../nbs/rbe/00_probability.ipynb 23
+# %% ../../nbs/rbe/00_probability.ipynb 29
 def eff_size(weights):
     "Calculate effective sample size of normalized `weights`"
     weights = normalize(weights)
     return 1.0 / np.sum(weights**2)
 
-# %% ../../nbs/rbe/00_probability.ipynb 26
+# %% ../../nbs/rbe/00_probability.ipynb 32
 def categorical(probs, labels=None):
     "Create categorical distribution from `probs` with optional `labels`"
     probs = normalize(probs)
@@ -82,7 +90,7 @@ def from_counts(counts):
         raise ValueError("Counts must be non-negative")
     return normalize(counts)
 
-# %% ../../nbs/rbe/00_probability.ipynb 29
+# %% ../../nbs/rbe/00_probability.ipynb 35
 __all__ = [
     # Basic operations
     'normalize', 'sample',
