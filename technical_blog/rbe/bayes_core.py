@@ -95,18 +95,43 @@ def predictive(posterior, likelihood_fn, n_samples=1000, rng=None):
     return np.array(predictions, dtype=int)
 
 
-# %% ../../nbs/rbe/01_bayes_core.ipynb 36
-def bayes_factor(likelihood1, likelihood2, data):
-    "Calculate Bayes factor for hypothesis 1 vs 2 given `data`"
+# %% ../../nbs/rbe/01_bayes_core.ipynb 37
+def bayes_factor(likelihood1, # likelihood of hypothesis 1
+                 likelihood2, # likelihood of hypothesis 2
+                 data, # data to use for the calculation
+                 eps=1e-15 # epsilon for numerical stability
+                 ):
+    """Calculate Bayes factor for hypothesis 1 vs 2 given data."""
+    likelihood1 = np.asarray(likelihood1)
+    likelihood2 = np.asarray(likelihood2)
+    
+    # Validate inputs
+    if len(likelihood1) != len(likelihood2):
+        raise ValueError("Likelihood arrays must have same length")
+    
     # For single observation
     if np.isscalar(data):
+        if likelihood2[data] == 0:
+            return np.inf if likelihood1[data] > 0 else np.nan
         return likelihood1[data] / likelihood2[data]
     
     # For multiple observations (assuming independence)
-    bf = 1.0
+    # Use log-space computation for numerical stability
+    log_bf = 0.0
     for obs in data:
-        bf *= likelihood1[obs] / likelihood2[obs]
-    return bf
+        if likelihood2[obs] == 0:
+            if likelihood1[obs] > 0:
+                return np.inf  # Decisive evidence for H1
+            else:
+                return np.nan  # Both hypotheses say impossible
+        
+        if likelihood1[obs] == 0:
+            return 0.0  # Decisive evidence for H2
+        
+        # Accumulate in log space
+        log_bf += np.log(likelihood1[obs]) - np.log(likelihood2[obs])
+    
+    return np.exp(log_bf)
 
 def interpret_bf(bf):
     "Interpret Bayes factor strength"
@@ -127,7 +152,7 @@ def interpret_bf(bf):
     else:
         return "Decisive evidence for H1"
 
-# %% ../../nbs/rbe/01_bayes_core.ipynb 39
+# %% ../../nbs/rbe/01_bayes_core.ipynb 43
 def beta_binomial_update(alpha, beta, successes, failures):
     "Update Beta prior with binomial data"
     return alpha + successes, beta + failures
@@ -144,7 +169,7 @@ def normal_normal_update(prior_mean, prior_var, data_mean, data_var, n_obs):
     
     return post_mean, post_var
 
-# %% ../../nbs/rbe/01_bayes_core.ipynb 42
+# %% ../../nbs/rbe/01_bayes_core.ipynb 46
 __all__ = [
     # Core updates
     'update', 'sequential',
