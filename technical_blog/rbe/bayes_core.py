@@ -152,11 +152,16 @@ def interpret_bf(bf):
     else:
         return "Decisive evidence for H1"
 
-# %% ../../nbs/rbe/01_bayes_core.ipynb 43
-def beta_binomial_update(alpha, beta, successes, failures):
+# %% ../../nbs/rbe/01_bayes_core.ipynb 44
+def beta_binomial_update(alpha, # prior alpha
+                         beta, # prior beta
+                         successes, # number of successes
+                         failures # number of failures
+                         ):
     "Update Beta prior with binomial data"
     return alpha + successes, beta + failures
 
+# %% ../../nbs/rbe/01_bayes_core.ipynb 50
 def normal_normal_update(prior_mean, prior_var, data_mean, data_var, n_obs):
     "Update Normal prior with Normal likelihood"
     # Precision weighting
@@ -169,7 +174,7 @@ def normal_normal_update(prior_mean, prior_var, data_mean, data_var, n_obs):
     
     return post_mean, post_var
 
-# %% ../../nbs/rbe/01_bayes_core.ipynb 46
+# %% ../../nbs/rbe/01_bayes_core.ipynb 56
 __all__ = [
     # Core updates
     'update', 'sequential',
